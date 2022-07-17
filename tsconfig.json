@@ -1,0 +1,18 @@
+{
+    "extends": "@tsconfig/node16/tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "typeRoots": [
+            "node_modules/@toebeann"
+        ],
+        "declaration": true,
+        "declarationMap": true,
+        "declarationDir": "./types",
+        "sourceMap": true,
+        "strictNullChecks": true
+    },
+    "include": [
+        "./src"
+    ]
+}
