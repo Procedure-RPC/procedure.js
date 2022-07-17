@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { createSocket, Socket } from 'nanomsg';
 import { encode, decode, ExtensionCodec } from '@msgpack/msgpack'
 import { once, EventEmitter } from "events"
@@ -45,7 +46,6 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
 
         for (const prop in this.options) {
             this[prop] = this.options[prop];
-            console.log(prop, this[prop]);
         }
     }
 
@@ -58,8 +58,8 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
         for (let i = 0; i < this.workers; i++) {
             const socket = this.sockets[this.sockets.push(createSocket('rep')) - 1];
             socket
-                .on('data', data => this.#onRepSocketData(data, socket))
-                .on('error', error => this.#onRepSocketError(error))
+                .on('data', (data: Buffer) => this.#onRepSocketData(data, socket))
+                .on('error', (error: unknown) => this.#onRepSocketError(error))
                 .once('close', () => this.#onRepSocketClose())
                 .bind(this.endpoint); // bind the socket to the endpoint
         }
@@ -104,25 +104,16 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
         }
 
         try {
-            return await new Promise<Output>(async (resolve, reject) => {
-                socket
-                    .once('error', reject) // pass socket errors to the promise's error handler(s)
-                    .connect(endpoint); // connect to the endpoint
+            socket.connect(endpoint);
+            socket.send(Procedure.#encode(input, opts.extensionCodec)); // send the encoded input data to the endpoint
 
-                socket.send(Procedure.#encode(input, opts.extensionCodec)); // send the encoded input data to the endpoint
-
-                try {
-                    const [buffer]: Buffer[] = await once(socket, 'data', { signal: opts.signal }); // await a response from the endpoint
-                    const response = Procedure.#decode<Response<Output>>(buffer, opts.extensionCodec); // decode the response
-                    if (response.output === undefined) { // if no output, an error was thrown
-                        reject(response.error); // pass the thrown error to the promise's error handler(s)
-                    } else {
-                        resolve(response.output); // resolve the promise, passing the output to the promise's then handler(s)
-                    }
-                } catch (e) {
-                    reject(e); // an error was thrown while awaiting or decoding the response from the socket - pass it to the promise's error handler(s)
-                }
-            });
+            const [buffer]: Buffer[] = await once(socket, 'data', { signal: opts.signal }); // await a response from the endpoint
+            const response = Procedure.#decode<Response<Output>>(buffer, opts.extensionCodec); // decode the response
+            if ('error' in response) {
+                throw response.error;
+            } else {
+                return response.output;
+            }
         } finally {
             socket.removeAllListeners().close(); // clear all listeners and close the socket
             clearTimeout(timeoutSignal?.timeout); // clear the TimeoutSignal's timeout, if any
@@ -315,7 +306,7 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
 /**
  * Represents a nullable value, which cannot be `undefined`.
  */
-export type Nullable = {} | null;
+export type Nullable = unknown | null;
 
 /**
  * Represents a simple callback function with a single nullable input value and likewise nullable output value.
@@ -390,7 +381,7 @@ type ProcedureEvents = {
  * @param object The object.
  * @returns `true` if the object is determined to be an `Error`, otherwise `false`.
  */
-export function isError(object: any): object is Error {
+export function isError(object: unknown): object is Error {
     return object instanceof Error;
 }
 
@@ -399,7 +390,7 @@ export function isError(object: any): object is Error {
  * @param object The object.
  * @returns `true` if the object is determined to fit the shape of an `Error`, otherwise `false`.
  */
-export function isErrorLike(object: any): object is Error {
+export function isErrorLike(object: unknown): object is Error {
     return object !== undefined && (isError(object) || ((object as Error).name !== undefined && (object as Error).message !== undefined));
 }
 
@@ -409,7 +400,7 @@ export function isErrorLike(object: any): object is Error {
  * @param {boolean} [stack=false] Whether or not we should retrieve the `stack` property, if defined. Defaults to `false`.
  * @returns An array of key-value pairs.
  */
-export function errorEntries(error: Error, stack: boolean = false): Array<[string, any]> {
+export function errorEntries(error: Error, stack = false): Array<unknown[]> {
     return [
         ["name", error.name],
         ...Object.entries(Object.getOwnPropertyDescriptors(error))
@@ -424,7 +415,7 @@ export function errorEntries(error: Error, stack: boolean = false): Array<[strin
  * @param {boolean} [stack=false] Whether or not we should clone the `stack` property, if defined. Defaults to `false`.
  * @returns The cloned `Error`.
  */
-export function cloneError(error: Error, stack: boolean = false): Error {
+export function cloneError(error: Error, stack = false): Error {
     if (isErrorLike(error)) {
         return Object.fromEntries(errorEntries(error, stack)) as Error;
     } else {
