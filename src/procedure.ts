@@ -98,7 +98,7 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
         };
 
         let timeoutSignal: TimeoutSignal | undefined = undefined;
-        if (opts.signal === undefined) {
+        if (!('signal' in opts)) {
             timeoutSignal = new TimeoutSignal(opts.timeout);
             opts.signal = timeoutSignal.signal;
         }
@@ -107,7 +107,7 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
             socket.connect(endpoint);
             socket.send(Procedure.#encode(input, opts.extensionCodec)); // send the encoded input data to the endpoint
 
-            const [buffer]: Buffer[] = await once(socket, 'data', { signal: opts.signal }); // await a response from the endpoint
+            const [buffer]: [Buffer] = await once(socket, 'data', { signal: opts.signal }) as [Buffer]; // await a response from the endpoint
             const response = Procedure.#decode<Response<Output>>(buffer, opts.extensionCodec); // decode the response
             if ('error' in response) {
                 throw response.error;
@@ -183,9 +183,9 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
         } catch (error) {
             this.#emitAndLogError('Procedure response could not be encoded for transmission', error);
             return this.#tryEncodeResponse({ // As the response could not be encoded, encode and return a new response containing the thrown error
-                error: response.output !== undefined
-                    ? error // output failed to encode
-                    : null // error failed to encode, should break any infinite loops unless msgpack or the extension codec is broken
+                error: 'output' in response
+                    ? null // error failed to encode, should break any infinite loops unless msgpack or the extension codec is broken
+                    : error // output failed to encode
             });
         }
     }
@@ -333,10 +333,10 @@ export class TimeoutSignal {
      * timeout which will call the AbortController's `abort` method after the given number of milliseconds and wraps its signal.
      */
     constructor(timeout?: number) {
-        if (timeout !== undefined && !isNaN(timeout) && isFinite(timeout)) { // number is valid and finite
+        if (timeout !== undefined && !isNaN(timeout) && isFinite(timeout) && timeout >= 0) { // number is not-NaN, finite and positive
             const ac = new AbortController();
             this.signal = ac.signal; // wrap the AbortController's signal
-            this.timeout = setTimeout(() => ac.abort(), Math.max(timeout, 0)); // abort after the given number of milliseconds
+            this.timeout = setTimeout(() => ac.abort(), timeout); // abort after the given number of milliseconds
         }
     }
 }
