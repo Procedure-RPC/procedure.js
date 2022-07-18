@@ -5,6 +5,12 @@
     "main": "./dist/index",
     "types": "./types/index.d.ts",
     "author": "Tobey Blaber <https://github.com/toebeann>",
+    "scripts": {
+        "build": "tsc",
+        "lint": "eslint . --ext .ts",
+        "test": "mocha -r ts-node/register -r source-map-support/register ./test/**/*.ts",
+        "test:coverage": "nyc npm run test"
+    },
     "dependencies": {
         "@msgpack/msgpack": "^2.7.2",
         "nanomsg": "^4.2.0"
@@ -35,12 +41,6 @@
         "dist/**/*.js",
         "types/**/*.d.ts"
     ],
-    "scripts": {
-        "build": "tsc",
-        "lint": "eslint . --ext .ts",
-        "test": "mocha -r ts-node/register -r source-map-support/register ./test/**/*.ts",
-        "test:coverage": "nyc npm run test"
-    },
     "nyc": {
         "extends": "@istanbuljs/nyc-config-typescript",
         "all": true,
