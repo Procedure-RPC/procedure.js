@@ -391,7 +391,7 @@ export function isError(object: unknown): object is Error {
  * @returns `true` if the object is determined to fit the shape of an `Error`, otherwise `false`.
  */
 export function isErrorLike(object: unknown): object is Error {
-    return object !== undefined && (isError(object) || ((object as Error).name !== undefined && (object as Error).message !== undefined));
+    return object !== undefined && object !== null && (isError(object) || ('name' in <Error>object && 'message' in <Error>object));
 }
 
 /**
