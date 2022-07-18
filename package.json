@@ -1,7 +1,7 @@
 {
-    "name": "@toebeann/rpc",
+    "name": "@toebeann/rpc.js",
     "version": "0.0.1",
-    "description": "A simple RPC framework built on top of nanomsg and msgpack",
+    "description": "A simple RPC framework, built on top of nanomsg and msgpack.",
     "main": "./dist/index",
     "typescript": {
         "definition": "./types/index.d.ts"
