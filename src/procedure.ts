@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import { createSocket, Socket } from 'nanomsg';
 import { encode, decode, ExtensionCodec } from '@msgpack/msgpack'
-import { once, EventEmitter } from "events"
+import { once, EventEmitter } from 'events'
 import TypedEmitter from 'typed-emitter'
-import TimeoutSignal from './timeout-signal';
+import TimeoutSignal from './timeout-signal'
 
 /**
  * A low level abstraction over Procedures (the P in RPC).
@@ -64,7 +64,6 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
                 .once('close', () => this.#onRepSocketClose())
                 .bind(this.endpoint); // bind the socket to the endpoint
         }
-        this.#emitAndLogBind(); // emit the bind event
         return this;
     }
 
@@ -75,11 +74,10 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     unbind(): this {
         if (this.sockets.length > 0) {
             for (const socket of this.sockets) {
-                socket.removeAllListeners().close() // clear all event listeners from the socket and close it
-                this.#emitAndLogClose(); // manually emit the close event for the socket
+                socket.close();
+                socket.removeAllListeners();
             }
             this.sockets = [];
-            this.#emitAndLogUnbind(); // emit the unbind event
         }
         return this;
     }
@@ -244,20 +242,10 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
      * Handles the socket's close event.
      */
     #onRepSocketClose(): void {
-        this.#emitAndLogClose();
+        this.#logSocketClose();
         if (this.sockets.every(socket => socket.closed)) {
             this.unbind();
-        }
-    }
-
-    /**
-     * Handles the bind event.
-     */
-    #emitAndLogBind() {
-        this.emit('bind');
-
-        if (this.verbose) {
-            console.log(`Procedure bound at endpoint: ${this.endpoint}`);
+            this.#emitAndLogUnbind(); // emit the unbind event
         }
     }
 
@@ -293,11 +281,9 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Emits and optionally logs the socket close event.
+     * Optionally logs the socket close event.
      */
-    #emitAndLogClose() {
-        this.emit('close');
-
+    #logSocketClose() {
         if (this.verbose) { // optionally output the event to the console
             console.log(`Socket closed at endpoint: ${this.endpoint}`);
         }
@@ -349,8 +335,6 @@ export interface ProcedureCallOptions {
  */
 type ProcedureEvents = {
     error: (error: unknown) => void
-    close: () => void
-    bind: () => void
     unbind: () => void
 }
 
@@ -369,7 +353,7 @@ export function isError(object: unknown): object is Error {
  * @returns `true` if the object is determined to fit the shape of an `Error`, otherwise `false`.
  */
 export function isErrorLike(object: unknown): object is Error {
-    return !(object === undefined || object == null || !isError(object) || !('name' in <Error>object) || !('message' in <Error>object));
+    return typeof object === 'object' && object !== null && (isError(object) || 'name' in object);
 }
 
 /**
