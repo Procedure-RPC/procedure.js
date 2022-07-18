@@ -247,8 +247,12 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
             afterEach(() => callEndpoint = undefined);
         });
 
+        // TODO: when endpoint: incorrect
+
         afterEach(() => procedure.unbind());
     });
+
+    // TODO: when callback asynchronous (completes normally, times out, throws error, infinite timeout, abortion signaled during execution, abortion signaled before execution)
 });
 
 describe('isError(object: unknown): object is Error', () => {
