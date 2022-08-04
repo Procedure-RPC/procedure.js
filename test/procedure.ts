@@ -154,7 +154,6 @@ describe('Procedure', () => {
                     sandbox.on(console, 'log', () => { return });
                 });
                 describe('instance', () => it('should call console.log', () => {
-                    // const log = chai.spy.on(console, 'log', () => { return; })
                     instance.unbind();
                     expect(console.log).to.have.been.called.twice;
                 }));
@@ -196,6 +195,15 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
 
             context('when input: 0', () => {
                 beforeEach(() => input = 0);
+
+                it('should emit: data, with parameter: 0', async () => {
+                    let x: unknown = undefined;
+                    const data = chai.spy((data: unknown) => x = data);
+                    procedure.on('data', data);
+                    await Procedure.call(<string>callEndpoint, input);
+                    expect(data).to.have.been.called.once;
+                    expect(x).to.equal(0);
+                });
 
                 it('should return: 0', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.eventually.equal(0));
 

@@ -341,7 +341,6 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
      * @param {Input} data The input data to emit and log.
      */
     #emitAndLogData(data: Input) {
-        //TODO: Write unit tests
         this.emit('data', data);
 
         if (this.verbose) {
