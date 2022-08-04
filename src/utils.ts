@@ -1,18 +1,29 @@
+/**
+ * Type guard for determining whether a given object is an `AbortSignal` instance.
+ * @param {unknown} object The object.
+ * @returns {object is AbortSignal} `true` if the object is determined to be an `AbortSignal`, otherwise false.
+ */
+export function isAbortSignal(object: unknown): object is AbortSignal {
+    return object instanceof AbortSignal;
+}
+
+/**
+ * A helpful interface to allow use of AbortSignal EventTarget interface when TypeScript hates us.
+ */
 export interface Signal {
     addEventListener: (event: 'abort', callback: () => void) => void;
     removeEventListener: (event: 'abort') => void;
     readonly aborted: boolean;
 }
 
-// TODO: Write unit tests
+/**
+ * Type guard for determining whether a given object conforms to the `Signal` interface.
+ * @param {unknown} object The object.
+ * @returns {object is Signal} `true` if the object conforms to the `Signal` interface, otherwise `false`.
+ */
 export function isSignal(object: unknown): object is Signal {
     return isAbortSignal(object) && 'addEventListener' in object && 'removeEventListener' in object
         && typeof (<Signal>object).addEventListener === 'function' && typeof (<Signal>object).removeEventListener === 'function';
-}
-
-// TODO: Write units tests
-export function isAbortSignal(object: unknown): object is AbortSignal {
-    return object instanceof AbortSignal;
 }
 
 /**
@@ -25,17 +36,16 @@ export interface Ping {
 /**
  * Type guard for determining whether a given object conforms to the `Ping` interface.
  * @param {unknown} object The object.
- * @returns {boolean} `true` if the object conforms to the `Ping` interface, otherwise `false`.
+ * @returns {object is Ping} `true` if the object conforms to the `Ping` interface, otherwise `false`.
  */
-// TODO: Write unit tests
 export function isPing(object: unknown): object is Ping {
     return typeof object === 'object' && object !== null && 'ping' in object && typeof (object as { ping: unknown }).ping === 'string';
 }
 
 /**
- * Type guard for determining whether a given object is an `Error`.
+ * Type guard for determining whether a given object is an `Error` instance.
  * @param {unknown} object The object.
- * @returns {boolean} `true` if the object is determined to be an `Error`, otherwise `false`.
+ * @returns {object is Error} `true` if the object is determined to be an `Error`, otherwise `false`.
  */
 export function isError(object: unknown): object is Error {
     return object instanceof Error;
@@ -44,7 +54,7 @@ export function isError(object: unknown): object is Error {
 /**
  * Type guard for determining whether a given object is `Error`-like, i.e. it matches the most basic `Error` interface.
  * @param {unknown} object The object.
- * @returns {boolean} `true` if the object is determined to fit the shape of an `Error`, otherwise `false`.
+ * @returns {object is Error} `true` if the object is determined to fit the shape of an `Error`, otherwise `false`.
  */
 export function isErrorLike(object: unknown): object is Error {
     return typeof object === 'object' && object !== null && (isError(object) || 'name' in object);
