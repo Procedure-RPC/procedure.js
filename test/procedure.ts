@@ -262,3 +262,54 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
 
     // TODO: when callback asynchronous (completes normally, times out, throws error, infinite timeout, abortion signaled during execution, abortion signaled before execution)
 });
+
+describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<boolean>', () => {
+    let func: Callback<unknown, unknown>;
+    let spy: ChaiSpies.SpyFunc1<unknown, unknown>;
+    let procedure: Procedure<unknown, unknown>;
+    let procedureEndpoint: string;
+    let pingEndpoint: string | undefined;
+
+    context('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
+        beforeEach(() => {
+            let i = 0;
+            func = <Callback<unknown, unknown>>((n: number) => {
+                if (typeof n !== 'number') {
+                    throw new TypeError('Expected a number');
+                }
+
+                return i += n;
+            });
+            spy = chai.spy(func);
+            procedureEndpoint = 'ipc://Procedure/Add.ipc';
+            procedure = new Procedure(procedureEndpoint, spy, { workers: 3 });
+            procedure.bind();
+        });
+
+        context('when endpoint: correct', () => {
+            beforeEach(() => pingEndpoint = procedureEndpoint);
+
+            it('should not emit: data', async () => {
+                const data = chai.spy(() => { return });
+                procedure.on('data', data);
+                await Procedure.ping(<string>pingEndpoint);
+                expect(data).to.have.been.called.exactly(0);
+            });
+
+            it('should return: true', async () => await expect(Procedure.ping(<string>pingEndpoint)).to.eventually.equal(true));
+
+            context('when signal: already aborted AbortSignal', () => {
+                let ac: AbortController;
+
+                beforeEach(() => {
+                    ac = new AbortController();
+                    ac.abort();
+                });
+
+                it('should throw: Error', async () => await expect(Procedure.ping(<string>pingEndpoint, 500, ac.signal)).to.be.rejectedWith('signal was aborted'));
+            });
+        });
+
+        afterEach(() => procedure.unbind());
+    });
+});
