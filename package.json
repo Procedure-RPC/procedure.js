@@ -1,10 +1,13 @@
 {
-    "name": "@toebeann/rpc.js",
-    "version": "0.0.1",
+    "name": "@toebeann/procedure.js",
+    "version": "0.1.0",
     "description": "A simple RPC framework, built on top of nanomsg and msgpack.",
     "main": "./dist/index",
     "types": "./types/index.d.ts",
-    "author": "Tobey Blaber <https://github.com/toebeann>",
+    "author": "Tobey Blaber (https://github.com/toebeann)",
+    "funding": "https://paypal.me/tobeyblaber",
+    "license": "UNLICENSED",
+    "private": true,
     "scripts": {
         "build": "tsc",
         "lint": "eslint . --ext .ts",
