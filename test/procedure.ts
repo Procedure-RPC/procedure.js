@@ -1,12 +1,10 @@
 import 'mocha'
 import chai, { expect } from 'chai'
-import chaiQuantifiers from 'chai-quantifiers'
 import spies from 'chai-spies'
 import chaiAsPromised from 'chai-as-promised'
 import Procedure, { Callback } from '../src'
 import { ExtensionCodec } from '@msgpack/msgpack'
 
-chai.use(chaiQuantifiers);
 chai.use(spies);
 chai.use(chaiAsPromised);
 
@@ -246,6 +244,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
 
             afterEach(() => callEndpoint = undefined);
         });
+
+        // TODO: test ping option
 
         // TODO: when endpoint: incorrect
 

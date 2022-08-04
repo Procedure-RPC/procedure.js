@@ -1,10 +1,11 @@
 {
     "name": "@toebeann/procedure.js",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "A simple RPC framework, built on top of nanomsg and msgpack.",
     "main": "./dist/index",
     "types": "./types/index.d.ts",
     "author": "Tobey Blaber (https://github.com/toebeann)",
+    "homepage": "https://github.com/toebeann/procedure.js",
     "repository": "github:toebeann/procedure.js",
     "funding": "https://paypal.me/tobeyblaber",
     "license": "UNLICENSED",
@@ -13,7 +14,7 @@
         "build": "tsc",
         "lint": "eslint . --ext .ts",
         "test": "mocha -r ts-node/register -r source-map-support/register ./test/**/*.ts",
-        "test:coverage": "nyc npm run test"
+        "test:coverage": "npm run build & nyc npm run test"
     },
     "dependencies": {
         "@msgpack/msgpack": "^2.7.2",
@@ -28,7 +29,7 @@
         "@types/chai-as-promised": "^7.1.5",
         "@types/chai-spies": "^1.0.3",
         "@types/mocha": "^9.1.1",
-        "@types/node": "^18.0.3",
+        "@types/node": "^18.6.3",
         "@types/uuid": "^8.3.4",
         "@typescript-eslint/eslint-plugin": "^5.30.6",
         "@typescript-eslint/parser": "^5.30.6",

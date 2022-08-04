@@ -1,6 +1,9 @@
-import 'mocha'
-import { expect } from 'chai'
-import { cloneError, errorEntries, isError, isErrorLike } from '../src/utils'
+import 'mocha';
+import chai, { expect } from 'chai';
+import chaiQuantifiers from 'chai-quantifiers';
+import { cloneError, errorEntries, isError, isErrorLike } from '../src/utils';
+
+chai.use(chaiQuantifiers);
 
 describe('isError(object: unknown): object is Error', () => {
     let object: unknown;
