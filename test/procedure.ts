@@ -250,10 +250,67 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.be.rejectedWith('Expected a number'));
             });
 
+            context('when ping: 100', () => {
+                context('when input: 0', () => {
+                    beforeEach(() => input = 0);
+
+                    it('should emit: data, with parameter: 0', async () => {
+                        let x: unknown = undefined;
+                        const data = chai.spy((data: unknown) => x = data);
+                        procedure.on('data', data);
+                        await Procedure.call(<string>callEndpoint, input, { ping: 100 });
+                        expect(data).to.have.been.called.once;
+                        expect(x).to.equal(0);
+                    });
+
+                    it('should return: 0', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(0));
+
+                    afterEach(() => input = undefined);
+
+                    context('when verbose: true', () => {
+                        const sandbox = chai.spy.sandbox();
+                        beforeEach(() => {
+                            procedure.verbose = true;
+                            sandbox.on(console, 'log', () => { return });
+                        });
+
+                        it('should call console.log', async () => {
+                            await Procedure.call(<string>callEndpoint, input, { ping: 100 });
+                            expect(console.log).to.have.been.called.exactly(5);
+                        });
+
+                        afterEach(() => {
+                            procedure.verbose = false;
+                            sandbox.restore();
+                        });
+                    });
+                });
+
+                context('when input: \'foo\'', () => {
+                    beforeEach(() => input = 'foo');
+
+                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+
+                    afterEach(() => input = undefined);
+                });
+
+                context('when input: 1000', () => {
+                    beforeEach(() => input = 1000);
+
+                    it('should return: 1000', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(input));
+
+                    afterEach(() => input = undefined);
+                });
+
+                context('when input: undefined', () => {
+                    beforeEach(() => input = undefined);
+
+                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+                });
+            });
+
             afterEach(() => callEndpoint = undefined);
         });
-
-        // TODO: test ping option
 
         // TODO: when endpoint: incorrect
 
@@ -309,6 +366,10 @@ describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, si
                 it('should throw: Error', async () => await expect(Procedure.ping(<string>pingEndpoint, 500, ac.signal)).to.be.rejectedWith('signal was aborted'));
             });
         });
+
+        // TODO: when endpoint: incorrect
+        // TODO: when timeout infinity, NaN
+        // TODO: when abortion signaled during ping
 
         afterEach(() => procedure.unbind());
     });
