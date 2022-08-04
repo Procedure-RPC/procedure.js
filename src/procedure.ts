@@ -153,14 +153,13 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
      * @returns {Promise<boolean>} A promise which, when resolved, indicates whether the endpoint correctly responded to the ping.
      */
     static async ping(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<boolean> {
-        const socket = createSocket('req');
-
-        const timeoutSignal = new TimeoutSignal(timeout);
-        signal = new AggregateSignal(signal, timeoutSignal.signal).signal;
-
         if (signal?.aborted) {
             throw new Error('signal was aborted');
         } else {
+            const socket = createSocket('req');
+            const timeoutSignal = new TimeoutSignal(timeout);
+            signal = new AggregateSignal(signal, timeoutSignal.signal).signal;
+
             try {
                 const ping = uuidv5(endpoint, uuidNamespace);
 
@@ -341,7 +340,6 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
      * @param {Input} data The input data to emit and log.
      */
     #emitAndLogData(data: Input) {
-        //TODO: Write unit tests
         this.emit('data', data);
 
         if (this.verbose) {
