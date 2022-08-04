@@ -1,12 +1,10 @@
 import 'mocha'
 import chai, { expect } from 'chai'
-import chaiQuantifiers from 'chai-quantifiers'
 import spies from 'chai-spies'
 import chaiAsPromised from 'chai-as-promised'
 import Procedure, { Callback } from '../src'
 import { ExtensionCodec } from '@msgpack/msgpack'
 
-chai.use(chaiQuantifiers);
 chai.use(spies);
 chai.use(chaiAsPromised);
 
@@ -156,7 +154,6 @@ describe('Procedure', () => {
                     sandbox.on(console, 'log', () => { return });
                 });
                 describe('instance', () => it('should call console.log', () => {
-                    // const log = chai.spy.on(console, 'log', () => { return; })
                     instance.unbind();
                     expect(console.log).to.have.been.called.twice;
                 }));
@@ -198,6 +195,15 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
 
             context('when input: 0', () => {
                 beforeEach(() => input = 0);
+
+                it('should emit: data, with parameter: 0', async () => {
+                    let x: unknown = undefined;
+                    const data = chai.spy((data: unknown) => x = data);
+                    procedure.on('data', data);
+                    await Procedure.call(<string>callEndpoint, input);
+                    expect(data).to.have.been.called.once;
+                    expect(x).to.equal(0);
+                });
 
                 it('should return: 0', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.eventually.equal(0));
 
@@ -244,6 +250,65 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.be.rejectedWith('Expected a number'));
             });
 
+            context('when ping: 100', () => {
+                context('when input: 0', () => {
+                    beforeEach(() => input = 0);
+
+                    it('should emit: data, with parameter: 0', async () => {
+                        let x: unknown = undefined;
+                        const data = chai.spy((data: unknown) => x = data);
+                        procedure.on('data', data);
+                        await Procedure.call(<string>callEndpoint, input, { ping: 100 });
+                        expect(data).to.have.been.called.once;
+                        expect(x).to.equal(0);
+                    });
+
+                    it('should return: 0', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(0));
+
+                    afterEach(() => input = undefined);
+
+                    context('when verbose: true', () => {
+                        const sandbox = chai.spy.sandbox();
+                        beforeEach(() => {
+                            procedure.verbose = true;
+                            sandbox.on(console, 'log', () => { return });
+                        });
+
+                        it('should call console.log', async () => {
+                            await Procedure.call(<string>callEndpoint, input, { ping: 100 });
+                            expect(console.log).to.have.been.called.exactly(5);
+                        });
+
+                        afterEach(() => {
+                            procedure.verbose = false;
+                            sandbox.restore();
+                        });
+                    });
+                });
+
+                context('when input: \'foo\'', () => {
+                    beforeEach(() => input = 'foo');
+
+                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+
+                    afterEach(() => input = undefined);
+                });
+
+                context('when input: 1000', () => {
+                    beforeEach(() => input = 1000);
+
+                    it('should return: 1000', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(input));
+
+                    afterEach(() => input = undefined);
+                });
+
+                context('when input: undefined', () => {
+                    beforeEach(() => input = undefined);
+
+                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+                });
+            });
+
             afterEach(() => callEndpoint = undefined);
         });
 
@@ -253,4 +318,59 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
     });
 
     // TODO: when callback asynchronous (completes normally, times out, throws error, infinite timeout, abortion signaled during execution, abortion signaled before execution)
+});
+
+describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<boolean>', () => {
+    let func: Callback<unknown, unknown>;
+    let spy: ChaiSpies.SpyFunc1<unknown, unknown>;
+    let procedure: Procedure<unknown, unknown>;
+    let procedureEndpoint: string;
+    let pingEndpoint: string | undefined;
+
+    context('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
+        beforeEach(() => {
+            let i = 0;
+            func = <Callback<unknown, unknown>>((n: number) => {
+                if (typeof n !== 'number') {
+                    throw new TypeError('Expected a number');
+                }
+
+                return i += n;
+            });
+            spy = chai.spy(func);
+            procedureEndpoint = 'ipc://Procedure/Add.ipc';
+            procedure = new Procedure(procedureEndpoint, spy, { workers: 3 });
+            procedure.bind();
+        });
+
+        context('when endpoint: correct', () => {
+            beforeEach(() => pingEndpoint = procedureEndpoint);
+
+            it('should not emit: data', async () => {
+                const data = chai.spy(() => { return });
+                procedure.on('data', data);
+                await Procedure.ping(<string>pingEndpoint);
+                expect(data).to.have.been.called.exactly(0);
+            });
+
+            it('should return: true', async () => await expect(Procedure.ping(<string>pingEndpoint)).to.eventually.equal(true));
+
+            context('when signal: already aborted AbortSignal', () => {
+                let ac: AbortController;
+
+                beforeEach(() => {
+                    ac = new AbortController();
+                    ac.abort();
+                });
+
+                it('should throw: Error', async () => await expect(Procedure.ping(<string>pingEndpoint, 500, ac.signal)).to.be.rejectedWith('signal was aborted'));
+            });
+        });
+
+        // TODO: when endpoint: incorrect
+        // TODO: when timeout infinity, NaN
+        // TODO: when abortion signaled during ping
+
+        afterEach(() => procedure.unbind());
+    });
 });
