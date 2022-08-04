@@ -5,6 +5,7 @@
     "main": "./dist/index",
     "types": "./types/index.d.ts",
     "author": "Tobey Blaber (https://github.com/toebeann)",
+    "repository": "github:toebeann/procedure.js",
     "funding": "https://paypal.me/tobeyblaber",
     "license": "UNLICENSED",
     "private": true,
@@ -16,16 +17,19 @@
     },
     "dependencies": {
         "@msgpack/msgpack": "^2.7.2",
-        "nanomsg": "^4.2.0"
+        "nanomsg": "^4.2.0",
+        "uuid": "^8.3.2"
     },
     "devDependencies": {
         "@istanbuljs/nyc-config-typescript": "^1.0.2",
+        "@toebeann/nanomsg": "^4.2.0",
         "@tsconfig/node16": "^1.0.3",
         "@types/chai": "^4.3.1",
         "@types/chai-as-promised": "^7.1.5",
         "@types/chai-spies": "^1.0.3",
         "@types/mocha": "^9.1.1",
         "@types/node": "^18.0.3",
+        "@types/uuid": "^8.3.4",
         "@typescript-eslint/eslint-plugin": "^5.30.6",
         "@typescript-eslint/parser": "^5.30.6",
         "chai": "^4.3.6",
