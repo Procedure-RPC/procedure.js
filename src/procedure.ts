@@ -1,4 +1,4 @@
-/// <reference types="node" />
+/// <reference types='node' />
 import { Ping, isPing, isErrorLike, cloneError } from './utils';
 import AggregateSignal from './aggregate-signal';
 import TimeoutSignal from './timeout-signal'
@@ -17,7 +17,7 @@ const uuidNamespace = uuidv5(homepage, uuidv5.URL);
  * Allows you to turn any generic function or callback into a procedure, which remote or local processes can call.
  * Includes the functionality to ping procedures to check whether they are available.
  */
-export default class Procedure<Input extends Nullable = null, Output extends Nullable = null> extends (EventEmitter as new () => TypedEmitter<ProcedureEvents>) implements ProcedureOptions {
+export default class Procedure<Input extends Nullable = null, Output extends Nullable = null> extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureOptions {
     [key: keyof ProcedureOptions]: ProcedureOptions[keyof ProcedureOptions];
 
     /** The options in use by the procedure, including defaults. */
@@ -131,7 +131,7 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
                 } else if (response.output !== undefined) {
                     return response.output;
                 } else {
-                    throw new RangeError("response is not of valid shape");
+                    throw new RangeError(`Response is not of valid shape: ${JSON.stringify(response)}`);
                 }
             } finally {
                 socket.removeAllListeners().close(); // clear all listeners and close the socket
@@ -150,9 +150,9 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
      * Defaults to `100`.
      * @param {AbortSignal | undefined} [signal=undefined] An optional AbortSignal which, when passed, will be used to abort awaiting the ping.
      * Defaults to `undefined`.
-     * @returns {Promise<true>} A promise which, when resolved, indicates whether the endpoint successfully responded to the ping.
+     * @returns {Promise<boolean>} A promise which, when resolved, indicates whether the endpoint correctly responded to the ping.
      */
-    static async ping(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<true> {
+    static async ping(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<boolean> {
         const socket = createSocket('req');
 
         const timeoutSignal = new TimeoutSignal(timeout);
@@ -162,18 +162,19 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
             throw new Error('signal was aborted');
         } else {
             try {
+                const ping = uuidv5(endpoint, uuidNamespace);
+
                 socket.connect(endpoint);
-
-                socket.send(Procedure.#encode({ ping: uuidv5(endpoint, uuidNamespace) }));
+                socket.send(Procedure.#encode({ ping }));
                 const [buffer]: [Buffer] = await once(socket, 'data', { signal }) as [Buffer];
-                const pong = Procedure.#decode<Response<unknown>>(buffer);
+                const response = Procedure.#decode<Response<unknown>>(buffer);
 
-                if ('pong' in pong && pong.pong !== undefined) {
-                    return pong.pong;
-                } else if ('error' in pong) {
-                    throw pong.error;
+                if ('pong' in response) {
+                    return response.pong === uuidv5(endpoint, ping);
+                } else if ('error' in response) {
+                    throw response.error;
                 } else {
-                    throw pong;
+                    throw response;
                 }
             } finally {
                 socket.removeAllListeners().close();
@@ -281,8 +282,8 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
                 console.log(`PONG sent at endpoint ${this.endpoint}`);
             }
         } else {
-            if (input !== undefined && this.verbose) {
-                console.log(`Received input data at endpoint: ${this.endpoint}`, input);
+            if (input !== undefined) {
+                this.#emitAndLogData(input as Input);
             }
 
             const response = input !== undefined
@@ -310,7 +311,7 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
             if (this.verbose) {
                 console.log(`PING received at endpoint: ${this.endpoint}`);
             }
-            return this.#trySendBuffer(this.#tryEncodeResponse({ pong: true }), socket);
+            return this.#trySendBuffer(this.#tryEncodeResponse({ pong: uuidv5(this.endpoint, object.ping) }), socket);
         } else {
             return false;
         }
@@ -336,6 +337,19 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
+     * Emits and optionally logs input data.
+     * @param {Input} data The input data to emit and log.
+     */
+    #emitAndLogData(data: Input) {
+        //TODO: Write unit tests
+        this.emit('data', data);
+
+        if (this.verbose) {
+            console.log(`Received input data at endpoint: ${this.endpoint}`, data);
+        }
+    }
+
+    /**
      * Handles the unbind event.
      */
     #emitAndLogUnbind() {
@@ -349,9 +363,9 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     /**
      * Emits and optionally logs the given error, wrapping it in a new Error with a custom error message.
      * @param {string} message A custom error message describing the cause of the original error. The message will be concatenated with the Procedure's endpoint.
-     * @param {unknown} error The error.
+     * @param {unknown} [error=undefined] The error.
      */
-    #emitAndLogError(message: string, error: unknown) {
+    #emitAndLogError(message: string, error?: unknown) {
         message = message.concat(` at endpoint: ${this.endpoint}`); // concatenate the Procedure's endpoint to the custom error message.
 
         const e: Error & { cause?: unknown } = new Error(message);
@@ -362,7 +376,11 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
         }
 
         if (this.verbose) { // optionally output the error to the console
-            console.error(`${message}\r\n`, error);
+            if (error !== undefined) {
+                console.error(`${message}\r\n`, error);
+            } else {
+                console.error(message);
+            }
         }
     }
 
@@ -392,7 +410,7 @@ export type Callback<Input extends Nullable = null, Output extends Nullable = nu
 export type Response<Output extends Nullable = null>
     = { output: Output, error?: never, pong?: never }
     | { output?: never, error: unknown, pong?: never }
-    | { output?: never, error?: never, pong: true };
+    | { output?: never, error?: never, pong: string };
 
 /**
  * Options for defining a Procedure.
@@ -431,7 +449,8 @@ export interface ProcedureCallOptions {
 /**
  * A map of the names of events emitted by Procedures and their function signatures.
  */
-type ProcedureEvents = {
-    error: (error: unknown) => void
-    unbind: () => void
+type ProcedureEvents<Input extends Nullable = null> = {
+    data: (data: Input) => void;
+    error: (error: unknown) => void;
+    unbind: () => void;
 }
