@@ -1,3 +1,4 @@
+/// <reference types='node' />
 import 'mocha';
 import chai, { expect } from 'chai';
 import spies from 'chai-spies';
