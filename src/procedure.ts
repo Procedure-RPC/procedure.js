@@ -23,13 +23,20 @@ const uuidNamespace = uuidv5(homepage, uuidv5.URL);
 export default class Procedure<Input extends Nullable = undefined, Output extends Nullable = undefined> extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureDefinitionOptions {
     [key: keyof ProcedureDefinitionOptions]: ProcedureDefinitionOptions[keyof ProcedureDefinitionOptions];
 
+    #endpoint?: string;
+    /** The endpoint at which the procedure, when bound, can be called. */
+    get endpoint() { return this.#endpoint; }
+    protected set endpoint(value) { this.#endpoint = value; }
+
     /** The options in use by the procedure, including defaults. */
     protected options: ProcedureDefinitionOptions;
     /** The underlying nanomsg socket used for data transmission. */
     protected sockets: Socket[] = [];
 
+    #uuid?: string;
     /** A v5 uuid generated for this endpoint, used for checking whether a Procedure is available and ready to respond to requests. */
-    protected readonly uuid: string;
+    protected get uuid() { return this.#uuid; }
+    protected set uuid(value) { this.#uuid = value; }
 
     get verbose() { return this.options.verbose; }
     set verbose(value) { this.options.verbose = value; }
@@ -52,11 +59,10 @@ export default class Procedure<Input extends Nullable = undefined, Output extend
 
     /**
      * Initializes a new Procedure at the given endpoint.
-     * @param {string} endpoint The endpoint at which the procedure will be callable. It is your task to ensure endpoints are unique per procedure.
      * @param {Callback<Input, Output>} callback The callback function powering the procedure itself. The callback may be asynchronous.
      * @param {Partial<ProcedureDefinitionOptions>} [options={}] An options bag defining how the procedure should be run. Defaults to `{}`.
      */
-    constructor(public readonly endpoint: string, protected callback: Callback<Input, Output>, options: Partial<ProcedureDefinitionOptions> = {}) {
+    constructor(protected callback: Callback<Input, Output>, options: Partial<ProcedureDefinitionOptions> = {}) {
         super();
         this.options = {
             ...{
@@ -67,24 +73,31 @@ export default class Procedure<Input extends Nullable = undefined, Output extend
             },
             ...options
         };
-        this.uuid = uuidv5(endpoint, uuidNamespace);
         this.workers = this.options.workers; // explicitly run setter logic
     }
-
+    
     /**
      * Binds the procedure to its endpoint, making it available to be called.
+     * Does nothiung if the procedure has not previously been bound to an endpoint.
+     * @param {string} [endpoint=undefined] The endpoint at which the procedure will be callable. When `undefined`, uses the previously set endpoint.
      * @returns {this} The bound Procedure for chaining convenience.
      */
-    bind(): this {
+    bind(endpoint?: string): this {
         this.unbind();
-        for (let i = 0; i < this.workers; i++) {
-            const socket = this.sockets[this.sockets.push(createSocket('rep')) - 1];
-            socket
-                .on('data', (data: Buffer) => this.#onRepSocketData(data, socket))
-                .on('error', (error: unknown) => this.#onRepSocketError(error))
-                .once('close', () => this.#onRepSocketClose())
-                .bind(this.endpoint); // bind the socket to the endpoint
+        this.endpoint = endpoint ?? this.endpoint;
+
+        if (typeof this.endpoint === 'string') {
+            this.uuid = uuidv5(this.endpoint, uuidNamespace);
+            for (let i = 0; i < this.workers; i++) {
+                const socket = this.sockets[this.sockets.push(createSocket('rep')) - 1];
+                socket
+                    .on('data', (data: Buffer) => this.#onRepSocketData(data, socket))
+                    .on('error', (error: unknown) => this.#onRepSocketError(error))
+                    .once('close', () => this.#onRepSocketClose())
+                    .bind(this.endpoint); // bind the socket to the endpoint
+            }
         }
+
         return this;
     }
 
@@ -331,7 +344,7 @@ export default class Procedure<Input extends Nullable = undefined, Output extend
             if (this.verbose) {
                 console.log(`PING received at endpoint: ${this.endpoint}`);
             }
-            return this.#trySendBuffer(this.#tryEncodeResponse({ pong: uuidv5(this.endpoint, object.ping) }), socket);
+            return this.#trySendBuffer(this.#tryEncodeResponse({ pong: uuidv5(<string>this.endpoint, object.ping) }), socket);
         } else {
             return false;
         }
