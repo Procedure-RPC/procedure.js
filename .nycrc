@@ -8,8 +8,9 @@
         "text-summary"
     ],
     "report-dir": "coverage",
-    "statements": "93",
-    "branches": "85",
-    "functions": "100",
-    "lines": "92"
+    "statements": "91",
+    "branches": "82",
+    "functions": "90",
+    "lines": "90",
+    "include": "src"
 }

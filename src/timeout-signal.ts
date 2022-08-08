@@ -12,7 +12,7 @@ export default class TimeoutSignal {
      * @param {number} [timeout] Constructs an AbortController and sets a timeout which will call the AbortController's `abort`
      * method after the given number of milliseconds, exposing its signal via the `signal` property.
      * Undefined, infinite or NaN values will result in the `signal` property being `undefined`.
-     * Finite values will be clamped between `0` and `Number.MAX_SAFE_INTEGER`.
+     * Finite values will be clamped between `0` and `Number.MAX_SAFE_INTEGER` inclusive.
      */
     constructor(timeout?: number) {
         if (timeout !== undefined && isFinite(timeout) && !isNaN(timeout)) {

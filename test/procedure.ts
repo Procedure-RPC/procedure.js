@@ -78,6 +78,8 @@ describe('Procedure', () => {
         });
     });
 
+    // TODO: test workers, extensionCodic, optionalParameterSupport & stripUndefinedProperties accessors
+
     describe('bind(): this', () => {
         let instance: Procedure;
         beforeEach(() => instance = new Procedure('', x => x));
@@ -127,9 +129,6 @@ describe('Procedure', () => {
                 }));
             });
         });
-
-        // TODO: test optionalParameterSupport property
-        // TODO: test stripUndefinedProperties property
     });
 
     describe('unbind(): this', () => {
@@ -320,8 +319,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
         afterEach(() => procedure.unbind());
     });
 
-    // TODO: test optionalParameterSupport property
-    // TODO: test stripUndefinedProperties property
+    // TODO: test optionalParameterSupport option works as intended
+    // TODO: test stripUndefinedProperties option works as intended
 
     // TODO: when callback asynchronous (completes normally, times out, throws error, infinite timeout, abortion signaled during execution, abortion signaled before execution)
 });
