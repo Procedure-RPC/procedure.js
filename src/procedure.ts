@@ -58,8 +58,8 @@ export default class Procedure<Input extends Nullable = undefined, Output extend
     protected set stripUndefinedProperties(value) { this.options.stripUndefinedProperties = value; }
 
     /**
-     * Initializes a new Procedure at the given endpoint.
-     * @param {Callback<Input, Output>} callback The callback function powering the procedure itself. The callback may be asynchronous.
+     * Initializes a new Procedure.
+     * @param {Callback<Input, Output>} callback The underlying callback function powering the procedure itself. The callback may be asynchronous.
      * @param {Partial<ProcedureDefinitionOptions>} [options={}] An options bag defining how the procedure should be run. Defaults to `{}`.
      */
     constructor(protected callback: Callback<Input, Output>, options: Partial<ProcedureDefinitionOptions> = {}) {
@@ -77,9 +77,9 @@ export default class Procedure<Input extends Nullable = undefined, Output extend
     }
     
     /**
-     * Binds the procedure to its endpoint, making it available to be called.
-     * Does nothiung if the procedure has not previously been bound to an endpoint.
-     * @param {string} [endpoint=undefined] The endpoint at which the procedure will be callable. When `undefined`, uses the previously set endpoint.
+     * Binds the Procedure to its endpoint, making it available to be called.
+     * Does nothing if the Procedure has not previously been bound to an endpoint.
+     * @param {string} [endpoint=undefined] The endpoint at which the procedure will be callable. When `undefined`, uses the previously set endpoint, if any.
      * @returns {this} The bound Procedure for chaining convenience.
      */
     bind(endpoint?: string): this {
@@ -102,7 +102,7 @@ export default class Procedure<Input extends Nullable = undefined, Output extend
     }
 
     /**
-     * Releases the procedure from its endpoint.
+     * Releases the Procedure from its endpoint.
      * @returns {this} The unbound Procedure for chaining convenience.
      */
     unbind(): this {
