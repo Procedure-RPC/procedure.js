@@ -1,3 +1,6 @@
+// TODO: add and test ipv6 support
+// TODO: rework error handling to throw a generic error with status code, and optionally an object containing an error message and relevant data - look at grpc for examples
+
 /// <reference types='node' />
 import { Ping, isPing, isErrorLike, cloneError } from './utils';
 import AggregateSignal from './aggregate-signal';
@@ -17,11 +20,11 @@ const uuidNamespace = uuidv5(homepage, uuidv5.URL);
  * Allows you to turn any generic function or callback into a procedure, which remote or local processes can call.
  * Includes the functionality to ping procedures to check whether they are available.
  */
-export default class Procedure<Input extends Nullable = null, Output extends Nullable = null> extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureOptions {
-    [key: keyof ProcedureOptions]: ProcedureOptions[keyof ProcedureOptions];
+export default class Procedure<Input extends Nullable = undefined, Output extends Nullable = undefined> extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureDefinitionOptions {
+    [key: keyof ProcedureDefinitionOptions]: ProcedureDefinitionOptions[keyof ProcedureDefinitionOptions];
 
     /** The options in use by the procedure, including defaults. */
-    protected options: ProcedureOptions;
+    protected options: ProcedureDefinitionOptions;
     /** The underlying nanomsg socket used for data transmission. */
     protected sockets: Socket[] = [];
 
@@ -41,18 +44,26 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     get extensionCodec() { return this.options.extensionCodec; }
     protected set extensionCodec(value) { this.options.extensionCodec = value; }
 
+    get optionalParameterSupport() { return this.options.optionalParameterSupport; }
+    protected set optionalParameterSupport(value) { this.options.optionalParameterSupport = value; }
+
+    get stripUndefinedProperties() { return this.options.stripUndefinedProperties; }
+    protected set stripUndefinedProperties(value) { this.options.stripUndefinedProperties = value; }
+
     /**
      * Initializes a new Procedure at the given endpoint.
      * @param {string} endpoint The endpoint at which the procedure will be callable. It is your task to ensure endpoints are unique per procedure.
      * @param {Callback<Input, Output>} callback The callback function powering the procedure itself. The callback may be asynchronous.
-     * @param {Partial<ProcedureOptions>} [options={}] An options bag defining how the procedure should be run. Defaults to `{}`.
+     * @param {Partial<ProcedureDefinitionOptions>} [options={}] An options bag defining how the procedure should be run. Defaults to `{}`.
      */
-    constructor(public readonly endpoint: string, protected callback: Callback<Input, Output>, options: Partial<ProcedureOptions> = {}) {
+    constructor(public readonly endpoint: string, protected callback: Callback<Input, Output>, options: Partial<ProcedureDefinitionOptions> = {}) {
         super();
         this.options = {
             ...{
                 verbose: false,
-                workers: 1
+                workers: 1,
+                optionalParameterSupport: true,
+                stripUndefinedProperties: true
             },
             ...options
         };
@@ -99,14 +110,19 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     /**
      * Asynchronously calls a Procedure at a given endpoint with given a input.
      * @param {string} endpoint The endpoint at which the Procedure is bound.
-     * @param {Input | null} [input=null] The input value for the procedure. Pass `null` to indicate no input value. Defaults to `null`.
+     * @param {Input} [input] The input value for the procedure. Pass `null` to indicate no input value. Defaults to `null`.
      * @param {ProcedureCallOptions} [options={}] An options bag defining how the Procedure should be called. Defaults to `{}`.
      * @returns {Promise<Output>} A promise which when resolved passes the output value to the promise's `then` handler(s).
      */
-    static async call<Input extends Nullable = null, Output extends Nullable = null>(endpoint: string, input: Input | null = null, options: Partial<ProcedureCallOptions> = {}): Promise<Output> {
+    static async call<Output extends Nullable = undefined>(endpoint: string, input?: Nullable, options: Partial<ProcedureCallOptions> = {}): Promise<Output> {
         const socket = createSocket('req');
         const opts: ProcedureCallOptions = {
-            ...{ timeout: 1000, ping: false },
+            ...{
+                timeout: 1000,
+                ping: false,
+                optionalParameterSupport: true,
+                stripUndefinedProperties: true
+            },
             ...options
         };
 
@@ -122,14 +138,17 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
                 }
 
                 socket.connect(endpoint);
-                socket.send(Procedure.#encode(input, opts.extensionCodec)); // send the encoded input data to the endpoint
+                socket.send(Procedure.#encode(input, opts.extensionCodec, opts.stripUndefinedProperties)); // send the encoded input data to the endpoint
 
                 const [buffer]: [Buffer] = await once(socket, 'data', { signal }) as [Buffer]; // await a response from the endpoint
                 const response = Procedure.#decode<Response<Output>>(buffer, opts.extensionCodec); // decode the response
                 if ('error' in response) {
                     throw response.error;
-                } else if (response.output !== undefined) {
-                    return response.output;
+                } else if ('output' in response) {
+                    return response.output
+                        ?? <Output>(opts.optionalParameterSupport
+                            ? undefined
+                            : response.output);
                 } else {
                     throw new RangeError(`Response is not of valid shape: ${JSON.stringify(response)}`);
                 }
@@ -186,10 +205,11 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
      * Encodes a given value for transmission via nanomsg.
      * @param {unknown} value The value to be encoded.
      * @param {ExtensionCodec} [extensionCodec] The extension codec to use.
+     * @param {boolean} [ignoreUndefined=false] Whether to strip `undefined` values from objects or not.
      * @returns {Buffer} A buffer containing the encoded value.
      */
-    static #encode(value: unknown, extensionCodec?: ExtensionCodec): Buffer {
-        const encoded = encode(value, { extensionCodec });
+    static #encode(value: unknown, extensionCodec?: ExtensionCodec, ignoreUndefined = false): Buffer {
+        const encoded = encode(value, { extensionCodec, ignoreUndefined });
         return Buffer.from(encoded.buffer, encoded.byteOffset, encoded.byteLength);
     }
 
@@ -224,7 +244,12 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
      */
     async #tryGetCallbackResponse(input: Input): Promise<Response<Output>> {
         try {
-            return { output: await this.callback(input) };
+            return {
+                output: await this.callback(input
+                    ?? <Input>(this.optionalParameterSupport
+                        ? undefined
+                        : input))
+            };
         } catch (error) {
             this.#emitAndLogError('Procedure encountered an error while executing callback', error);
             return { error };
@@ -241,7 +266,7 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
             if (isErrorLike(response.error)) { // clone the error so that it can be encoded for transmission
                 response.error = cloneError(response.error);
             }
-            return Procedure.#encode(response, this.extensionCodec);
+            return Procedure.#encode(response, this.extensionCodec, this.stripUndefinedProperties);
         } catch (error) {
             this.#emitAndLogError('Procedure response could not be encoded for transmission', error);
             return this.#tryEncodeResponse({ // As the response could not be encoded, encode and return a new response containing the thrown error
@@ -274,22 +299,22 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
      * @param {Socket} socket The socket the data was received on.
      */
     async #onRepSocketData(data: Buffer, socket: Socket): Promise<void> {
-        const { input, error } = this.#tryDecodeInput(data);
+        const decoded = this.#tryDecodeInput(data);
 
-        if (this.#tryHandlePing(input, socket)) { // input was a ping of valid uuid & pong was successfully sent
+        if (this.#tryHandlePing(decoded.input, socket)) { // input was a ping of valid uuid & pong was successfully sent
             if (this.verbose) {
                 console.log(`PONG sent at endpoint ${this.endpoint}`);
             }
         } else {
-            if (input !== undefined) {
-                this.#emitAndLogData(input as Input);
+            if ('input' in decoded) {
+                this.#emitAndLogData(decoded.input as Input);
             }
 
-            const response = input !== undefined
-                ? await this.#tryGetCallbackResponse(input as Input)
-                : { error };
+            const response = 'input' in decoded
+                ? await this.#tryGetCallbackResponse(decoded.input as Input)
+                : decoded;
 
-            if (response.output !== undefined && this.verbose) {
+            if ('output' in response && this.verbose) {
                 console.log(`Generated output data at endpoint: ${this.endpoint}`, response.output);
             }
 
@@ -361,7 +386,7 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     /**
      * Emits and optionally logs the given error, wrapping it in a new Error with a custom error message.
      * @param {string} message A custom error message describing the cause of the original error. The message will be concatenated with the Procedure's endpoint.
-     * @param {unknown} [error=undefined] The error.
+     * @param {unknown} [error] The error.
      */
     #emitAndLogError(message: string, error?: unknown) {
         message = message.concat(` at endpoint: ${this.endpoint}`); // concatenate the Procedure's endpoint to the custom error message.
@@ -393,40 +418,45 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
 }
 
 /**
- * Represents a nullable value, which cannot be `undefined`.
+ * Represents a nullable value.
  */
-export type Nullable = unknown | null;
+export type Nullable = unknown | null | undefined;
 
 /**
  * Represents a simple callback function with a single nullable input value and likewise nullable output value.
  */
-export type Callback<Input extends Nullable = null, Output extends Nullable = null> = (input: Input) => Output;
+export type Callback<Input extends Nullable = undefined, Output extends Nullable = undefined> = (input: Input) => Output;
 
 /**
  * A response from a procedure call. If the call returned successfully, the response will be of shape `{ output: Output }`, otherwise `{ error: unknown }`.
  */
-export type Response<Output extends Nullable = null>
+export type Response<Output extends Nullable = undefined>
     = { output: Output, error?: never, pong?: never }
     | { output?: never, error: unknown, pong?: never }
     | { output?: never, error?: never, pong: string };
 
+export interface ProcedureCommonOptions {
+    optionalParameterSupport: boolean;
+    stripUndefinedProperties: boolean;
+}
+
 /**
  * Options for defining a Procedure.
  */
-export interface ProcedureOptions {
+export interface ProcedureDefinitionOptions extends ProcedureCommonOptions {
     [key: string]: unknown;
     /** The number of socket workers to spin up for the Procedure. Useful for Procedures which may take a long time to complete. Defaults to `1`. */
     workers: number;
     /** A boolean indicating whether to output errors and events to the console. Defaults to `false`. */
     verbose: boolean;
     /** The msgpack `ExtensionCodec` to use for encoding and decoding messages. Defaults to `undefined`. */
-    extensionCodec?: ExtensionCodec;
+    extensionCodec?: ExtensionCodec | undefined;
 }
 
 /**
  * Options for calling a Procedure.
  */
-export interface ProcedureCallOptions {
+export interface ProcedureCallOptions extends ProcedureCommonOptions {
     /** The number of milliseconds after which the Procedure call will automatically be aborted.
      * Set to `Infinity` or `NaN` to never timeout.
      * Non-NaN, finite values will be clamped between `0` and `Number.MAX_SAFE_INTEGER`.
@@ -438,16 +468,16 @@ export interface ProcedureCallOptions {
     ping: number | false;
     /** An optional msgpack `ExtensionCodec` to use for encoding and decoding messages.
      * Defaults to `undefined`. */
-    extensionCodec?: ExtensionCodec;
+    extensionCodec?: ExtensionCodec | undefined;
     /** An optional `AbortSignal` which will be used to abort the Procedure call.
      * Defaults to `undefined`. */
-    signal?: AbortSignal;
+    signal?: AbortSignal | undefined;
 }
 
 /**
  * A map of the names of events emitted by Procedures and their function signatures.
  */
-type ProcedureEvents<Input extends Nullable = null> = {
+type ProcedureEvents<Input extends Nullable = undefined> = {
     data: (data: Input) => void;
     error: (error: unknown) => void;
     unbind: () => void;
