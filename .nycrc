@@ -1,0 +1,15 @@
+{
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "check-coverage": true,
+    "reporter": [
+        "html",
+        "text",
+        "text-summary"
+    ],
+    "report-dir": "coverage",
+    "statements": "93",
+    "branches": "85",
+    "functions": "100",
+    "lines": "92"
+}
