@@ -9,7 +9,7 @@
     "homepage": "https://github.com/toebeann/procedure.js",
     "repository": "github:toebeann/procedure.js",
     "funding": "https://paypal.me/tobeyblaber",
-    "license": "UNLICENSED",
+    "license": "MIT",
     "private": true,
     "scripts": {
         "build": "tsc",
