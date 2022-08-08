@@ -53,6 +53,7 @@ With [implementations in multiple languages](#language-implementations), applica
     - [WS: intra/inter-network over WebSockets](#ws-intrainter-network-over-websockets)
   - [Handling breaking changes to your procedures](#handling-breaking-changes-to-your-procedures)
   - [Language implementations](#language-implementations)
+  - [License](#license)
 
 <!-- ## Install
 
@@ -346,3 +347,6 @@ Procedure is currently implemented in the following languages:
 -->
 
 If you would like to contribute a Procedure implementation in another language, please feel free! Create a GitHub repository for the language implementation and open an issue with us once it's ready for review! 💜
+
+## License
+procedure.js is licensed under [MIT](LICENSE).
