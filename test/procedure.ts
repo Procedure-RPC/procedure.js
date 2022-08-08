@@ -3,6 +3,7 @@ import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import chaiAsPromised from 'chai-as-promised'
 import Procedure, { Callback } from '../src'
+import { Procedure as namedImport } from '../src';
 import { ExtensionCodec } from '@msgpack/msgpack'
 
 chai.use(spies);
@@ -165,6 +166,10 @@ describe('Procedure', () => {
                 });
             });
         });
+    });
+
+    describe('named import', () => {
+        describe('namedImport instance', () => it('should be: instanceof Procedure', () => expect(new namedImport('', () => false)).to.be.instanceOf(Procedure)));
     });
 });
 
