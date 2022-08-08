@@ -17,7 +17,7 @@ const uuidNamespace = uuidv5(homepage, uuidv5.URL);
 
 /**
  * A simple abstraction of a procedure (the P in RPC).
- * Allows you to turn any generic function or callback into a procedure, which remote or local processes can call.
+ * Allows you to turn any generic function or callback into a procedure, which can be called via the transport specified.
  * Includes the functionality to ping procedures to check whether they are available.
  */
 export default class Procedure<Input extends Nullable = undefined, Output extends Nullable = undefined> extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureDefinitionOptions {
@@ -37,7 +37,7 @@ export default class Procedure<Input extends Nullable = undefined, Output extend
     get workers() { return this.options.workers; }
     protected set workers(value) {
         this.options.workers = !isNaN(value) && isFinite(value)
-            ? Math.max(value, 1)
+            ? Math.min(Math.max(value, 1), Number.MAX_SAFE_INTEGER)
             : 1;
     }
 
@@ -67,12 +67,8 @@ export default class Procedure<Input extends Nullable = undefined, Output extend
             },
             ...options
         };
-
         this.uuid = uuidv5(endpoint, uuidNamespace);
-
-        for (const prop in this.options) {
-            this[prop] = this.options[prop];
-        }
+        this.workers = this.options.workers; // explicitly run setter logic
     }
 
     /**
@@ -165,7 +161,7 @@ export default class Procedure<Input extends Nullable = undefined, Output extend
      * @param {number | undefined} [timeout=100] How long to wait for a response before timing out.
      * NaN, undefined or infinite values will result in the ping never timing out if no response is received, unless
      * `signal` is a valid `AbortSignal` and gets aborted.
-     * Non-NaN, finite values will be clamped to between `0` and `Number.MAX_SAFE_INTEGER`.
+     * Non-NaN, finite values will be clamped between `0` and `Number.MAX_SAFE_INTEGER` inclusive.
      * Defaults to `100`.
      * @param {AbortSignal | undefined} [signal=undefined] An optional AbortSignal which, when passed, will be used to abort awaiting the ping.
      * Defaults to `undefined`.
@@ -445,7 +441,9 @@ export interface ProcedureCommonOptions {
  */
 export interface ProcedureDefinitionOptions extends ProcedureCommonOptions {
     [key: string]: unknown;
-    /** The number of socket workers to spin up for the Procedure. Useful for Procedures which may take a long time to complete. Defaults to `1`. */
+    /** The number of socket workers to spin up for the Procedure. Useful for Procedures which may take a long time to complete.
+     * Will be clamped between `1` and `Number.MAX_SAFE_INTEGER` inclusive.
+     * Defaults to `1`. */
     workers: number;
     /** A boolean indicating whether to output errors and events to the console. Defaults to `false`. */
     verbose: boolean;
@@ -459,7 +457,7 @@ export interface ProcedureDefinitionOptions extends ProcedureCommonOptions {
 export interface ProcedureCallOptions extends ProcedureCommonOptions {
     /** The number of milliseconds after which the Procedure call will automatically be aborted.
      * Set to `Infinity` or `NaN` to never timeout.
-     * Non-NaN, finite values will be clamped between `0` and `Number.MAX_SAFE_INTEGER`.
+     * Non-NaN, finite values will be clamped between `0` and `Number.MAX_SAFE_INTEGER` inclusive.
      * Defaults to `1000`. */
     timeout: number;
     /** The number of millisceonds to wait for a ping-pong from the endpoint before calling the remote procedure.
