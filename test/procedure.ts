@@ -127,6 +127,9 @@ describe('Procedure', () => {
                 }));
             });
         });
+
+        // TODO: test optionalParameterSupport property
+        // TODO: test stripUndefinedProperties property
     });
 
     describe('unbind(): this', () => {
@@ -316,6 +319,9 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
 
         afterEach(() => procedure.unbind());
     });
+
+    // TODO: test optionalParameterSupport property
+    // TODO: test stripUndefinedProperties property
 
     // TODO: when callback asynchronous (completes normally, times out, throws error, infinite timeout, abortion signaled during execution, abortion signaled before execution)
 });
