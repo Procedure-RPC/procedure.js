@@ -65,7 +65,7 @@ With [implementations in multiple languages](#language-implementations), applica
 ## Usage
 With Procedure, setting up your function to be called from another process (whether remote or local) is remarkably simple:
 ```js
-const procedure = new Procedure((n) => n ** 2);
+const procedure = new Procedure((n) => n ** 2)
 procedure.bind('tcp://*:5000');
 ```
 
@@ -87,7 +87,8 @@ const procedure = new Procedure(async () => {
     } else {
         throw new Error(`${response.status}: ${response.statusText}`);
     }
-}).bind('tcp://127.0.0.1:8888');
+});
+procedure.bind('tcp://127.0.0.1:8888');
 ```
 
 ### Parameters and return types
@@ -124,7 +125,8 @@ To handle these inconsistencies, we coerce a msgpack decoded `null` to `undefine
 
 To disable this behavior, you can set `optionalParameterSupport` to `false` for either procedure definitions or calls, or both:
 ```js
-const procedure = new Procedure(x => { ... }, { optionalParameterSupport: false }).bind('tcp://*:54321');
+const procedure = new Procedure(x => { ... }, { optionalParameterSupport: false })
+    .bind('tcp://*:54321');
 ```
 
 ```js
@@ -139,13 +141,8 @@ This operation adds some overhead, and any code that relies on the presence of a
 
 To disable this behavior, you can set the `stripUndefinedProperties` option to `false` for either procedure definitions or calls, or both:
 ```js
-const procedure = new Procedure(
-    'tcp://*:54321',
-    x => {
-        ...
-    },
-    { stripUndefinedProperties: false }
-);
+const procedure = new Procedure(x => { ... }, { stripUndefinedProperties: false }
+    .bind('tcp://*:54321');
 ```
 
 ```js
@@ -261,7 +258,8 @@ If you do need to make breaking changes to a procedure, it is recommended to eit
           case 2: return myFunctionV2(options.x);
           default: return myFunction(options.x);
       }
-  }).bind('tcp://*:33000');
+  });
+  procedure.bind('tcp://*:33000');
   ```
 
   ```js
