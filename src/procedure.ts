@@ -79,7 +79,7 @@ export default class Procedure<Input extends Nullable = undefined, Output extend
     /**
      * Binds the Procedure to its endpoint, making it available to be called.
      * Does nothing if the Procedure has not previously been bound to an endpoint.
-     * @param {string} [endpoint=undefined] The endpoint at which the procedure will be callable. When `undefined`, uses the previously set endpoint, if any.
+     * @param {string} [endpoint=undefined] The endpoint at which the procedure will be callable. When `undefined`, uses `this.endpoint`.
      * @returns {this} The bound Procedure for chaining convenience.
      */
     bind(endpoint?: string): this {
