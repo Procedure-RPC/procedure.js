@@ -10,7 +10,6 @@
     "repository": "github:procedure-rpc/procedure.js",
     "funding": "https://paypal.me/tobeyblaber",
     "license": "MIT",
-    "private": true,
     "scripts": {
         "build": "tsc",
         "lint": "eslint . --ext .ts",
