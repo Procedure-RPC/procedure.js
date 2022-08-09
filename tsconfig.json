@@ -3,9 +3,6 @@
     "compilerOptions": {
         "rootDir": "./src",
         "outDir": "./dist",
-        "typeRoots": [
-            "node_modules/@toebeann"
-        ],
         "declaration": true,
         "declarationMap": true,
         "declarationDir": "./types",
