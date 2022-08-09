@@ -1,2 +1,2 @@
 export * from './procedure';
-export { default } from './procedure';
+export { Procedure as default } from './procedure';

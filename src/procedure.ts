@@ -1,7 +1,9 @@
+// TODO: add and test ipv6 support
+// TODO: rework error handling to throw a generic error with status code, and optionally an object containing an error message and relevant data - look at grpc for examples
+
 /// <reference types='node' />
 import { Ping, isPing, isErrorLike, cloneError } from './utils';
-import AggregateSignal from './aggregate-signal';
-import TimeoutSignal from './timeout-signal'
+import { AggregateSignal, TimeoutSignal } from './signals';
 import { createSocket, Socket } from 'nanomsg';
 import { encode, decode, ExtensionCodec } from '@msgpack/msgpack'
 import { once, EventEmitter } from 'events'
@@ -14,76 +16,120 @@ const uuidNamespace = uuidv5(homepage, uuidv5.URL);
 
 /**
  * A simple abstraction of a procedure (the P in RPC).
- * Allows you to turn any generic function or callback into a procedure, which remote or local processes can call.
- * Includes the functionality to ping procedures to check whether they are available.
+ * Allows you to turn a function or callback into a procedure, which can be called via the transport specified.
+ * @template Input Type of input parameter the procedure accepts. Defaults to `undefined`.
+ * @template Output Type of output value the procedure returns. Defaults to `undefined`.
  */
-export default class Procedure<Input extends Nullable = null, Output extends Nullable = null> extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureOptions {
-    [key: keyof ProcedureOptions]: ProcedureOptions[keyof ProcedureOptions];
+export class Procedure<Input extends Nullable = undefined, Output extends Nullable = undefined> extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureDefinitionOptions {
+    #endpoint?: string;
+    /** 
+     * The endpoint at which the {@link Procedure}, when {@link bind bound}, can be {@link Procedure.call called}.
+    */
+    get endpoint() { return this.#endpoint; }
+    protected set endpoint(value) { this.#endpoint = value; }
 
-    /** The options in use by the procedure, including defaults. */
-    protected options: ProcedureOptions;
-    /** The underlying nanomsg socket used for data transmission. */
+    #uuid?: string;
+    /** 
+     * A v5 uuid generated from {@link endpoint}, used to identify ping requests.
+     */
+    protected get uuid() { return this.#uuid; }
+    protected set uuid(value) { this.#uuid = value; }
+
+    /** 
+     * The options in use by the {@link Procedure}, including defaults.
+     */
+    protected options: ProcedureDefinitionOptions;
+
+    /** 
+     * The underlying nanomsg {@link Socket sockets} used for data transmission.
+     */
     protected sockets: Socket[] = [];
 
-    /** A v5 uuid generated for this endpoint, used for checking whether a Procedure is available and ready to respond to requests. */
-    protected readonly uuid: string;
-
+    /**
+     * @inheritDoc ProcedureDefinitionOptions.verbose
+     */
     get verbose() { return this.options.verbose; }
     set verbose(value) { this.options.verbose = value; }
 
+    /**
+     * @inheritDoc ProcedureDefinitionOptions.workers
+     */
     get workers() { return this.options.workers; }
-    protected set workers(value) {
+    set workers(value) {
         this.options.workers = !isNaN(value) && isFinite(value)
-            ? Math.max(value, 1)
+            ? Math.min(Math.max(value, 1), Number.MAX_SAFE_INTEGER)
             : 1;
     }
 
+    /**
+     * @inheritDoc ProcedureDefinitionOptions.extensionCodec
+     */
     get extensionCodec() { return this.options.extensionCodec; }
-    protected set extensionCodec(value) { this.options.extensionCodec = value; }
+    set extensionCodec(value) { this.options.extensionCodec = value; }
 
     /**
-     * Initializes a new Procedure at the given endpoint.
-     * @param {string} endpoint The endpoint at which the procedure will be callable. It is your task to ensure endpoints are unique per procedure.
-     * @param {Callback<Input, Output>} callback The callback function powering the procedure itself. The callback may be asynchronous.
-     * @param {Partial<ProcedureOptions>} [options={}] An options bag defining how the procedure should be run. Defaults to `{}`.
+     * @inheritDoc ProcedureOptions.optionalParameterSupport
      */
-    constructor(public readonly endpoint: string, protected callback: Callback<Input, Output>, options: Partial<ProcedureOptions> = {}) {
+    get optionalParameterSupport() { return this.options.optionalParameterSupport; }
+    set optionalParameterSupport(value) { this.options.optionalParameterSupport = value; }
+
+    /**
+     * @inheritDoc ProcedureOptions.ignoreUndefinedProperties
+     */
+    get ignoreUndefinedProperties() { return this.options.ignoreUndefinedProperties; }
+    set ignoreUndefinedProperties(value) { this.options.ignoreUndefinedProperties = value; }
+
+    /**
+     * Initializes a new {@link Procedure}.
+     * @param {Callback<Input, Output>} callback The underlying callback function powering the procedure itself. The callback may be asynchronous.
+     * @param {Partial<ProcedureDefinitionOptions>} [options={}] Options for a {@link Procedure}. Defaults to `{}`.
+     * @template Input Type of input parameter the procedure accepts. Defaults to `undefined`.
+     * @template Output Type of output value the procedure returns. Defaults to `undefined`.
+     */
+    constructor(protected callback: Callback<Input, Output>, options: Partial<ProcedureDefinitionOptions> = {}) {
         super();
         this.options = {
             ...{
                 verbose: false,
-                workers: 1
+                workers: 1,
+                optionalParameterSupport: true,
+                ignoreUndefinedProperties: true
             },
             ...options
         };
-
-        this.uuid = uuidv5(endpoint, uuidNamespace);
-
-        for (const prop in this.options) {
-            this[prop] = this.options[prop];
-        }
+        this.workers = this.options.workers; // explicitly run setter logic
     }
 
     /**
-     * Binds the procedure to its endpoint, making it available to be called.
-     * @returns {this} The bound Procedure for chaining convenience.
+     * Binds the {@link Procedure} to an {@link endpoint}, making it available to be {@link Procedure.call called}.
+     * @param {string} [endpoint=undefined] The endpoint at which the procedure will be callable. Defaults to {@link Procedure.endpoint}.
+     * @returns {this} The bound {@link Procedure} for method chaining.
+     * @see {@link unbind}
      */
-    bind(): this {
-        this.unbind();
-        for (let i = 0; i < this.workers; i++) {
-            const socket = this.sockets[this.sockets.push(createSocket('rep')) - 1];
-            socket
+    bind(endpoint?: string): this {
+        endpoint = endpoint ?? this.endpoint;
+
+        if (typeof endpoint === 'string') {
+            this.unbind();
+            this.uuid = uuidv5(endpoint, uuidNamespace);
+            this.endpoint = endpoint;
+            for (let i = 0; i < this.workers; i++) {
+                const socket = this.sockets[this.sockets.push(createSocket('rep')) - 1];
+                socket
                 .on('data', (data: Buffer) => this.#onRepSocketData(data, socket))
                 .on('error', (error: unknown) => this.#onRepSocketError(error))
                 .once('close', () => this.#onRepSocketClose())
-                .bind(this.endpoint); // bind the socket to the endpoint
+                .bind(endpoint); // bind the socket to the endpoint
+            }
         }
+
         return this;
     }
 
     /**
-     * Releases the procedure from its endpoint.
-     * @returns {this} The unbound Procedure for chaining convenience.
+     * Releases the {@link Procedure} from its {@link endpoint}.
+     * @returns {this} The unbound {@link Procedure} for method chaining.
+     * @see {@link bind}
      */
     unbind(): this {
         if (this.sockets.length > 0) {
@@ -97,16 +143,23 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Asynchronously calls a Procedure at a given endpoint with given a input.
-     * @param {string} endpoint The endpoint at which the Procedure is bound.
-     * @param {Input | null} [input=null] The input value for the procedure. Pass `null` to indicate no input value. Defaults to `null`.
-     * @param {ProcedureCallOptions} [options={}] An options bag defining how the Procedure should be called. Defaults to `{}`.
-     * @returns {Promise<Output>} A promise which when resolved passes the output value to the promise's `then` handler(s).
+     * Asynchronously calls a {@link Procedure} at a given {@link endpoint} with given a {@link input}.
+     * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
+     * @param {Nullable} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
+     * @param {ProcedureCallOptions} [options={}] Options for calling a {@link Procedure}. Defaults to `{}`.
+     * @returns {Promise<Output>} A {@link Promise} which when resolved passes the output value to the {@link Promise.then then} handler(s).
+     * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
+     * @see {@link Procedure.endpoint}
+     * @see {@link Procedure.ping}
      */
-    static async call<Input extends Nullable = null, Output extends Nullable = null>(endpoint: string, input: Input | null = null, options: Partial<ProcedureCallOptions> = {}): Promise<Output> {
+    static async call<Output extends Nullable = unknown>(endpoint: string, input?: Nullable, options: Partial<ProcedureCallOptions> = {}): Promise<Output> {
         const socket = createSocket('req');
         const opts: ProcedureCallOptions = {
-            ...{ timeout: 1000, ping: false },
+            ...{
+                timeout: 1000,
+                optionalParameterSupport: true,
+                ignoreUndefinedProperties: true
+            },
             ...options
         };
 
@@ -117,19 +170,22 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
             throw new Error('signal was aborted');
         } else {
             try {
-                if (opts.ping && !await Procedure.ping(endpoint, opts.ping, signal)) {
+                if (opts.ping !== undefined && !await Procedure.ping(endpoint, opts.ping, signal)) {
                     throw new Error(`ping returned false at endpoint: ${endpoint}`);
                 }
 
                 socket.connect(endpoint);
-                socket.send(Procedure.#encode(input, opts.extensionCodec)); // send the encoded input data to the endpoint
+                socket.send(Procedure.#encode(input, opts.extensionCodec, opts.ignoreUndefinedProperties)); // send the encoded input data to the endpoint
 
                 const [buffer]: [Buffer] = await once(socket, 'data', { signal }) as [Buffer]; // await a response from the endpoint
                 const response = Procedure.#decode<Response<Output>>(buffer, opts.extensionCodec); // decode the response
                 if ('error' in response) {
                     throw response.error;
-                } else if (response.output !== undefined) {
-                    return response.output;
+                } else if ('output' in response) {
+                    return response.output
+                        ?? <Output>(opts.optionalParameterSupport
+                            ? undefined
+                            : response.output);
                 } else {
                     throw new RangeError(`Response is not of valid shape: ${JSON.stringify(response)}`);
                 }
@@ -141,18 +197,18 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Asynchonously pings a Procedure at a given endpoint to check that it is ready to respond to requests.
-     * @param {string} endpoint The endpoint to ping at which a Procedure is expected to be bound.
-     * @param {number | undefined} [timeout=100] How long to wait for a response before timing out.
-     * NaN, undefined or infinite values will result in the ping never timing out if no response is received, unless
-     * `signal` is a valid `AbortSignal` and gets aborted.
-     * Non-NaN, finite values will be clamped to between `0` and `Number.MAX_SAFE_INTEGER`.
+     * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link Procedure.call called}.
+     * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
+     * @param {number} [timeout=100] How long to wait for a response before timing out.
+     * {@link NaN} or {@link Infinity infinite} values will result in the ping never timing out if no response is received, unless
+     * {@link signal} is a valid {@link AbortSignal} and gets aborted.
+     * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
      * Defaults to `100`.
-     * @param {AbortSignal | undefined} [signal=undefined] An optional AbortSignal which, when passed, will be used to abort awaiting the ping.
+     * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
      * Defaults to `undefined`.
-     * @returns {Promise<boolean>} A promise which, when resolved, indicates whether the endpoint correctly responded to the ping.
+     * @returns {Promise<boolean>} A {@link Promise} which when resolved indicates whether the {@link endpoint} correctly responded to the ping.
      */
-    static async ping(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<boolean> {
+    static async ping(endpoint: string, timeout = 100, signal?: AbortSignal): Promise<boolean> {
         if (signal?.aborted) {
             throw new Error('signal was aborted');
         } else {
@@ -183,30 +239,32 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Encodes a given value for transmission via nanomsg.
+     * Encodes a given value for transmission.
      * @param {unknown} value The value to be encoded.
-     * @param {ExtensionCodec} [extensionCodec] The extension codec to use.
-     * @returns {Buffer} A buffer containing the encoded value.
+     * @param {ExtensionCodec} [extensionCodec] The {@link ExtensionCodec} to use for encoding.
+     * @param {boolean} [ignoreUndefinedProperties=false] Whether to strip `undefined` properties from objects or not.
+     * @returns {Buffer} A {@link Buffer} containing the encoded value.
      */
-    static #encode(value: unknown, extensionCodec?: ExtensionCodec): Buffer {
-        const encoded = encode(value, { extensionCodec });
+    static #encode(value: unknown, extensionCodec?: ExtensionCodec, ignoreUndefinedProperties = false): Buffer {
+        const encoded = encode(value, { extensionCodec, ignoreUndefined: ignoreUndefinedProperties });
         return Buffer.from(encoded.buffer, encoded.byteOffset, encoded.byteLength);
     }
 
     /**
-     * Decodes a given nanomsg data buffer.
-     * @param {Buffer} buffer The buffer to be decoded.
-     * @param {ExtensionCodec} [extensionCodec] The extension codec to use.
-     * @returns {T} The buffer, decoded into an object.
+     * Decodes a given {@link Buffer} and casts it as {@link T}.
+     * @param {Buffer} buffer The {@link Buffer} to be decoded.
+     * @param {ExtensionCodec} [extensionCodec] The {@link ExtensionCodec} to use for decoding.
+     * @returns {T} The buffer, decoded and cast to type {@link T}.
+     * @template T The type the decoded value should be cast to.
      */
     static #decode<T = unknown>(buffer: Buffer, extensionCodec?: ExtensionCodec): T {
         return decode(buffer, { extensionCodec }) as T;
     }
 
     /**
-     * Attempts to decode the given buffer into a usable input value for the Procedure.
-     * @param {Buffer} buffer The buffer to decode.
-     * @returns {{ input: Input, error?: never } | { input?: never, error: unknown }} If successful, an object of shape `{ input: Input }`, otherwise `{ error: unknown }`.
+     * Attempts to decode the given {@link Buffer}.
+     * @param {Buffer} buffer The {@link Buffer} to decode.
+     * @returns {{ input: Input, error?: never } | { input?: never, error: unknown }} If successful, an object of shape `{ input: Input | Ping }`, otherwise `{ error: unknown }`.
      */
     #tryDecodeInput(buffer: Buffer): { input: Input | Ping, error?: never } | { input?: never, error: unknown } {
         try {
@@ -218,13 +276,18 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Attempts to asynchronously call the Procedure's callback and return a response containing its output value.
-     * @param {Input} input The input value for the callback.
-     * @returns {Promise<Response<Output>>} A promise which when resolved passes the response to the promise's `then` handler.
+     * Attempts to asynchronously call the {@link Procedure Procedure's} {@link callback} and return a response containing its output value.
+     * @param {Input} input An input parameter to pass to the {@link callback}.
+     * @returns {Promise<Response<Output>>} A {@link Promise} which when resolved passes the response to the {@link Promise.then then} handler(s).
      */
     async #tryGetCallbackResponse(input: Input): Promise<Response<Output>> {
         try {
-            return { output: await this.callback(input) };
+            return {
+                output: await this.callback(input
+                    ?? <Input>(this.optionalParameterSupport
+                        ? undefined
+                        : input))
+            };
         } catch (error) {
             this.#emitAndLogError('Procedure encountered an error while executing callback', error);
             return { error };
@@ -232,16 +295,16 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Attempts to encode the given response for transmission back to the Procedure's caller.
+     * Attempts to encode the given response for transmission back to the {@link Procedure Procedure's} caller.
      * @param {Response<Output>} response The response to encode.
-     * @returns {Buffer} A buffer containing the encoded response.
+     * @returns {Buffer} A {@link Buffer} containing the encoded response.
      */
     #tryEncodeResponse(response: Response<Output>): Buffer {
         try {
             if (isErrorLike(response.error)) { // clone the error so that it can be encoded for transmission
                 response.error = cloneError(response.error);
             }
-            return Procedure.#encode(response, this.extensionCodec);
+            return Procedure.#encode(response, this.extensionCodec, this.ignoreUndefinedProperties);
         } catch (error) {
             this.#emitAndLogError('Procedure response could not be encoded for transmission', error);
             return this.#tryEncodeResponse({ // As the response could not be encoded, encode and return a new response containing the thrown error
@@ -253,10 +316,10 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Attempts to send the encoded buffer back to the Procedure's caller.
-     * @param {Buffer} buffer A buffer containing the encoded response.
-     * @param {Socket} socket The socket to send the response on.
-     * @returns {boolean} `true` when the encoded buffer was successfully sent, otherwise false.
+     * Attempts to send the encoded buffer back to the {@link Procedure Procedure's} caller.
+     * @param {Buffer} buffer A {@link Buffer} containing the encoded response.
+     * @param {Socket} socket The {@link Socket} through which to send the response.
+     * @returns {boolean} `true` when the encoded {@link Buffer} was successfully sent, otherwise `false`.
      */
     #trySendBuffer(buffer: Buffer, socket: Socket): boolean {
         try {
@@ -269,27 +332,24 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Asynchrously handles the socket's data event, representing requests to call the Procedure.
-     * @param {Buffer} data The encoded input buffer.
-     * @param {Socket} socket The socket the data was received on.
+     * Asynchrously handles the {@link socket socket's} data event, representing requests to call the {@link Procedure}.
+     * @param {Buffer} data The encoded input {@link Buffer}.
+     * @param {Socket} socket The {@link Socket} the data was received on.
+     * @see {@link Socket}
      */
     async #onRepSocketData(data: Buffer, socket: Socket): Promise<void> {
-        const { input, error } = this.#tryDecodeInput(data);
+        const decoded = this.#tryDecodeInput(data);
 
-        if (this.#tryHandlePing(input, socket)) { // input was a ping of valid uuid & pong was successfully sent
-            if (this.verbose) {
-                console.log(`PONG sent at endpoint ${this.endpoint}`);
-            }
-        } else {
-            if (input !== undefined) {
-                this.#emitAndLogData(input as Input);
+        if (!this.#tryHandlePing(decoded.input, socket)) { // input was not a ping, handle it
+            if ('input' in decoded) {
+                this.#emitAndLogData(decoded.input as Input);
             }
 
-            const response = input !== undefined
-                ? await this.#tryGetCallbackResponse(input as Input)
-                : { error };
+            const response = 'input' in decoded
+                ? await this.#tryGetCallbackResponse(decoded.input as Input)
+                : decoded;
 
-            if (response.output !== undefined && this.verbose) {
+            if ('output' in response && this.verbose) {
                 console.log(`Generated output data at endpoint: ${this.endpoint}`, response.output);
             }
 
@@ -300,32 +360,41 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Handles ping requests for a given socket
-     * @param {unknown} object The decoded incoming data object.
-     * @param {Socket} socket The socket the data was received on.
-     * @returns {boolean} `true` when the decoded data object was a valid `Ping` and a `Pong` was successfully sent back, otherwise `false`.
+     * Handles ping requests for a given {@link socket}.
+     * @param {unknown} data The decoded incoming data object.
+     * @param {Socket} socket The {@link Socket} the data was received on.
+     * @returns {boolean} `true` when the decoded data object was a valid {@link Ping} and handled, otherwise `false`.
      */
-    #tryHandlePing(object: unknown, socket: Socket): boolean {
-        if (isPing(object) && object.ping === this.uuid) {
+    #tryHandlePing(data: unknown, socket: Socket): data is Ping {
+        if (isPing(data) && data.ping === this.uuid) {
             if (this.verbose) {
                 console.log(`PING received at endpoint: ${this.endpoint}`);
             }
-            return this.#trySendBuffer(this.#tryEncodeResponse({ pong: uuidv5(this.endpoint, object.ping) }), socket);
+
+            if (this.#trySendBuffer(this.#tryEncodeResponse({ pong: uuidv5(<string>this.endpoint, data.ping) }), socket)) {
+                if (this.verbose) {
+                    console.log(`PONG sent at endpoint ${this.endpoint}`);
+                }
+            }
+
+            return true;
         } else {
             return false;
         }
     }
 
     /**
-     * Handles the socket's error event.
-     * @param {unknown} error The error data passed by the socket.
+     * Handles the error event for the underlying {@link sockets} of the {@link Procedure}.
+     * @param {unknown} error The error data passed by the {@link Socket}.
+     * @see {@link Socket}
      */
     #onRepSocketError(error: unknown): void {
         this.#emitAndLogError('Socket encountered an error', error);
     }
 
     /**
-     * Handles the socket's close event.
+     * Handles the close event for the underlying {@link sockets} of the {@link Procedure}.
+     * @see {@link Socket}
      */
     #onRepSocketClose(): void {
         this.#logSocketClose();
@@ -336,7 +405,7 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Emits and optionally logs input data.
+     * Emits and optionally logs input {@link data}.
      * @param {Input} data The input data to emit and log.
      */
     #emitAndLogData(data: Input) {
@@ -348,7 +417,8 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Handles the unbind event.
+     * Emits and optionally logs the unbind event.
+     * @see {@link unbind}
      */
     #emitAndLogUnbind() {
         this.emit('unbind');
@@ -359,9 +429,9 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Emits and optionally logs the given error, wrapping it in a new Error with a custom error message.
-     * @param {string} message A custom error message describing the cause of the original error. The message will be concatenated with the Procedure's endpoint.
-     * @param {unknown} [error=undefined] The error.
+     * Emits and optionally logs a given {@link error}, wrapping it in a new {@link Error} with a custom error {@link message}.
+     * @param {string} message A custom error message describing the cause of the error. The message will be concatenated with the {@link Procedure Procedure's} {@link endpoint}.
+     * @param {unknown} [error] The error.
      */
     #emitAndLogError(message: string, error?: unknown) {
         message = message.concat(` at endpoint: ${this.endpoint}`); // concatenate the Procedure's endpoint to the custom error message.
@@ -383,7 +453,7 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
     }
 
     /**
-     * Optionally logs the socket close event.
+     * Optionally logs the close event of the {@link Procedure Procedure's} underlying {@link sockets}.
      */
     #logSocketClose() {
         if (this.verbose) { // optionally output the event to the console
@@ -393,62 +463,128 @@ export default class Procedure<Input extends Nullable = null, Output extends Nul
 }
 
 /**
- * Represents a nullable value, which cannot be `undefined`.
+ * Represents a nullable value.
  */
-export type Nullable = unknown | null;
+export type Nullable = unknown | null | undefined;
 
 /**
- * Represents a simple callback function with a single nullable input value and likewise nullable output value.
+ * Represents a simple callback function which can take a single input parameter.
+ * @template Input The type of input parameter the callback accepts. Defaults to `undefined`.
+ * @template Output The type of output value the callback returns. Defaults to `undefined`.
+ * @see {@link Procedure}
  */
-export type Callback<Input extends Nullable = null, Output extends Nullable = null> = (input: Input) => Output;
+export type Callback<Input extends Nullable = undefined, Output extends Nullable = undefined> = (input: Input) => Output;
 
 /**
- * A response from a procedure call. If the call returned successfully, the response will be of shape `{ output: Output }`, otherwise `{ error: unknown }`.
+ * A response from a {@link Procedure.call Procedure call}. If the call returned successfully, the response will be of shape `{ output: Output }`, otherwise `{ error: unknown }`.
  */
-export type Response<Output extends Nullable = null>
+export type Response<Output extends Nullable = undefined>
     = { output: Output, error?: never, pong?: never }
     | { output?: never, error: unknown, pong?: never }
     | { output?: never, error?: never, pong: string };
 
 /**
- * Options for defining a Procedure.
+ * Options for defining or calling a {@link Procedure}.
+ * @see {@link ProcedureDefinitionOptions}
+ * @see {@link ProcedureCallOptions}
  */
 export interface ProcedureOptions {
-    [key: string]: unknown;
-    /** The number of socket workers to spin up for the Procedure. Useful for Procedures which may take a long time to complete. Defaults to `1`. */
+    /**
+     * Whether or not to enable optional parameter support. Defaults to `true`.
+     * When `true` on a {@link Procedure Procedure definition}, a `null` input parameter will be coerced to `undefined`.
+     * When `true` for a {@link Procedure.call Procedure call}, a `null` return value will be coerced to `undefined`.
+     * 
+     * @remarks
+     * The {@link https://github.com/toebeann/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
+     * format for encoding JavaScript objects and values for transmission to and from remote {@link Procedure procedures}.
+     * The JavaScript implementation of msgpack {@link https://github.com/msgpack/msgpack-javascript#messagepack-mapping-table maps undefined to null}.
+     * For procedures which accept optional parameters, this is problematic.
+     * It could also be an issue if you depend on the return value of a procedure to conditionally be `undefined`,
+     * for the convenience of passing the return value into an optional parameter of another function call.
+     * {@link optionalParameterSupport} aims to alleviate these issues by mapping `null` to `undefined`
+     * for the input and output of your {@link Procedure} calls.
+     * 
+     * @see {@link ignoreUndefinedProperties}
+     * @see {@link https://github.com/toebeann/procedure.js#optional-parameter-support Optional parameter support}
+     */
+    optionalParameterSupport: boolean;
+    /**
+     * Whether or not to ignore `undefined` properties of objects passed to or from a {@link Procedure}. Defaults to `true`.
+     * When `true` on a {@link Procedure Procedure definition}, only affects properties of input parameters.
+     * When `true` on a {@link Procedure.call Procedure call}, only affects properties of the return value.
+     * 
+     * @remarks
+     * The {@link https://github.com/toebeann/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
+     * format for encoding JavaScript objects and values for transmission to and from remote {@link Procedure procedures}.
+     * The JavaScript implementation of msgpack {@link https://github.com/msgpack/msgpack-javascript#messagepack-mapping-table maps undefined to null}.
+     * This means that when passing objects in or out of a {@link Procedure} (i.e. as a parameter or return value), any properties defined as `undefined`
+     * will evaluate to `null` on receipt.
+     * {@link ignoreUndefinedProperties} aims to alleviate this by signalling msgpack to ignore undefined properties from objects before they are encoded,
+     * allowing `undefined` to be evaluated as `undefined` and `null` to be evaluated as `null`.
+     * This operation incurs some overhead, and means that code relying on the presence of a property to infer meaning
+     * may not operate as expected.
+     * 
+     * @see {@link https://github.com/toebeann/procedure.js#null-and-undefined-properties null and undefined properties}
+     */
+    ignoreUndefinedProperties: boolean;
+}
+
+/**
+ * Options for defining a {@link Procedure}.
+ */
+export interface ProcedureDefinitionOptions extends ProcedureOptions {
+    /** 
+     * The number of workers to spin up for the {@link Procedure}. Useful for procedures which may take a long time to complete.
+     * Will be clamped between `1` and {@link Number.MAX_SAFE_INTEGER} inclusive.
+     * Defaults to `1`. */
     workers: number;
-    /** A boolean indicating whether to output errors and events to the console. Defaults to `false`. */
+    /** Whether or not to output errors and events to the console. Defaults to `false`. */
     verbose: boolean;
-    /** The msgpack `ExtensionCodec` to use for encoding and decoding messages. Defaults to `undefined`. */
-    extensionCodec?: ExtensionCodec;
+    /** An optional msgpack {@link ExtensionCodec} to use for encoding and decoding messages. */
+    extensionCodec?: ExtensionCodec | undefined;
 }
 
 /**
- * Options for calling a Procedure.
+ * Options for {@link Procedure.call calling} a {@link Procedure}.
  */
-export interface ProcedureCallOptions {
-    /** The number of milliseconds after which the Procedure call will automatically be aborted.
-     * Set to `Infinity` or `NaN` to never timeout.
-     * Non-NaN, finite values will be clamped between `0` and `Number.MAX_SAFE_INTEGER`.
-     * Defaults to `1000`. */
+export interface ProcedureCallOptions extends ProcedureOptions {
+    /** 
+     * The number of milliseconds after which the {@link Procedure.call Procedure call} will automatically be aborted.
+     * Set to {@link Infinity} or {@link NaN} to never timeout.
+     * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
+     * Defaults to `1000`.
+     */
     timeout: number;
-    /** The number of millisceonds to wait for a ping-pong from the endpoint before calling the remote procedure.
-     * Set to `false` to skip pinging the endpoint.
-     * Defaults to `false`. */
-    ping: number | false;
-    /** An optional msgpack `ExtensionCodec` to use for encoding and decoding messages.
-     * Defaults to `undefined`. */
-    extensionCodec?: ExtensionCodec;
-    /** An optional `AbortSignal` which will be used to abort the Procedure call.
-     * Defaults to `undefined`. */
-    signal?: AbortSignal;
+    /** 
+     * The number of milliseconds to wait for a ping-pong from the endpoint before calling the remote procedure.
+     * When set, if a ping-pong is not received in the given time, the {@link Procedure.call Procedure call} will be aborted.
+     * {@link NaN} or {@link Infinity infinite} numbers will result in the ping never timing out if no response is received, unless
+     * {@link signal} is a valid {@link AbortSignal} and gets aborted.
+     * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
+     */
+    ping?: number | undefined;
+    /** An optional msgpack {@link ExtensionCodec} to use for encoding and decoding messages. */
+    extensionCodec?: ExtensionCodec | undefined;
+    /** An optional {@link AbortSignal} which will be used to abort the Procedure call. */
+    signal?: AbortSignal | undefined;
 }
 
 /**
- * A map of the names of events emitted by Procedures and their function signatures.
+ * A map of the names of events emitted by {@link Procedure Procedures} and their function signatures.
+ * @template Input The type of input parameter passed to the data event.
+ * @see {@link TypedEmitter}
  */
-type ProcedureEvents<Input extends Nullable = null> = {
+export type ProcedureEvents<Input extends Nullable = undefined> = {
+    /**
+     * Signature for the data event.
+     * @param {Input} data The input parameter which was passed to the {@link Procedure}.
+     */
     data: (data: Input) => void;
+    /**
+     * Signature for the error event.
+     * @param {unknown} error The error data which was thrown by the {@link Procedure}.
+     */
     error: (error: unknown) => void;
+    /** Signature for the unbind event. */
     unbind: () => void;
 }
