@@ -78,12 +78,12 @@ describe('Procedure', () => {
         });
     });
 
-    // TODO: test workers, extensionCodic, optionalParameterSupport & stripUndefinedProperties accessors
+    // TODO: test workers, extensionCodic, optionalParameterSupport & ignoreUndefinedProperties accessors
 
     describe('bind(): this', () => {
         let instance: Procedure;
         beforeEach(() => instance = new Procedure(x => x));
-        afterEach(() => { instance.unbind().removeAllListeners() });
+        afterEach(() => { instance.unbind().removeAllListeners(); });
 
         it('should return: this', () => expect(instance.bind()).to.equal(instance));
 
@@ -99,6 +99,7 @@ describe('Procedure', () => {
             context('when verbose: true', () => {
                 const sandbox = chai.spy.sandbox();
                 beforeEach(() => {
+                    instance = new Procedure(x => x);
                     instance.verbose = true;
                     sandbox.on(console, 'error', () => { return })
                 });
@@ -321,7 +322,7 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
     });
 
     // TODO: test optionalParameterSupport option works as intended
-    // TODO: test stripUndefinedProperties option works as intended
+    // TODO: test ignoreUndefinedProperties option works as intended
 
     // TODO: when callback asynchronous (completes normally, times out, throws error, infinite timeout, abortion signaled during execution, abortion signaled before execution)
 });
