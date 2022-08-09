@@ -2,9 +2,8 @@
 import 'mocha';
 import chai, { expect } from 'chai';
 import spies from 'chai-spies';
-import AggregateSignal from '../src/aggregate-signal';
+import { AggregateSignal, TimeoutSignal } from '../src/signals';
 import { Signal, isSignal } from '../src/utils';
-import TimeoutSignal from '../src/timeout-signal';
 
 chai.use(spies);
 
@@ -88,5 +87,37 @@ describe('AggregateSignal', () => {
                 expect(instance.signal?.aborted).to.be.true;
             });
         });
+    });
+});
+
+describe('TimeoutSignal', () => {
+    context('when timeout: undefined', () => {
+        const instance = new TimeoutSignal();
+        describe('signal', () => it('should be: undefined', () => expect(instance.signal).to.be.undefined));
+        describe('timeout', () => it('should be: undefined', () => expect(instance.timeout).to.be.undefined));
+    });
+
+    context('when timeout: NaN', () => {
+        const instance = new TimeoutSignal(NaN);
+        describe('signal', () => it('should be: undefined', () => expect(instance.signal).to.be.undefined));
+        describe('timeout', () => it('should be: undefined', () => expect(instance.timeout).to.be.undefined));
+    });
+
+    context('when timeout: Infinity', () => {
+        const instance = new TimeoutSignal(Infinity);
+        describe('signal', () => it('should be: undefined', () => expect(instance.signal).to.be.undefined));
+        describe('timeout', () => it('should be: undefined', () => expect(instance.timeout).to.be.undefined));
+    });
+
+    context('when timeout: < 0', () => {
+        const instance = new TimeoutSignal(-1);
+        describe('signal', () => it('should not be: undefined', () => expect(instance.signal).to.not.be.undefined));
+        describe('timeout', () => it('should not be: undefined', () => expect(instance.timeout).to.not.be.undefined));
+    });
+
+    context('when timeout: 1000', () => {
+        const instance = new TimeoutSignal(1000);
+        describe('signal', () => it('should not be: undefined', () => expect(instance.signal).to.not.be.undefined));
+        describe('timeout', () => it('should not be: undefined', () => expect(instance.timeout).to.not.be.undefined));
     });
 });

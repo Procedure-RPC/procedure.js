@@ -15,7 +15,7 @@ A lightweight alternative to the boilerplate-heavy gRPC, or spinning up a HTTP s
 // my-app/index.js
 
 // a simple procedure which returns the square of a given number
-const procedure = new Procedure('tcp://*:5000', (n) => n ** 2).bind();
+const procedure = new Procedure((n) => n ** 2).bind('tcp://*:5000');
 ```
 
 ```js
@@ -65,8 +65,8 @@ With [implementations in multiple languages](#language-implementations), applica
 ## Usage
 With Procedure, setting up your function to be called from another process (whether remote or local) is remarkably simple:
 ```js
-const procedure = new Procedure('tcp://*:5000', (n) => n ** 2);
-procedure.bind();
+const procedure = new Procedure((n) => n ** 2)
+procedure.bind('tcp://*:5000');
 ```
 
 And calling it is just as easy:
@@ -80,7 +80,7 @@ console.log(typeof xSquared); // outputs 'number'
 ### `async`/`await`
 Asynchronous functions are fully supported:
 ```js
-const procedure = new Procedure('tcp://127.0.0.1:8888', async () => {
+const procedure = new Procedure(async () => {
     const response = await fetch('https://catfact.ninja/fact');
     if (response.ok) {
         return (await response.json()).fact;
@@ -88,6 +88,7 @@ const procedure = new Procedure('tcp://127.0.0.1:8888', async () => {
         throw new Error(`${response.status}: ${response.statusText}`);
     }
 });
+procedure.bind('tcp://127.0.0.1:8888');
 ```
 
 ### Parameters and return types
@@ -101,7 +102,8 @@ function myFunction(a, b, c) {
     return a + b * c;
 }
 
-const procedure = new Procedure('tcp://*:30666', params => myFunction(...params)).bind();
+const procedure = new Procedure(params => myFunction(...params))
+    .bind('tcp://*:30666');
 ```
 Which can then be called like so:
 ```js
@@ -123,11 +125,8 @@ To handle these inconsistencies, we coerce a msgpack decoded `null` to `undefine
 
 To disable this behavior, you can set `optionalParameterSupport` to `false` for either procedure definitions or calls, or both:
 ```js
-const procedure = new Procedure(
-    'tcp://*:54321',
-    x => { ... },
-    { optionalParameterSupport: false }
-);
+const procedure = new Procedure(x => { ... }, { optionalParameterSupport: false })
+    .bind('tcp://*:54321');
 ```
 
 ```js
@@ -136,23 +135,18 @@ await Procedure.call('tcp://*:54321', x, { optionalParameterSupport: false });
 Note that disabling at the definition will not affect the return value, and disabling at the call will not affect the input parameter.
 
 ##### `null` and `undefined` properties
-For objects, we do not coerce `null` properties to `undefined`. Instead, we leave them as is, but strip any properties with the value of `undefined` from the object prior to transmission, thereby allowing those properties to be evaluated as `undefined` at the other end, while `null` properties remain `null`.
+For objects, we do not coerce `null` properties to `undefined`. Instead, we leave them as is, but properties with the value of `undefined` are ignored, thereby allowing those properties to be evaluated as `undefined` at the other end, while `null` properties remain `null`.
 
 This operation adds some overhead, and any code that relies on the presence of a property to infer meaning may not work as expected, e.g. `if ('prop' in obj)`.
 
-To disable this behavior, you can set the `stripUndefinedProperties` option to `false` for either procedure definitions or calls, or both:
+To disable this behavior, you can set the `ignoreUndefinedProperties` option to `false` for either procedure definitions or calls, or both:
 ```js
-const procedure = new Procedure(
-    'tcp://*:54321',
-    x => {
-        ...
-    },
-    { stripUndefinedProperties: false }
-);
+const procedure = new Procedure(x => { ... }, { ignoreUndefinedProperties: false }
+    .bind('tcp://*:54321');
 ```
 
 ```js
-await Procedure.call('tcp://*:54321', x, { stripUndefinedProperties: false });
+await Procedure.call('tcp://*:54321', x, { ignoreUndefinedProperties: false });
 ```
 Note that disabling at the definition will not affect the return value, and disabling at the call will not affect the input parameter.
 
@@ -161,7 +155,8 @@ It is **impossible** to pass by reference with Procedure. All data is encoded an
 
 For example, if you were to implement the following procedure:
 ```js
-const procedure = new Procedure('tcp://*:33333', x => x.foo = "bar");
+const procedure = new Procedure(x => x.foo = 'bar')
+    .bind('tcp://*:33333');
 ```
 And then call it like so:
 ```js
@@ -234,8 +229,8 @@ If you do need to make breaking changes to a procedure, it is recommended to eit
       // breaking change, we no longer return a boolean in all cases
   }
 
-  const procedure = new Procedure('tcp://*:33000', myFunction).bind();
-  const procedureV2 = new Procedure('tcp://*:33001', myFunctionV2).bind();
+  const procedure = new Procedure(myFunction).bind('tcp://*:33000');
+  const procedureV2 = new Procedure(myFunctionV2).bind('tcp://*:33001');
   ```
 
   ```js
@@ -258,13 +253,13 @@ If you do need to make breaking changes to a procedure, it is recommended to eit
       // breaking change, we no longer return a boolean in all cases
   }
 
-  const procedure = new Procedure('tcp://*:33000', options => {
+  const procedure = new Procedure(options => {
       switch (options?.version) {
           case 2: return myFunctionV2(options.x);
           default: return myFunction(options.x);
       }
   });
-  procedure.bind();
+  procedure.bind('tcp://*:33000');
   ```
 
   ```js

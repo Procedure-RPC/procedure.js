@@ -1,14 +1,14 @@
 /**
- * Type guard for determining whether a given object is an `AbortSignal` instance.
+ * Type guard for determining whether a given object is an {@link AbortSignal} instance.
  * @param {unknown} object The object.
- * @returns {object is AbortSignal} `true` if the object is determined to be an `AbortSignal`, otherwise false.
+ * @returns {object is AbortSignal} `true` if {@link object} is determined to be an {@link AbortSignal}, otherwise `false`.
  */
 export function isAbortSignal(object: unknown): object is AbortSignal {
     return object instanceof AbortSignal;
 }
 
 /**
- * A helpful interface to allow use of AbortSignal EventTarget interface when TypeScript hates us.
+ * A helpful interface to allow use of {@link AbortSignal AbortSignal's} {@link EventTarget} interface when TypeScript hates us.
  */
 export interface Signal {
     addEventListener: (event: 'abort', callback: () => void) => void;
@@ -17,9 +17,9 @@ export interface Signal {
 }
 
 /**
- * Type guard for determining whether a given object conforms to the `Signal` interface.
+ * Type guard for determining whether a given object conforms to the {@link Signal} interface.
  * @param {unknown} object The object.
- * @returns {object is Signal} `true` if the object conforms to the `Signal` interface, otherwise `false`.
+ * @returns {object is Signal} `true` if {@link object} conforms to the {@link Signal} interface, otherwise `false`.
  */
 export function isSignal(object: unknown): object is Signal {
     return isAbortSignal(object) && 'addEventListener' in object && 'removeEventListener' in object
@@ -27,7 +27,8 @@ export function isSignal(object: unknown): object is Signal {
 }
 
 /**
- * A simple Ping interface for internal use.
+ * A simple interface representing a ping.
+ * @internal
  */
 export interface Ping {
     ping: string;

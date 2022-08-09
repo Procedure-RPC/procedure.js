@@ -15,7 +15,7 @@
         "build": "tsc",
         "lint": "eslint . --ext .ts",
         "test": "mocha -r ts-node/register -r source-map-support/register ./test/**/*.ts",
-        "test:coverage": "npm run build & nyc npm run test"
+        "test:coverage": "npm run build & nyc npm test"
     },
     "dependencies": {
         "@msgpack/msgpack": "^2.7.2",
@@ -44,6 +44,7 @@
         "source-map-support": "^0.5.21",
         "ts-node": "^10.9.1",
         "typed-emitter": "^2.1.0",
+        "typedoc": "^0.23.10",
         "typescript": "^4.7.4"
     },
     "files": [

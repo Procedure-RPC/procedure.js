@@ -1,0 +1,37 @@
+name: Publish API Reference
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup node.js @ lts
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm ci
+      - name: Test build
+        run: npm test
+
+  publish-api-reference:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup node.js @ lts
+        uses: actions/setup-node@v3
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate API reference
+        run: npx typedoc src
+      - name: Publish to GitHub Pages 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs

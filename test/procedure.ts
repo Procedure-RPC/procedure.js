@@ -3,7 +3,6 @@ import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import chaiAsPromised from 'chai-as-promised'
 import Procedure, { Callback } from '../src'
-import { Procedure as namedImport } from '../src';
 import { ExtensionCodec } from '@msgpack/msgpack'
 
 chai.use(spies);
@@ -14,59 +13,59 @@ describe('Procedure', () => {
         let instance: Procedure;
 
         context('when options.verbose: true', () => {
-            beforeEach(() => instance = new Procedure('', x => x, { verbose: true }));
+            beforeEach(() => instance = new Procedure(x => x, { verbose: true }));
             describe('verbose', () => it('should be: true', () => expect(instance.verbose).to.be.true));
         });
 
         context('when options.verbose is false', () => {
-            beforeEach(() => instance = new Procedure('', x => x, { verbose: false }));
+            beforeEach(() => instance = new Procedure(x => x, { verbose: false }));
             describe('verbose', () => it('should be: false', () => expect(instance.verbose).to.be.false));
         });
 
         context('when options.verbose: undefined', () => {
-            beforeEach(() => instance = new Procedure('', x => x));
+            beforeEach(() => instance = new Procedure(x => x));
             describe('verbose', () => it('should be: false', () => expect(instance.verbose).to.be.false));
         });
 
         context('when options.workers: undefined', () => {
-            beforeEach(() => instance = new Procedure('', x => x));
+            beforeEach(() => instance = new Procedure(x => x));
             describe('workers', () => it('should be: 1', () => expect(instance.workers).to.equal(1)));
         });
 
         context('when options.workers: NaN', () => {
-            beforeEach(() => instance = new Procedure('', x => x, { workers: NaN }));
+            beforeEach(() => instance = new Procedure(x => x, { workers: NaN }));
             describe('workers', () => it('should be: 1', () => expect(instance.workers).to.equal(1)));
         });
 
         context('when options.workers: Infinity', () => {
-            beforeEach(() => instance = new Procedure('', x => x, { workers: Infinity }));
+            beforeEach(() => instance = new Procedure(x => x, { workers: Infinity }));
             describe('workers', () => it('should be: 1', () => expect(instance.workers).to.equal(1)));
         });
 
         context('when options.workers: < 1', () => {
-            beforeEach(() => instance = new Procedure('', x => x, { workers: 0.8 }));
+            beforeEach(() => instance = new Procedure(x => x, { workers: 0.8 }));
             describe('workers', () => it('should be: 1', () => expect(instance.workers).to.equal(1)));
         });
 
         context('when options.workers: 10', () => {
-            beforeEach(() => instance = new Procedure('', x => x, { workers: 10 }));
+            beforeEach(() => instance = new Procedure(x => x, { workers: 10 }));
             describe('workers', () => it('should be: 10', () => expect(instance.workers).to.equal(10)));
         });
 
         context('when options.extensionCodec: undefined', () => {
-            beforeEach(() => instance = new Procedure('', x => x));
+            beforeEach(() => instance = new Procedure(x => x));
             describe('extensionCodec', () => it('should be: undefined', () => expect(instance.extensionCodec).to.be.undefined));
         })
 
         context('when options.extensionCodec: instanceof ExtensionCodec', () => {
-            beforeEach(() => instance = new Procedure('', x => x, { extensionCodec: new ExtensionCodec() }));
+            beforeEach(() => instance = new Procedure(x => x, { extensionCodec: new ExtensionCodec() }));
             describe('extensionCodec', () => it('should be: instanceof ExtensionCodec', () => expect(instance.extensionCodec).to.be.instanceof(ExtensionCodec)));
         });
     });
 
     describe('set verbose(value: boolean)', () => {
         let instance: Procedure;
-        beforeEach(() => instance = new Procedure('', x => x));
+        beforeEach(() => instance = new Procedure(x => x));
 
         context('when value: true', () => {
             beforeEach(() => instance.verbose = true);
@@ -79,31 +78,33 @@ describe('Procedure', () => {
         });
     });
 
-    // TODO: test workers, extensionCodic, optionalParameterSupport & stripUndefinedProperties accessors
+    // TODO: test workers, extensionCodic, optionalParameterSupport & ignoreUndefinedProperties accessors
 
     describe('bind(): this', () => {
         let instance: Procedure;
-        beforeEach(() => instance = new Procedure('', x => x));
-        afterEach(() => { instance.unbind().removeAllListeners() });
+        beforeEach(() => instance = new Procedure(x => x));
+        afterEach(() => { instance.unbind().removeAllListeners(); });
 
         it('should return: this', () => expect(instance.bind()).to.equal(instance));
 
         context('when endpoint: \'\'', () => {
-            beforeEach(() => instance = new Procedure('', x => x));
+            beforeEach(() => instance = new Procedure(x => x));
+
             describe('instance', () => it('should emit: \'error\'', () => {
                 const error = chai.spy((error: unknown) => { expect(error).to.be.instanceof(Error) });
-                instance.on('error', error).bind();
+                instance.on('error', error).bind('');
                 expect(error).to.have.been.called.once;
             }));
 
             context('when verbose: true', () => {
                 const sandbox = chai.spy.sandbox();
                 beforeEach(() => {
+                    instance = new Procedure(x => x);
                     instance.verbose = true;
                     sandbox.on(console, 'error', () => { return })
                 });
                 describe('instance', () => it('should call console.error', () => {
-                    instance.bind();
+                    instance.bind('');
                     expect(console.error).to.have.been.called.once;
                 }));
                 afterEach(() => {
@@ -114,15 +115,15 @@ describe('Procedure', () => {
         });
 
         context('when endpoint: \'ipc://Procedure.ipc\'', () => {
-            beforeEach(() => instance = new Procedure('ipc://Procedure.ipc', x => x));
+            beforeEach(() => instance = new Procedure(x => x));
             describe('instance', () => it('should not emit: \'error\'', () => {
                 const error = chai.spy(() => { return });
-                instance.on('error', error).bind();
+                instance.on('error', error).bind('ipc://Procedure.ipc');
                 expect(error).to.not.have.been.called();
             }));
 
             context('when already bound', () => {
-                beforeEach(() => instance.bind());
+                beforeEach(() => instance.bind('ipc://Procedure.ipc'));
                 describe('instance', () => it('should emit: \'unbind\'', () => {
                     const unbind = chai.spy(() => { return });
                     instance.on('unbind', unbind).bind();
@@ -134,14 +135,14 @@ describe('Procedure', () => {
 
     describe('unbind(): this', () => {
         let instance: Procedure;
-        beforeEach(() => instance = new Procedure('', x => x));
+        beforeEach(() => instance = new Procedure(x => x));
 
         it('should return: this', () => expect(instance.unbind()).to.equal(instance));
 
-        context('when endpoint: \'ipc://Procedure.ipc\' and instance is bound', () => {
+        context('when instance bound to endpoint: \'ipc://Procedure.ipc\'', () => {
             beforeEach(() => {
-                instance = new Procedure('ipc://Procedure.ipc', x => x);
-                instance.bind();
+                instance = new Procedure(x => x);
+                instance.bind('ipc://Procedure.ipc');
             });
             describe('instance', () => it('should emit: \'unbind\'', () => {
                 const unbind = chai.spy(() => { return });
@@ -167,10 +168,6 @@ describe('Procedure', () => {
             });
         });
     });
-
-    describe('named import', () => {
-        describe('namedImport instance', () => it('should be: instanceof Procedure', () => expect(new namedImport('', () => false)).to.be.instanceOf(Procedure)));
-    });
 });
 
 describe('Procedure.call(endpoint: string, input: Input | null, options: Partial<ProcedureCallOptions>): Promise<Output>', () => {
@@ -193,8 +190,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
             });
             spy = chai.spy(func);
             procedureEndpoint = 'ipc://Procedure/Add.ipc';
-            procedure = new Procedure(procedureEndpoint, spy, { workers: 3 });
-            procedure.bind();
+            procedure = new Procedure(spy, { workers: 3 });
+            procedure.bind(procedureEndpoint);
         });
 
         context('when endpoint: correct', () => {
@@ -325,7 +322,7 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
     });
 
     // TODO: test optionalParameterSupport option works as intended
-    // TODO: test stripUndefinedProperties option works as intended
+    // TODO: test ignoreUndefinedProperties option works as intended
 
     // TODO: when callback asynchronous (completes normally, times out, throws error, infinite timeout, abortion signaled during execution, abortion signaled before execution)
 });
@@ -349,8 +346,8 @@ describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, si
             });
             spy = chai.spy(func);
             procedureEndpoint = 'ipc://Procedure/Add.ipc';
-            procedure = new Procedure(procedureEndpoint, spy, { workers: 3 });
-            procedure.bind();
+            procedure = new Procedure(spy, { workers: 3 });
+            procedure.bind(procedureEndpoint);
         });
 
         context('when endpoint: correct', () => {
