@@ -15,7 +15,8 @@
         "build": "tsc",
         "lint": "eslint . --ext .ts",
         "test": "mocha -r ts-node/register -r source-map-support/register ./test/**/*.ts",
-        "test:coverage": "npm run build & nyc npm test"
+        "test:coverage": "npm run build & nyc npm test",
+        "docs": "typedoc src --entryPointStrategy expand"
     },
     "dependencies": {
         "@msgpack/msgpack": "^2.7.2",
