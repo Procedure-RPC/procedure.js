@@ -1,15 +1,12 @@
-# procedure.js
+# procedure.js 🔗
 The simple RPC framework for Node.js.
 
-<!-- [![NPM version](https://img.shields.io/npm/v/@toebeann/procedure.js.svg)](https://npmjs.org/package/@toebeann/procedure.js "View procedure.js on NPM") [![NPM downloads](https://img.shields.io/npm/dw/@toebeann/procedure.js.svg)](https://npmjs.org/package/@toebeann/procedure.js "View procedure.js on NPM") -->
-<!-- [![Code quality](https://img.shields.io/codefactor/grade/github/toebeann/procedure.js.svg)](https://www.codefactor.io/repository/github/toebeann/procedure.js "Check code quality on CodeFactor") -->
-<!-- [![Coverity Scan build status](https://img.shields.io/coverity/scan/.svg)](https://scan.coverity.com/projects/toebeann-procedure.js "View build status on Coverity Scan") -->
-<!-- ![nyc code coverage](https://img.shields.io/nycrc/toebeann/procedure.js.svg)] -->
-[![Twitter Follow](https://img.shields.io/twitter/follow/toebean__.svg?style=social)](https://twitter.com/toebean__ "Follow @toebean__ on Twitter") <!-- [![GitHub Sponsors donation button](https://img.shields.io/badge/github-donate-yellow.svg)](https://github.com/sponsors/toebeann "Donate to procedure.js with GitHub Sponsors") --> [![PayPal donation button](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://paypal.me/tobeyblaber "Donate to procedure.js with PayPal")
+<!-- [![NPM version](https://img.shields.io/npm/v/@toebeann/procedure.js.svg)](https://npmjs.org/package/@toebeann/procedure.js "View procedure.js on NPM") [![NPM downloads](https://img.shields.io/npm/dw/@toebeann/procedure.js.svg)](https://npmjs.org/package/@toebeann/procedure.js "View procedure.js on NPM") --> [![API docs](https://img.shields.io/badge/docs-v0.3-green.svg)](https://toebeann.github.io/procedure.js "Read the documentation on Github Pages") [![Code quality](https://www.codefactor.io/repository/github/toebeann/procedure.js/badge)](https://www.codefactor.io/repository/github/toebeann/procedure.js "Check code quality on CodeFactor") <!-- [![Coverity Scan build status](https://img.shields.io/coverity/scan/.svg)](https://scan.coverity.com/projects/toebeann-procedure.js "View build status on Coverity Scan") --> <!-- ![nyc code coverage](https://img.shields.io/nycrc/toebeann/procedure.js.svg)] -->
+[![GitHub stars](https://img.shields.io/github/stars/toebeann/procedure.js.svg?style=social)](https://github.com/toebeann/procedure.js "Star procedure.js on GitHub") [![Twitter Follow](https://img.shields.io/twitter/follow/toebean__.svg?style=social)](https://twitter.com/toebean__ "Follow @toebean__ on Twitter") [![GitHub Sponsors donation button](https://img.shields.io/badge/github-donate-yellow.svg)](https://github.com/sponsors/toebeann "Donate to procedure.js with GitHub Sponsors") [![PayPal donation button](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://paypal.me/tobeyblaber "Donate to procedure.js with PayPal")
 
 
 ## Description
-A lightweight alternative to the boilerplate-heavy gRPC, or spinning up a HTTP server through which to run a REST API. Procedure bridges the gap between independent applications and services with as little code as possible, so that you can just focus on building your app!
+A lightweight alternative to the boilerplate-heavy gRPC, or spinning up a HTTP server and REST API. Procedure links your independent applications and services with as little code as possible, so that you can just focus on building your app!
 
 ```js
 // my-app/index.js
@@ -35,7 +32,7 @@ With [implementations in multiple languages](#language-implementations), applica
 -->
 
 ## Table of contents
-- [procedure.js](#procedurejs)
+- [procedure.js 🔗](#procedurejs-)
   - [Description](#description)
   - [Table of contents](#table-of-contents)
   - [Usage](#usage)
@@ -46,6 +43,8 @@ With [implementations in multiple languages](#language-implementations), applica
         - [`null` and `undefined` properties](#null-and-undefined-properties)
       - [Pass by reference?](#pass-by-reference)
     - [Error handling](#error-handling)
+  - [API reference](#api-reference)
+    - [Quick links](#quick-links)
   - [Transports: More than just TCP!](#transports-more-than-just-tcp)
     - [INPROC: intraprocess](#inproc-intraprocess)
     - [IPC: intra/interprocess](#ipc-intrainterprocess)
@@ -123,7 +122,7 @@ It also means that procedures with no return value will evaluate to `null` inste
 
 To handle these inconsistencies, we coerce a msgpack decoded `null` to `undefined`. This does not affect the properties of objects - they will still be evaluated as `null` when they were either `null` or `undefined`.
 
-To disable this behavior, you can set `optionalParameterSupport` to `false` for either procedure definitions or calls, or both:
+To disable this behavior, you can [set `optionalParameterSupport` to `false`](https://toebeann.github.io/procedure.js/interfaces/procedure.ProcedureOptions.html#optionalParameterSupport) for either procedure definitions or calls, or both:
 ```js
 const procedure = new Procedure(x => { ... }, { optionalParameterSupport: false })
     .bind('tcp://*:54321');
@@ -139,7 +138,7 @@ For objects, we do not coerce `null` properties to `undefined`. Instead, we leav
 
 This operation adds some overhead, and any code that relies on the presence of a property to infer meaning may not work as expected, e.g. `if ('prop' in obj)`.
 
-To disable this behavior, you can set the `ignoreUndefinedProperties` option to `false` for either procedure definitions or calls, or both:
+To disable this behavior, you can [set `ignoreUndefinedProperties` to `false`](https://toebeann.github.io/procedure.js/interfaces/procedure.ProcedureOptions.html#ignoreUndefinedProperties) for either procedure definitions or calls, or both:
 ```js
 const procedure = new Procedure(x => { ... }, { ignoreUndefinedProperties: false }
     .bind('tcp://*:54321');
@@ -173,6 +172,16 @@ let x = { foo: 'bar' };
 let xSquared = await Procedure.call('tcp://localhost:5000', x);
 // throws `SyntaxError: expected expression, got '**'
 ```
+
+## API reference
+Full API reference [available on GitHub Pages](https://toebeann.github.io/procedure.js).
+
+### Quick links
+- [Initializing a procedure](https://toebeann.github.io/procedure.js/classes/procedure.Procedure.html#constructor)
+  - [Options](https://toebeann.github.io/procedure.js/interfaces/procedure.ProcedureDefinitionOptions.html)
+- [Binding a procedure to an endpoint](https://toebeann.github.io/procedure.js/classes/procedure.Procedure.html#bind)
+- [Calling a procedure](https://toebeann.github.io/procedure.js/classes/procedure.Procedure.html#call)
+  - [Options](https://toebeann.github.io/procedure.js/interfaces/procedure.ProcedureCallOptions.html)
 
 ## Transports: More than just TCP!
 The examples in this readme all use TCP to demonstrate the most common use case for RPC. However, Procedure is built on top of [nanomsg](https://nanomsg.org/), which means it supports all of the same transports that nanomsg does:
@@ -269,12 +278,6 @@ If you do need to make breaking changes to a procedure, it is recommended to eit
 
   You may prefer to use a [semver](https://www.npmjs.com/package/semver) compatible string for versioning.
 
-<!-- TODO: API reference
-
-## API reference
-
--->
-
 ## Language implementations
 As Procedure is designed around nanomsg and msgpack, it can be implemented in any language that has both a nanomsg binding and a msgpack implementation.
 
@@ -344,4 +347,4 @@ Procedure is currently implemented in the following languages:
 If you would like to contribute a Procedure implementation in another language, please feel free! Create a GitHub repository for the language implementation and open an issue with us once it's ready for review! 💜
 
 ## License
-procedure.js is licensed under [MIT](LICENSE).
+procedure.js is licensed under [MIT](https://github.com/toebeann/procedure.js/blob/main/LICENSE).
