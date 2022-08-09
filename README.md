@@ -1,7 +1,7 @@
 # procedure.js 🔗
 The simple RPC framework for Node.js.
 
-[![NPM version](https://img.shields.io/npm/v/procedure.js.svg)](https://npmjs.org/package/procedure.js "View procedure.js on NPM") <!-- [![NPM downloads](https://img.shields.io/npm/dw/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/procedure.js "View procedure.js on NPM") --> [![API docs](https://img.shields.io/badge/docs-v0.3-green.svg)](https://procedure-rpc.github.io/procedure.js "Read the documentation on Github Pages") [![Code quality](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js/badge)](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js "Check code quality on CodeFactor") <!-- [![Coverity Scan build status](https://img.shields.io/coverity/scan/.svg)](https://scan.coverity.com/projects/procedure-rpc-procedure.js "View build status on Coverity Scan") --> <!-- ![nyc code coverage](https://img.shields.io/nycrc/procedure-rpc/procedure.js.svg)] -->
+[![NPM version](https://img.shields.io/npm/v/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on NPM") <!-- [![NPM downloads](https://img.shields.io/npm/dw/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on NPM") --> [![API docs](https://img.shields.io/badge/docs-v0.3-green.svg)](https://procedure-rpc.github.io/procedure.js "Read the documentation on Github Pages") [![Code quality](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js/badge)](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js "Check code quality on CodeFactor") <!-- [![Coverity Scan build status](https://img.shields.io/coverity/scan/.svg)](https://scan.coverity.com/projects/procedure-rpc-procedure.js "View build status on Coverity Scan") --> <!-- ![nyc code coverage](https://img.shields.io/nycrc/procedure-rpc/procedure.js.svg)] -->
 
 [![GitHub stars](https://img.shields.io/github/stars/procedure-rpc/procedure.js.svg?style=social)](https://github.com/procedure-rpc/procedure.js "Star procedure.js on GitHub") [![Twitter Follow](https://img.shields.io/twitter/follow/toebean__.svg?style=social)](https://twitter.com/toebean__ "Follow @toebean__ on Twitter") [![GitHub Sponsors donation button](https://img.shields.io/badge/github-sponsor-yellow.svg)](https://github.com/sponsors/toebeann "Sponsor procedure.js on GitHub") [![PayPal donation button](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://paypal.me/tobeyblaber "Donate to procedure.js with PayPal")
 
@@ -59,9 +59,9 @@ With [implementations in multiple languages](#language-implementations), applica
 ## Install
 
 ### [npm](https://npmjs.com "npm is a package manager for JavaScript")
-- Install : `npm install --save procedure.js`
-- Import: `import Procedure from 'procedure.js'`
-- Require: `const Procedure = require('procedure.js')`
+- Install : `npm install --save @procedure-rpc/procedure.js`
+- Import: `import Procedure from '@procedure-rpc/procedure.js'`
+- Require: `const Procedure = require('@procedure-rpc/procedure.js')`
 
 ## Usage
 With Procedure, setting up your function to be called from another process (whether remote or local) is remarkably simple:

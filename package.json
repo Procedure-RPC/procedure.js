@@ -1,5 +1,5 @@
 {
-    "name": "procedure.js",
+    "name": "@procedure-rpc/procedure.js",
     "version": "0.3.3",
     "title": "procedure.js",
     "description": "The simple RPC framework for Node.js.",
