@@ -135,18 +135,18 @@ await Procedure.call('tcp://*:54321', x, { optionalParameterSupport: false });
 Note that disabling at the definition will not affect the return value, and disabling at the call will not affect the input parameter.
 
 ##### `null` and `undefined` properties
-For objects, we do not coerce `null` properties to `undefined`. Instead, we leave them as is, but strip any properties with the value of `undefined` from the object prior to transmission, thereby allowing those properties to be evaluated as `undefined` at the other end, while `null` properties remain `null`.
+For objects, we do not coerce `null` properties to `undefined`. Instead, we leave them as is, but properties with the value of `undefined` are ignored, thereby allowing those properties to be evaluated as `undefined` at the other end, while `null` properties remain `null`.
 
 This operation adds some overhead, and any code that relies on the presence of a property to infer meaning may not work as expected, e.g. `if ('prop' in obj)`.
 
-To disable this behavior, you can set the `stripUndefinedProperties` option to `false` for either procedure definitions or calls, or both:
+To disable this behavior, you can set the `ignoreUndefinedProperties` option to `false` for either procedure definitions or calls, or both:
 ```js
-const procedure = new Procedure(x => { ... }, { stripUndefinedProperties: false }
+const procedure = new Procedure(x => { ... }, { ignoreUndefinedProperties: false }
     .bind('tcp://*:54321');
 ```
 
 ```js
-await Procedure.call('tcp://*:54321', x, { stripUndefinedProperties: false });
+await Procedure.call('tcp://*:54321', x, { ignoreUndefinedProperties: false });
 ```
 Note that disabling at the definition will not affect the return value, and disabling at the call will not affect the input parameter.
 
