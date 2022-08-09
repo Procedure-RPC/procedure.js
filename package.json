@@ -53,6 +53,8 @@
         "types/**/*.d.ts.map"
     ],
     "keywords": [
+        "procedure-rpc",
+        "procedurerpc",
         "RPC",
         "remote",
         "procedure",
@@ -75,6 +77,8 @@
         "intranetwork",
         "intra-network",
         "internetwork",
-        "inter-network"
+        "inter-network",
+        "nanomsg",
+        "msgpack"
     ]
 }
