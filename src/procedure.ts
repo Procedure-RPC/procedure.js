@@ -495,7 +495,7 @@ export interface ProcedureOptions {
      * When `true` for a {@link Procedure.call Procedure call}, a `null` return value will be coerced to `undefined`.
      * 
      * @remarks
-     * The {@link https://toebeann.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
+     * The {@link https://procedure-rpc.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
      * format for encoding JavaScript objects and values for transmission to and from remote {@link Procedure procedures}.
      * The JavaScript implementation of msgpack {@link https://github.com/msgpack/msgpack-javascript#messagepack-mapping-table maps undefined to null}.
      * For procedures which accept optional parameters, this is problematic.
@@ -505,7 +505,7 @@ export interface ProcedureOptions {
      * for the input and output of your {@link Procedure} calls.
      * 
      * @see {@link ignoreUndefinedProperties}
-     * @see {@link https://toebeann.github.io/procedure.js#optional-parameter-support Optional parameter support}
+     * @see {@link https://procedure-rpc.github.io/procedure.js#optional-parameter-support Optional parameter support}
      */
     optionalParameterSupport: boolean;
     /**
@@ -514,7 +514,7 @@ export interface ProcedureOptions {
      * When `true` on a {@link Procedure.call Procedure call}, only affects properties of the return value.
      * 
      * @remarks
-     * The {@link https://toebeann.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
+     * The {@link https://procedure-rpc.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
      * format for encoding JavaScript objects and values for transmission to and from remote {@link Procedure procedures}.
      * The JavaScript implementation of msgpack {@link https://github.com/msgpack/msgpack-javascript#messagepack-mapping-table maps undefined to null}.
      * This means that when passing objects in or out of a {@link Procedure} (i.e. as a parameter or return value), any properties defined as `undefined`
@@ -524,7 +524,7 @@ export interface ProcedureOptions {
      * This operation incurs some overhead, and means that code relying on the presence of a property to infer meaning
      * may not operate as expected.
      * 
-     * @see {@link https://toebeann.github.io/procedure.js#null-and-undefined-properties null and undefined properties}
+     * @see {@link https://procedure-rpc.github.io/procedure.js#null-and-undefined-properties null and undefined properties}
      */
     ignoreUndefinedProperties: boolean;
 }

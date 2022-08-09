@@ -1,10 +1,10 @@
 # procedure.js 🔗
 The simple RPC framework for Node.js.
 
-<!-- [![NPM version](https://img.shields.io/npm/v/@toebeann/procedure.js.svg)](https://npmjs.org/package/@toebeann/procedure.js "View procedure.js on NPM") [![NPM downloads](https://img.shields.io/npm/dw/@toebeann/procedure.js.svg)](https://npmjs.org/package/@toebeann/procedure.js "View procedure.js on NPM") -->
-[![API docs](https://img.shields.io/badge/docs-v0.3-green.svg)](https://toebeann.github.io/procedure.js "Read the documentation on Github Pages") [![Code quality](https://www.codefactor.io/repository/github/toebeann/procedure.js/badge)](https://www.codefactor.io/repository/github/toebeann/procedure.js "Check code quality on CodeFactor") <!-- [![Coverity Scan build status](https://img.shields.io/coverity/scan/.svg)](https://scan.coverity.com/projects/toebeann-procedure.js "View build status on Coverity Scan") --> <!-- ![nyc code coverage](https://img.shields.io/nycrc/toebeann/procedure.js.svg)] -->
+<!-- [![NPM version](https://img.shields.io/npm/v/@procedure/procedure.js.svg)](https://npmjs.org/package/@procedure/procedure.js "View procedure.js on NPM") [![NPM downloads](https://img.shields.io/npm/dw/@procedure/procedure.js.svg)](https://npmjs.org/package/@procedure/procedure.js "View procedure.js on NPM") -->
+[![API docs](https://img.shields.io/badge/docs-v0.3-green.svg)](https://procedure-rpc.github.io/procedure.js "Read the documentation on Github Pages") [![Code quality](https://www.codefactor.io/repository/github/toebeann/procedure.js/badge)](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js "Check code quality on CodeFactor") <!-- [![Coverity Scan build status](https://img.shields.io/coverity/scan/.svg)](https://scan.coverity.com/projects/procedure-rpc-procedure.js "View build status on Coverity Scan") --> <!-- ![nyc code coverage](https://img.shields.io/nycrc/procedure-rpc/procedure.js.svg)] -->
 
-[![GitHub stars](https://img.shields.io/github/stars/toebeann/procedure.js.svg?style=social)](https://github.com/toebeann/procedure.js "Star procedure.js on GitHub") [![Twitter Follow](https://img.shields.io/twitter/follow/toebean__.svg?style=social)](https://twitter.com/toebean__ "Follow @toebean__ on Twitter") [![GitHub Sponsors donation button](https://img.shields.io/badge/github-donate-yellow.svg)](https://github.com/sponsors/toebeann "Donate to procedure.js with GitHub Sponsors") [![PayPal donation button](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://paypal.me/tobeyblaber "Donate to procedure.js with PayPal")
+[![GitHub stars](https://img.shields.io/github/stars/procedure-rpc/procedure.js.svg?style=social)](https://github.com/procedure-rpc/procedure.js "Star procedure.js on GitHub") [![Twitter Follow](https://img.shields.io/twitter/follow/toebean__.svg?style=social)](https://twitter.com/toebean__ "Follow @toebean__ on Twitter") [![GitHub Sponsors donation button](https://img.shields.io/badge/github-sponsor-yellow.svg)](https://github.com/sponsors/toebeann "Sponsor procedure.js on GitHub") [![PayPal donation button](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://paypal.me/tobeyblaber "Donate to procedure.js with PayPal")
 
 ## Description
 A lightweight alternative to the boilerplate-heavy gRPC, or spinning up a HTTP server and REST API. Procedure links your independent applications and services with as little code as possible, so that you can just focus on building your app!
@@ -58,9 +58,9 @@ With [implementations in multiple languages](#language-implementations), applica
 <!-- ## Install
 
 ### [npm](https://npmjs.com "npm is a package manager for JavaScript")
-- Install : `npm install --save @toebeann/procedure.js`
-- Import: `import Procedure from '@toebeann/procedure.js'`
-- Require: `const Procedure = require('@toebeann/procedure.js')` -->
+- Install : `npm install --save @procedure/procedure.js`
+- Import: `import Procedure from '@procedure/procedure.js'`
+- Require: `const Procedure = require('@procedure/procedure.js')` -->
 
 ## Usage
 With Procedure, setting up your function to be called from another process (whether remote or local) is remarkably simple:
@@ -123,7 +123,7 @@ It also means that procedures with no return value will evaluate to `null` inste
 
 To handle these inconsistencies, we coerce a msgpack decoded `null` to `undefined`. This does not affect the properties of objects - they will still be evaluated as `null` when they were either `null` or `undefined`.
 
-To disable this behavior, you can [set `optionalParameterSupport` to `false`](https://toebeann.github.io/procedure.js/interfaces/procedure.ProcedureOptions.html#optionalParameterSupport) for either procedure definitions or calls, or both:
+To disable this behavior, you can [set `optionalParameterSupport` to `false`](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureOptions.html#optionalParameterSupport) for either procedure definitions or calls, or both:
 ```js
 const procedure = new Procedure(x => { ... }, { optionalParameterSupport: false })
     .bind('tcp://*:54321');
@@ -139,7 +139,7 @@ For objects, we do not coerce `null` properties to `undefined`. Instead, we leav
 
 This operation adds some overhead, and any code that relies on the presence of a property to infer meaning may not work as expected, e.g. `if ('prop' in obj)`.
 
-To disable this behavior, you can [set `ignoreUndefinedProperties` to `false`](https://toebeann.github.io/procedure.js/interfaces/procedure.ProcedureOptions.html#ignoreUndefinedProperties) for either procedure definitions or calls, or both:
+To disable this behavior, you can [set `ignoreUndefinedProperties` to `false`](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureOptions.html#ignoreUndefinedProperties) for either procedure definitions or calls, or both:
 ```js
 const procedure = new Procedure(x => { ... }, { ignoreUndefinedProperties: false }
     .bind('tcp://*:54321');
@@ -175,14 +175,14 @@ let xSquared = await Procedure.call('tcp://localhost:5000', x);
 ```
 
 ## API reference
-Full API reference [available on GitHub Pages](https://toebeann.github.io/procedure.js).
+Full API reference [available on GitHub Pages](https://procedure-rpc.github.io/procedure.js).
 
 ### Quick links
-- [Initializing a procedure](https://toebeann.github.io/procedure.js/classes/procedure.Procedure.html#constructor)
-  - [Options](https://toebeann.github.io/procedure.js/interfaces/procedure.ProcedureDefinitionOptions.html)
-- [Binding a procedure to an endpoint](https://toebeann.github.io/procedure.js/classes/procedure.Procedure.html#bind)
-- [Calling a procedure](https://toebeann.github.io/procedure.js/classes/procedure.Procedure.html#call)
-  - [Options](https://toebeann.github.io/procedure.js/interfaces/procedure.ProcedureCallOptions.html)
+- [Initializing a procedure](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#constructor)
+  - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureDefinitionOptions.html)
+- [Binding a procedure to an endpoint](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#bind)
+- [Calling a procedure](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#call)
+  - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureCallOptions.html)
 
 ## Transports: More than just TCP!
 The examples in this readme all use TCP to demonstrate the most common use case for RPC. However, Procedure is built on top of [nanomsg](https://nanomsg.org/), which means it supports all of the same transports that nanomsg does:
@@ -300,7 +300,7 @@ Procedure is currently implemented in the following languages:
     <tbody>
         <tr>
             <td rowspan=3>
-                <a href="https://github.com/toebeann/Procedure.NET" target="_blank">Procedure.NET</a>
+                <a href="https://procedure-rpc.github.io/Procedure.NET" target="_blank">Procedure.NET</a>
             </td>
             <td>C#</td>
             <td rowspan=3>.NET</td>
@@ -316,12 +316,12 @@ Procedure is currently implemented in the following languages:
         </tr>
         <tr>
             <td rowspan=2>
-                <a href="https://github.com/toebeann/procedure.js" target="_blank">procedure.js</a>
+                <a href="https://procedure-rpc.github.io/procedure.js" target="_blank">procedure.js</a>
             </td>
             <td>JavaScript</td>
             <td rowspan=2>Node.js</td>
             <td rowspan=2>
-                For Node.js apps only. For a library designed for browser use, see <a href="https://github.com/toebeann/procedure.ws" target="_blank">procedure.ws</a>
+                For Node.js apps only. For a library designed for browser use, see <a href="https://procedure-rpc.github.io/procedure.ws" target="_blank">procedure.ws</a>
             </td>
         </tr>
         <tr>
@@ -329,12 +329,12 @@ Procedure is currently implemented in the following languages:
         </tr>
         <tr>
             <td rowspan=2>
-                <a href="https://github.com/toebeann/procedure.ws" target="_blank">procedure.ws</a>
+                <a href="https://procedure-rpc.github.io/procedure.ws" target="_blank">procedure.ws</a>
             </td>
             <td>JavaScript</td>
             <td rowspan=2>Browser</td>
             <td rowspan=2>
-                Designed for use in the browser, only calling procedures via the <a href="#ws-intrainter-network-over-websockets">WS transport</a> is available. For a fully featured Node.js implementation, see <a href="https://github.com/toebeann/procedure.js" target="_blank">procedure.js</a>
+                Designed for use in the browser, only calling procedures via the <a href="#ws-intrainter-network-over-websockets">WS transport</a> is available. For a fully featured Node.js implementation, see <a href="https://procedure-rpc.github.io/procedure.js" target="_blank">procedure.js</a>
             </td>
         </tr>
         <tr>
@@ -348,4 +348,4 @@ Procedure is currently implemented in the following languages:
 If you would like to contribute a Procedure implementation in another language, please feel free! Create a GitHub repository for the language implementation and open an issue with us once it's ready for review! 💜
 
 ## License
-procedure.js is licensed under [MIT](https://github.com/toebeann/procedure.js/blob/main/LICENSE).
+procedure.js is licensed under [MIT](https://github.com/procedure-rpc/procedure.js/blob/main/LICENSE).
