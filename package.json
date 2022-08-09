@@ -8,7 +8,10 @@
     "author": "Tobey Blaber (https://github.com/toebeann)",
     "homepage": "https://procedure-rpc.github.io/procedure.js",
     "repository": "github:procedure-rpc/procedure.js",
-    "funding": "https://paypal.me/tobeyblaber",
+    "funding": [
+        "https://github.com/sponsors/toebeann",
+        "https://paypal.me/tobeyblaber"
+    ],
     "license": "MIT",
     "scripts": {
         "build": "tsc",
