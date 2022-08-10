@@ -5,7 +5,10 @@
     "reporter": [
         "html",
         "text",
-        "text-summary"
+        "text-summary",
+        "cobertura",
+        "json",
+        "lcovonly"
     ],
     "report-dir": "coverage",
     "statements": "91",
