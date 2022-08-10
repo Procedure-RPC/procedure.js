@@ -48,8 +48,8 @@ jobs:
         env:
           cache-name: cache-node-modules
         with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: $AppData%/npm-cache
+          # npm cache files are stored in `%AppData%\npm-cache` on Windows
+          path: '%AppData%\npm-cache'
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -61,8 +61,5 @@ jobs:
         continue-on-error: true
         run: npm list
 
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Test
-        run: npm test
+      - name: Run tests
+        run: npm install-ci-test
