@@ -200,7 +200,7 @@ Call functions between different processes on the same host.
 
 On POSIX compliant systems (ubuntu, macOS, etc.), UNIX domain sockets are used and IPC addresses are file references. Both relative (`ipc://foobar.ipc`) and absolute (`ipc:///tmp/foobar.ipc`) paths may be used, assuming access rights on the files are set appropriately.
 
-On Windows, named pipes are used for IPC, and IPC addresses are arbitrary case-insensitive strings containing any characters except backslash (`\`).
+On Windows, named pipes are used and IPC addresses are arbitrary case-insensitive strings containing any characters except backslash (`\`).
 
 ### TCP: intra/inter-network over TCP/IP
 Call functions between processes across TCP with support for both IPv4 addresses and DNS names*. IPv6 support coming soon!
