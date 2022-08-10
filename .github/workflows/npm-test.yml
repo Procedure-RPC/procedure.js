@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: ${{ matrix.version }}
 
-      - name: Cache node_modules
+      - name: Cache node_modules (ubuntu-latest)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         id: cache-npm-ubuntu
         uses: actions/cache@v3
@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Cache node_modules
+      - name: Cache node_modules (windows-latest)
         if: ${{ matrix.os == 'windows-latest' }}
         id: cache-npm-windows
         uses: actions/cache@v3
