@@ -28,7 +28,7 @@ jobs:
 
       - name: Cache node_modules
         if: ${{ matrix.config.os == 'ubuntu-latest' }}
-        id: cache-npm
+        id: cache-npm-ubuntu
         uses: actions/cache@v3
         env:
           cache-name: cache-node-modules
@@ -43,7 +43,7 @@ jobs:
 
       - name: Cache node_modules
         if: ${{ matrix.config.os == 'windows-latest' }}
-        id: cache-npm
+        id: cache-npm-windows
         uses: actions/cache@v3
         env:
           cache-name: cache-node-modules
