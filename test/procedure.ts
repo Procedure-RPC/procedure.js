@@ -329,11 +329,11 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
     // TODO: when callback asynchronous (completes normally, times out, throws error, infinite timeout, abortion signaled during execution, abortion signaled before execution)
 
     context('IPC tests', () => {
-        // before(function () {
-        //     if (process.platform !== 'win32') {
-        //         this.skip();
-        //     }
-        // });
+        before(function () {
+            if (process.platform !== 'win32') {
+                this.skip();
+            }
+        });
 
         context('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
             beforeEach(() => {
