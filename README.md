@@ -1,7 +1,7 @@
 # procedure.js 🔗
 The simple RPC framework for Node.js.
 
-[![NPM version](https://img.shields.io/npm/v/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on NPM") <!-- [![NPM downloads](https://img.shields.io/npm/dw/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on NPM") --> [![API docs](https://img.shields.io/badge/docs-v0.3-green.svg)](https://procedure-rpc.github.io/procedure.js "Read the documentation on Github Pages") [![npm test](https://github.com/Procedure-RPC/procedure.js/actions/workflows/npm-test.yml/badge.svg)](https://github.com/Procedure-RPC/procedure.js/actions/workflows/npm-test.yml "View npm test on GitHub Actions") [![codecov](https://codecov.io/gh/Procedure-RPC/procedure.js/branch/main/graph/badge.svg?token=CTOBZIENOA)](https://codecov.io/gh/Procedure-RPC/procedure.js "View code coverage on codecov") [![Code quality](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js/badge)](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js "Check code quality on CodeFactor") <!-- [![Coverity Scan build status](https://img.shields.io/coverity/scan/.svg)](https://scan.coverity.com/projects/procedure-rpc-procedure.js "View build status on Coverity Scan") --> <!-- ![nyc code coverage](https://img.shields.io/nycrc/procedure-rpc/procedure.js.svg)] -->
+[![npm package version](https://img.shields.io/npm/v/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on npm") <!-- [![npm package downloads](https://img.shields.io/npm/dw/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on npm") --> [![API docs](https://img.shields.io/badge/docs-v0.3-green.svg)](https://procedure-rpc.github.io/procedure.js "Read the documentation on Github Pages") [![npm test](https://github.com/Procedure-RPC/procedure.js/actions/workflows/npm-test.yml/badge.svg)](https://github.com/Procedure-RPC/procedure.js/actions/workflows/npm-test.yml "View npm test on GitHub Actions") [![Code coverage](https://codecov.io/gh/procedure-rpc/procedure.js/branch/main/graph/badge.svg?token=CTOBZIENOA)](https://codecov.io/gh/procedure-rpc/procedure.js "View code coverage on Codecov") [![Code quality](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js/badge)](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js "Check code quality on CodeFactor") <!-- [![Coverity Scan build status](https://img.shields.io/coverity/scan/.svg)](https://scan.coverity.com/projects/procedure-rpc-procedure.js "View build status on Coverity Scan") --> <!-- ![nyc code coverage](https://img.shields.io/nycrc/procedure-rpc/procedure.js.svg)] -->
 
 [![GitHub stars](https://img.shields.io/github/stars/procedure-rpc/procedure.js.svg?style=social)](https://github.com/procedure-rpc/procedure.js "Star procedure.js on GitHub") [![Twitter Follow](https://img.shields.io/twitter/follow/toebean__.svg?style=social)](https://twitter.com/toebean__ "Follow @toebean__ on Twitter") [![GitHub Sponsors donation button](https://img.shields.io/badge/github-sponsor-yellow.svg)](https://github.com/sponsors/toebeann "Sponsor procedure.js on GitHub") [![PayPal donation button](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://paypal.me/tobeyblaber "Donate to procedure.js with PayPal")
 
@@ -20,10 +20,10 @@ const procedure = new Procedure((n) => n ** 2).bind('tcp://*:5000');
 
 // calling the procedure to find the square of 8
 let squared = await Procedure.call('tcp://localhost:5000', 8);
-console.log(squared); //outputs 64
+console.log(squared); // outputs 64
 ```
 
-Procedure allows you to define procedures which can be called over [TCP](#tcp-intrainter-network-over-tcpip), [WebSockets](#ws-intrainter-network-over-websockets), [IPC](#ipc-interprocess), and [across threads or modules in the same process](#inproc-intraprocess). Use whichever [transport](#transports-more-than-just-tcp) is most appropriate for your use case, or mix-and-match!
+Procedure allows you to define procedures which can be called over [TCP](#tcp-intrainter-network-over-tcpip), [WebSockets](#ws-intrainter-network-over-websockets), [IPC](#ipc-intrainterprocess), and [across threads or modules in the same process](#inproc-intraprocess). Use whichever [transport](#transports-more-than-just-tcp) is most appropriate for your use case, or mix-and-match!
 
 <!-- Placeholder for when the .NET implementation is ready
 
@@ -74,7 +74,7 @@ And calling it is just as easy:
 ```js
 let x = 8;
 let xSquared = await Procedure.call('tcp://localhost:5000', x);
-console.log(xSquared); //outputs 64
+console.log(xSquared); // outputs 64
 console.log(typeof xSquared); // outputs 'number'
 ```
 
@@ -196,7 +196,11 @@ Call functions between threads or modules of the same process.
 Call functions between different processes on the same host.
 - `ipc://foobar.ipc`
 - `ipc:///tmp/test.ipc`
-- `ipc://MyApp/MyProcedure`
+- `ipc://my-app/my-procedure`
+
+On POSIX compliant systems (ubuntu, macOS, etc.), UNIX domain sockets are used and IPC addresses are file references. Both relative (`ipc://foobar.ipc`) and absolute (`ipc:///tmp/foobar.ipc`) paths may be used, assuming access rights on the files are set appropriately.
+
+On Windows, named pipes are used and IPC addresses are arbitrary case-insensitive strings containing any characters except backslash (`\`).
 
 ### TCP: intra/inter-network over TCP/IP
 Call functions between processes across TCP with support for both IPv4 addresses and DNS names*. IPv6 support coming soon!
