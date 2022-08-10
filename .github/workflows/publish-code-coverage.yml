@@ -20,8 +20,7 @@ jobs:
 
       - name: Get npm cache directory
         id: npm-cache
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
+        run: echo "::set-output name=dir::$(npm config get cache)"
 
       - name: Cache node_modules
         id: cache-npm
@@ -47,7 +46,7 @@ jobs:
       - name: Generate code coverage reports
         run: npm run test:coverage
 
-      - name: Publish code coverage to codecov
+      - name: Publish code coverage to codecov 🚀
         uses: codecov/codecov-action@v3
         with:
           verbose: true
