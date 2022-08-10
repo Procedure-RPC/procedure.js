@@ -114,16 +114,16 @@ describe('Procedure', () => {
             });
         });
 
-        context('when endpoint: \'inproc://Procedure.inproc\'', () => {
+        context('when endpoint: \'ipc:///tmp/Procedure.inproc\'', () => {
             beforeEach(() => instance = new Procedure(x => x));
             describe('instance', () => it('should not emit: \'error\'', () => {
                 const error = chai.spy(() => { return });
-                instance.on('error', error).bind('inproc://Procedure.inproc');
+                instance.on('error', error).bind('ipc:///tmp/Procedure.inproc');
                 expect(error).to.not.have.been.called();
             }));
 
             context('when already bound', () => {
-                beforeEach(() => instance.bind('inproc://Procedure.inproc'));
+                beforeEach(() => instance.bind('ipc:///tmp/Procedure.inproc'));
                 describe('instance', () => it('should emit: \'unbind\'', () => {
                     const unbind = chai.spy(() => { return });
                     instance.on('unbind', unbind).bind();
@@ -139,10 +139,10 @@ describe('Procedure', () => {
 
         it('should return: this', () => expect(instance.unbind()).to.equal(instance));
 
-        context('when instance bound to endpoint: \'inproc://Procedure.inproc\'', () => {
+        context('when instance bound to endpoint: \'ipc:///tmp/Procedure.inproc\'', () => {
             beforeEach(() => {
                 instance = new Procedure(x => x);
-                instance.bind('inproc://Procedure.inproc');
+                instance.bind('ipc:///tmp/Procedure.inproc');
             });
             describe('instance', () => it('should emit: \'unbind\'', () => {
                 const unbind = chai.spy(() => { return });
@@ -189,7 +189,7 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 return i += n;
             });
             spy = chai.spy(func);
-            procedureEndpoint = 'inproc://Procedure/Add.inproc';
+            procedureEndpoint = 'ipc:///tmp/Procedure/Add.inproc';
             procedure = new Procedure(spy, { workers: 3 });
             procedure.bind(procedureEndpoint);
         });
@@ -345,7 +345,7 @@ describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, si
                 return i += n;
             });
             spy = chai.spy(func);
-            procedureEndpoint = 'inproc://Procedure/Add.inproc';
+            procedureEndpoint = 'ipc:///tmp/Procedure/Add.inproc';
             procedure = new Procedure(spy, { workers: 3 });
             procedure.bind(procedureEndpoint);
         });
