@@ -20,7 +20,7 @@ const procedure = new Procedure((n) => n ** 2).bind('tcp://*:5000');
 
 // calling the procedure to find the square of 8
 let squared = await Procedure.call('tcp://localhost:5000', 8);
-console.log(squared); //outputs 64
+console.log(squared); // outputs 64
 ```
 
 Procedure allows you to define procedures which can be called over [TCP](#tcp-intrainter-network-over-tcpip), [WebSockets](#ws-intrainter-network-over-websockets), [IPC](#ipc-intrainterprocess), and [across threads or modules in the same process](#inproc-intraprocess). Use whichever [transport](#transports-more-than-just-tcp) is most appropriate for your use case, or mix-and-match!
@@ -74,7 +74,7 @@ And calling it is just as easy:
 ```js
 let x = 8;
 let xSquared = await Procedure.call('tcp://localhost:5000', x);
-console.log(xSquared); //outputs 64
+console.log(xSquared); // outputs 64
 console.log(typeof xSquared); // outputs 'number'
 ```
 
