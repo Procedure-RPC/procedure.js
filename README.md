@@ -196,7 +196,7 @@ Call functions between threads or modules of the same process.
 Call functions between different processes on the same host.
 - `ipc://foobar.ipc`
 - `ipc:///tmp/test.ipc`
-- `ipc://MyApp/MyProcedure`
+- `ipc://my-app/my-procedure`
 
 On POSIX compliant systems (ubuntu, macOS, etc.), UNIX domain sockets are used and IPC addresses are file references. Both relative (`ipc://foobar.ipc`) and absolute (`ipc:///tmp/foobar.ipc`) paths may be used, assuming access rights on the files are set appropriately.
 
