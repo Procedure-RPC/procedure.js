@@ -12,10 +12,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup node.js @ lts
+      - name: Setup node.js @ 16
         uses: actions/setup-node@v3
         with:
-          node-version: lts/*
+          node-version: 16
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
 
       - name: Cache node_modules
         id: cache-npm
@@ -23,15 +27,14 @@ jobs:
         env:
           cache-name: cache-node-modules
         with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/.npm
+          path: ${{ steps.npm-cache.outputs.dir }}
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - if: ${{ steps.cache-npm.outputs.cache-hit == 'false '}}
+      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
         name: List the state of node modules
         continue-on-error: true
         run: npm list
