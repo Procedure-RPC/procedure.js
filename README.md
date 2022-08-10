@@ -23,7 +23,7 @@ let squared = await Procedure.call('tcp://localhost:5000', 8);
 console.log(squared); //outputs 64
 ```
 
-Procedure allows you to define procedures which can be called over [TCP](#tcp-intrainter-network-over-tcpip), [WebSockets](#ws-intrainter-network-over-websockets), [IPC](#ipc-interprocess), and [across threads or modules in the same process](#inproc-intraprocess). Use whichever [transport](#transports-more-than-just-tcp) is most appropriate for your use case, or mix-and-match!
+Procedure allows you to define procedures which can be called over [TCP](#tcp-intrainter-network-over-tcpip), [WebSockets](#ws-intrainter-network-over-websockets), [IPC](#ipc-intrainterprocess), and [across threads or modules in the same process](#inproc-intraprocess). Use whichever [transport](#transports-more-than-just-tcp) is most appropriate for your use case, or mix-and-match!
 
 <!-- Placeholder for when the .NET implementation is ready
 
@@ -197,6 +197,10 @@ Call functions between different processes on the same host.
 - `ipc://foobar.ipc`
 - `ipc:///tmp/test.ipc`
 - `ipc://MyApp/MyProcedure`
+
+On POSIX compliant systems (ubuntu, macOS, etc.), UNIX domain sockets are used and IPC addresses are file references. Both relative (`ipc://foobar.ipc`) and absolute (`ipc:///tmp/foobar.ipc`) paths may be used, assuming access rights on the files are set appropriately.
+
+On Windows, named pipes are used for IPC, and IPC addresses are arbitrary case-insensitive strings containing any characters except backslash (`\`).
 
 ### TCP: intra/inter-network over TCP/IP
 Call functions between processes across TCP with support for both IPv4 addresses and DNS names*. IPv6 support coming soon!
