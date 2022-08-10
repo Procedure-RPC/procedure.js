@@ -49,4 +49,4 @@ jobs:
         run: npm list
 
       - name: Run tests
-        run: npm install-ci-test
+        run: sudo npm install-ci-test
