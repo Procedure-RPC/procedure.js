@@ -5,20 +5,26 @@ name: npm test
 on:
   push:
     branches: ['main']
-    paths: ['**.ts']
+    paths: ['**.ts', '.github/workflows/npm-test.yml']
   workflow_dispatch:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        version: [12, 14, 16, 'lts/*']
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup node.js @ lts
+      - name: Setup node.js @ ${{ matrix.version }}
         uses: actions/setup-node@v3
         with:
-          node-version: lts/*
+          node-version: ${{ matrix.version }}
 
       - name: Cache node_modules
         id: cache-npm
