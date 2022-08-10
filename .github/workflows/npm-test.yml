@@ -2,7 +2,11 @@
 
 name: npm test
 
-on: workflow_dispatch
+on:
+  push:
+    branches: ['main']
+    paths: ['**.ts']
+  workflow_dispatch:
 
 jobs:
   test:
