@@ -346,7 +346,7 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                     return i += n;
                 });
                 spy = chai.spy(func);
-                procedureEndpoint = 'ipc://Procedure/Add';
+                procedureEndpoint = 'ipc://procedure/add';
                 procedure = new Procedure(spy, { workers: 3 });
                 procedure.bind(procedureEndpoint);
             });
