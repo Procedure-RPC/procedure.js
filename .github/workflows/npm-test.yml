@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        version: [16, 'lts/*']
+        version: [16]
 
     steps:
       - name: Checkout repository
