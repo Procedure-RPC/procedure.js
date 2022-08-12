@@ -221,6 +221,49 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     }
 
     /**
+     * Asynchronously calls a {@link Procedure} at a given {@link endpoint} with given a {@link input}.
+     * If any errors are thrown, absorbs them and returns `void`.
+     * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
+     * @param {Nullable} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
+     * @param {ProcedureCallOptions} [options={}] Options for calling a {@link Procedure}. Defaults to `{}`.
+     * @returns {Promise<Output | void>} A {@link Promise} which when resolved passes the output value to the {@link Promise.then then} handler(s). If errors were thrown,
+     * resolves to `void` (`undefined`) rather than rejecting.
+     * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
+     * @see {@link Procedure.endpoint}
+     * @see {@link Procedure.ping}
+     */
+    static async tryCall<Output extends Nullable = unknown>(endpoint: string, input?: Nullable, options: Partial<ProcedureCallOptions> = {}): Promise<Output | void> {
+        try {
+            return await Procedure.call<Output>(endpoint, input, options);
+        } catch {
+            return;
+        }
+    }
+
+    /**
+     * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link Procedure.call called}.
+     * If any errors are thrown, absorbs them and returns `false`.
+     * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
+     * @param {number} [timeout=1000] How long to wait for a response before timing out.
+     * {@link NaN} or {@link Infinity infinite} values will result in the ping never timing out if no response is received, unless
+     * {@link signal} is a valid {@link AbortSignal} and gets aborted.
+     * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
+     * Defaults to `1000`.
+     * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
+     * Defaults to `undefined`.
+     * @returns {Promise<void>} A {@link Promise} which when resolved indicated whether the {@link endpoint} is available and ready to handle {@link Procedure.call calls}.
+     * If errors were thrown, resolves to `false` instead of rejecting.
+     */
+    static async tryPing(endpoint: string, timeout = 1000, signal?: AbortSignal): Promise<boolean> {
+        try {
+            await Procedure.ping(endpoint, timeout, signal);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
      * 
      * @param endpoint 
      * @param input 

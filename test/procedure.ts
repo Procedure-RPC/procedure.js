@@ -847,6 +847,9 @@ describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, si
     });
 });
 
+// TODO: test Procedure.tryCall
+// TODO: test Procedure.tryPing
+
 describe('isPing(object: unknown): object is Ping', () => {
     let object: unknown;
 
