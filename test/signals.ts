@@ -2,8 +2,7 @@
 import 'mocha';
 import chai, { expect } from 'chai';
 import spies from 'chai-spies';
-import { AggregateSignal, TimeoutSignal } from '../src/signals';
-import { Signal, isSignal } from '../src/utils';
+import { AggregateSignal, TimeoutSignal, Signal, isSignal, isAbortSignal } from '../src/signals';
 
 chai.use(spies);
 
@@ -119,5 +118,63 @@ describe('TimeoutSignal', () => {
         const instance = new TimeoutSignal(1000);
         describe('signal', () => it('should not be: undefined', () => expect(instance.signal).to.not.be.undefined));
         describe('timeout', () => it('should not be: undefined', () => expect(instance.timeout).to.not.be.undefined));
+    });
+});
+
+describe('isSignal(object: unknown): object is Signal', () => {
+    let object: unknown;
+
+    context('when object: instanceof AbortSignal', () => {
+        beforeEach(() => object = new AbortController().signal);
+        it('should return: true', () => expect(isSignal(object)).to.be.true);
+    });
+
+    context('when object: undefined', () => {
+        beforeEach(() => object = undefined);
+        it('should return: false', () => expect(isSignal(object)).to.be.false);
+    });
+
+    context('when object: null', () => {
+        beforeEach(() => object = null);
+        it('should return: false', () => expect(isSignal(object)).to.be.false);
+    });
+
+    context('when object: instanceof TypeError', () => {
+        beforeEach(() => object = new TypeError());
+        it('should return: true', () => expect(isSignal(object)).to.be.false);
+    });
+
+    context('when object: { name: \'Foo\', message: \'Bar\' }', () => {
+        beforeEach(() => object = { name: 'Foo', message: 'Bar' });
+        it('should return: false', () => expect(isSignal(object)).to.be.false);
+    });
+});
+
+describe('isAbortSignal(object: unknown): object is AbortSignal', () => {
+    let object: unknown;
+
+    context('when object: instanceof AbortSignal', () => {
+        beforeEach(() => object = new AbortController().signal);
+        it('should return: true', () => expect(isAbortSignal(object)).to.be.true);
+    });
+
+    context('when object: undefined', () => {
+        beforeEach(() => object = undefined);
+        it('should return: false', () => expect(isAbortSignal(object)).to.be.false);
+    });
+
+    context('when object: null', () => {
+        beforeEach(() => object = null);
+        it('should return: false', () => expect(isAbortSignal(object)).to.be.false);
+    });
+
+    context('when object: instanceof TypeError', () => {
+        beforeEach(() => object = new TypeError());
+        it('should return: true', () => expect(isAbortSignal(object)).to.be.false);
+    });
+
+    context('when object: { name: \'Foo\', message: \'Bar\' }', () => {
+        beforeEach(() => object = { name: 'Foo', message: 'Bar' });
+        it('should return: false', () => expect(isAbortSignal(object)).to.be.false);
     });
 });

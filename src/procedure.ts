@@ -2,7 +2,7 @@
 // TODO: rework error handling to throw a generic error with status code, and optionally an object containing an error message and relevant data - look at grpc for examples
 
 /// <reference types='node' />
-import { Ping, isPing, isErrorLike, cloneError } from './utils';
+import { isErrorLike, cloneError } from './errors';
 import { AggregateSignal, TimeoutSignal } from './signals';
 import { createSocket, Socket } from 'nanomsg';
 import { encode, decode, ExtensionCodec } from '@msgpack/msgpack'
@@ -587,4 +587,21 @@ export type ProcedureEvents<Input extends Nullable = undefined> = {
     error: (error: unknown) => void;
     /** Signature for the unbind event. */
     unbind: () => void;
+}
+
+/**
+ * A simple interface representing a ping.
+ * @internal
+ */
+ export interface Ping {
+    ping: string;
+}
+
+/**
+ * Type guard for determining whether a given object conforms to the `Ping` interface.
+ * @param {unknown} object The object.
+ * @returns {object is Ping} `true` if the object conforms to the `Ping` interface, otherwise `false`.
+ */
+export function isPing(object: unknown): object is Ping {
+    return typeof object === 'object' && object !== null && 'ping' in object && typeof (object as { ping: unknown }).ping === 'string';
 }

@@ -1,7 +1,7 @@
 import 'mocha';
 import chai, { expect } from 'chai';
 import chaiQuantifiers from 'chai-quantifiers';
-import { cloneError, errorEntries, isAbortSignal, isError, isErrorLike, isPing, isSignal } from '../src/utils';
+import { cloneError, errorEntries, isError, isErrorLike } from '../src/errors';
 
 chai.use(chaiQuantifiers);
 
@@ -66,35 +66,6 @@ describe('errorEntries(error: Error, stack: boolean): Array<unknown[]>', () => {
     });
 });
 
-describe('isAbortSignal(object: unknown): object is AbortSignal', () => {
-    let object: unknown;
-
-    context('when object: instanceof AbortSignal', () => {
-        beforeEach(() => object = new AbortController().signal);
-        it('should return: true', () => expect(isAbortSignal(object)).to.be.true);
-    });
-
-    context('when object: undefined', () => {
-        beforeEach(() => object = undefined);
-        it('should return: false', () => expect(isAbortSignal(object)).to.be.false);
-    });
-
-    context('when object: null', () => {
-        beforeEach(() => object = null);
-        it('should return: false', () => expect(isAbortSignal(object)).to.be.false);
-    });
-
-    context('when object: instanceof TypeError', () => {
-        beforeEach(() => object = new TypeError());
-        it('should return: true', () => expect(isAbortSignal(object)).to.be.false);
-    });
-
-    context('when object: { name: \'Foo\', message: \'Bar\' }', () => {
-        beforeEach(() => object = { name: 'Foo', message: 'Bar' });
-        it('should return: false', () => expect(isAbortSignal(object)).to.be.false);
-    });
-});
-
 describe('isError(object: unknown): object is Error', () => {
     let object: unknown;
     context('when object: instanceof Error', () => {
@@ -148,63 +119,5 @@ describe('isErrorLike(object: unknown): object is Error', () => {
     context('when object: { name: \'Foo\', message: \'Bar\' }', () => {
         beforeEach(() => object = { name: 'Foo', message: 'Bar' });
         it('should return: true', () => expect(isErrorLike(object)).to.be.true);
-    });
-});
-
-describe('isPing(object: unknown): object is Ping', () => {
-    let object: unknown;
-
-    context('when object: { ping: \'foobar\' }', () => {
-        beforeEach(() => object = { ping: 'foobar' });
-        it('should return: true', () => expect(isPing(object)).to.be.true);
-    });
-
-    context('when object: undefined', () => {
-        beforeEach(() => object = undefined);
-        it('should return: false', () => expect(isPing(object)).to.be.false);
-    });
-
-    context('when object: null', () => {
-        beforeEach(() => object = null);
-        it('should return: false', () => expect(isPing(object)).to.be.false);
-    });
-
-    context('when object: instanceof TypeError', () => {
-        beforeEach(() => object = new TypeError());
-        it('should return: true', () => expect(isPing(object)).to.be.false);
-    });
-
-    context('when object: { name: \'Foo\', message: \'Bar\' }', () => {
-        beforeEach(() => object = { name: 'Foo', message: 'Bar' });
-        it('should return: false', () => expect(isPing(object)).to.be.false);
-    });
-});
-
-describe('isSignal(object: unknown): object is Signal', () => {
-    let object: unknown;
-
-    context('when object: instanceof AbortSignal', () => {
-        beforeEach(() => object = new AbortController().signal);
-        it('should return: true', () => expect(isSignal(object)).to.be.true);
-    });
-
-    context('when object: undefined', () => {
-        beforeEach(() => object = undefined);
-        it('should return: false', () => expect(isSignal(object)).to.be.false);
-    });
-
-    context('when object: null', () => {
-        beforeEach(() => object = null);
-        it('should return: false', () => expect(isSignal(object)).to.be.false);
-    });
-
-    context('when object: instanceof TypeError', () => {
-        beforeEach(() => object = new TypeError());
-        it('should return: true', () => expect(isSignal(object)).to.be.false);
-    });
-
-    context('when object: { name: \'Foo\', message: \'Bar\' }', () => {
-        beforeEach(() => object = { name: 'Foo', message: 'Bar' });
-        it('should return: false', () => expect(isSignal(object)).to.be.false);
     });
 });

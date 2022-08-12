@@ -1,54 +1,9 @@
 /**
- * Type guard for determining whether a given object is an {@link AbortSignal} instance.
- * @param {unknown} object The object.
- * @returns {object is AbortSignal} `true` if {@link object} is determined to be an {@link AbortSignal}, otherwise `false`.
- */
-export function isAbortSignal(object: unknown): object is AbortSignal {
-    return object instanceof AbortSignal;
-}
-
-/**
- * A helpful interface to allow use of {@link AbortSignal AbortSignal's} {@link EventTarget} interface when TypeScript hates us.
- */
-export interface Signal {
-    addEventListener: (event: 'abort', callback: () => void) => void;
-    removeEventListener: (event: 'abort') => void;
-    readonly aborted: boolean;
-}
-
-/**
- * Type guard for determining whether a given object conforms to the {@link Signal} interface.
- * @param {unknown} object The object.
- * @returns {object is Signal} `true` if {@link object} conforms to the {@link Signal} interface, otherwise `false`.
- */
-export function isSignal(object: unknown): object is Signal {
-    return isAbortSignal(object) && 'addEventListener' in object && 'removeEventListener' in object
-        && typeof (<Signal>object).addEventListener === 'function' && typeof (<Signal>object).removeEventListener === 'function';
-}
-
-/**
- * A simple interface representing a ping.
- * @internal
- */
-export interface Ping {
-    ping: string;
-}
-
-/**
- * Type guard for determining whether a given object conforms to the `Ping` interface.
- * @param {unknown} object The object.
- * @returns {object is Ping} `true` if the object conforms to the `Ping` interface, otherwise `false`.
- */
-export function isPing(object: unknown): object is Ping {
-    return typeof object === 'object' && object !== null && 'ping' in object && typeof (object as { ping: unknown }).ping === 'string';
-}
-
-/**
  * Type guard for determining whether a given object is an `Error` instance.
  * @param {unknown} object The object.
  * @returns {object is Error} `true` if the object is determined to be an `Error`, otherwise `false`.
  */
-export function isError(object: unknown): object is Error {
+ export function isError(object: unknown): object is Error {
     return object instanceof Error;
 }
 

@@ -2,7 +2,7 @@ import 'mocha'
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import chaiAsPromised from 'chai-as-promised'
-import Procedure, { Callback } from '../src'
+import Procedure, { Callback, isPing } from '../src'
 import { ExtensionCodec } from '@msgpack/msgpack'
 
 chai.use(spies);
@@ -836,5 +836,34 @@ describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, si
         // TODO: when abortion signaled during ping
 
         afterEach(() => procedure.unbind());
+    });
+});
+
+describe('isPing(object: unknown): object is Ping', () => {
+    let object: unknown;
+
+    context('when object: { ping: \'foobar\' }', () => {
+        beforeEach(() => object = { ping: 'foobar' });
+        it('should return: true', () => expect(isPing(object)).to.be.true);
+    });
+
+    context('when object: undefined', () => {
+        beforeEach(() => object = undefined);
+        it('should return: false', () => expect(isPing(object)).to.be.false);
+    });
+
+    context('when object: null', () => {
+        beforeEach(() => object = null);
+        it('should return: false', () => expect(isPing(object)).to.be.false);
+    });
+
+    context('when object: instanceof TypeError', () => {
+        beforeEach(() => object = new TypeError());
+        it('should return: true', () => expect(isPing(object)).to.be.false);
+    });
+
+    context('when object: { name: \'Foo\', message: \'Bar\' }', () => {
+        beforeEach(() => object = { name: 'Foo', message: 'Bar' });
+        it('should return: false', () => expect(isPing(object)).to.be.false);
     });
 });
