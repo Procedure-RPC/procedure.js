@@ -11,9 +11,9 @@
         "lcovonly"
     ],
     "report-dir": "coverage",
-    "statements": "91",
+    "statements": "90",
     "branches": "85",
-    "functions": "94",
-    "lines": "91",
+    "functions": "90",
+    "lines": "90",
     "include": "src"
 }
