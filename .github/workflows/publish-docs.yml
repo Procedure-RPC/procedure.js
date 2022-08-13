@@ -1,4 +1,4 @@
-name: Publish API Reference
+name: publish docs
 
 on:
   release:
