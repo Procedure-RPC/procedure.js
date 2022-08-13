@@ -90,7 +90,7 @@ const procedure = new Procedure(async () => {
     if (response.ok) {
         return (await response.json()).fact;
     } else {
-        throw new Error(`${response.status}: ${response.statusText}`);
+        throw new ProcedureExecutionError(`${response.status}: ${response.statusText}`);
     }
 });
 procedure.bind('tcp://127.0.0.1:8888');
