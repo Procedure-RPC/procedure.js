@@ -165,25 +165,14 @@ export class ProcedureExecutionError extends ProcedureError {
 }
 
 /**
- * Type guard for determining whether a given {@link object} is an {@link Error} instance.
- * @param {unknown} object The object.
- * @returns {object is Error} `true` if the {@link object} is determined to be an {@link Error}, otherwise `false`.
- * @internal
- * @remarks Intended for internal use; may not be exported in future.
- */
-export function isError(object: unknown): object is Error {
-    return object instanceof Error;
-}
-
-/**
- * Type guard for determining whether a given {@link object} is {@link Error}-like, i.e. it conforms to the most basic {@link Error} interface.
+ * Type guard for determining whether a given {@link object} conforms to the {@link Error} interface.
  * @param {unknown} object The object.
  * @returns {object is Error} `true` if the {@link object} conforms to the {@link Error} interface, otherwise `false`.
  * @internal
  * @remarks Intended for internal use; may not be exported in future.
  */
-export function isErrorLike(object: unknown): object is Error {
-    return typeof object === 'object' && object !== null && (isError(object) || 'name' in object);
+export function isError(object: unknown): object is Error {
+    return object instanceof Error || (typeof object === 'object' && object !== null && 'name' in object && 'message' in object);
 }
 
 /**
@@ -192,7 +181,7 @@ export function isErrorLike(object: unknown): object is Error {
  * @returns {object is ProcedureError} `true` if the {@link object} conforms to the {@link ProcedureError} interface, otherwise `false`.
  */
 export function isProcedureError(object: unknown): object is ProcedureError {
-    return object instanceof ProcedureError || (isErrorLike(object) && object.name.startsWith('Procedure') && object.name.endsWith('Error')
+    return object instanceof ProcedureError || (isError(object) && object.name.startsWith('Procedure') && object.name.endsWith('Error')
         && 'message' in object
         && 'code' in object && (<{ code: number }>object).code in ProcedureErrorCodes);
 }

@@ -4,7 +4,7 @@
 /// <reference types='node' />
 import {
     isProcedureError,
-    ProcedureCancelledError, ProcedureInvalidResponseError, ProcedureInternalClientError, ProcedureInternalServerError, ProcedureExecutionError, ProcedureError, isErrorLike
+    ProcedureCancelledError, ProcedureInvalidResponseError, ProcedureInternalClientError, ProcedureInternalServerError, ProcedureExecutionError, ProcedureError, isError
 } from './errors';
 import { AggregateSignal, TimeoutSignal } from './signals';
 import { createSocket, Socket } from 'nanomsg';
@@ -291,7 +291,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
         } catch (e) {
             if (isProcedureError(e)) {
                 throw e;
-            } else if (isErrorLike(e) && e.name === 'AbortError') {
+            } else if (isError(e) && e.name === 'AbortError') {
                 throw new ProcedureCancelledError();
             } else {
                 throw new ProcedureInternalClientError();
