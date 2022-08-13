@@ -1,5 +1,4 @@
 // TODO: add and test ipv6 support
-// TODO: rework error handling to throw a generic error with status code, and optionally an object containing an error message and relevant data - look at grpc for examples
 
 /// <reference types='node' />
 import {
