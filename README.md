@@ -19,7 +19,7 @@ const procedure = new Procedure((n) => n ** 2).bind('tcp://*:5000');
 // some-other-app/index.js
 
 // calling the procedure to find the square of 8
-let squared = await Procedure.call('tcp://localhost:5000', 8);
+let squared = await call('tcp://localhost:5000', 8);
 console.log(squared); // outputs 64
 ```
 
@@ -75,7 +75,7 @@ procedure.bind('tcp://*:5000');
 And calling it is just as easy:
 ```js
 let x = 8;
-let xSquared = await Procedure.call('tcp://localhost:5000', x);
+let xSquared = await call('tcp://localhost:5000', x);
 console.log(xSquared); // outputs 64
 console.log(typeof xSquared); // outputs 'number'
 ```
@@ -110,11 +110,11 @@ const procedure = new Procedure(params => myFunction(...params))
 ```
 Which can then be called like so:
 ```js
-Procedure.call('tcp://localhost:30666', [1, 2, 3]);
+call('tcp://localhost:30666', [1, 2, 3]);
 ```
 For functions where you have optional parameters, it might make more sense to use object literals/property bags instead of arrays.
 
-Functions which accept multiple parameters where only the first is required (or none) will work as is, but you will only be able to pass the first parameter via `Procedure.call`.
+Functions which accept multiple parameters where only the first is required (or none) will work as is, but you will only be able to pass the first parameter via `call`.
 
 #### A note about `null` and `undefined`
 ##### Optional parameter support
@@ -133,7 +133,7 @@ const procedure = new Procedure(x => { ... }, { optionalParameterSupport: false 
 ```
 
 ```js
-await Procedure.call('tcp://*:54321', x, { optionalParameterSupport: false });
+await call('tcp://*:54321', x, { optionalParameterSupport: false });
 ```
 Note that disabling at the definition will not affect the return value, and disabling at the call will not affect the input parameter.
 
@@ -149,7 +149,7 @@ const procedure = new Procedure(x => { ... }, { ignoreUndefinedProperties: false
 ```
 
 ```js
-await Procedure.call('tcp://*:54321', x, { ignoreUndefinedProperties: false });
+await call('tcp://*:54321', x, { ignoreUndefinedProperties: false });
 ```
 Note that disabling at the definition will not affect the return value, and disabling at the call will not affect the input parameter.
 
@@ -164,7 +164,7 @@ const procedure = new Procedure(x => x.foo = 'bar')
 And then call it like so:
 ```js
 let obj = { foo: 123 };
-await Procedure.call('tcp://*:33333', obj);
+await call('tcp://*:33333', obj);
 console.log(obj); // outputs '{ foo: 123 }'
 ```
 The `obj` object would remain unchanged, because the procedure is acting on a *clone* of the object, not the object itself. First, the object is encoded for transmission by msgpack, then sent across the wire by nanomsg, and finally decoded by msgpack at the other end into a brand new object.
@@ -177,7 +177,7 @@ procedure.bind('tcp://*:5000');
 ```
 ```js
 let x = { foo: 'bar' };
-let xSquared = await Procedure.call('tcp://localhost:5000', x);
+let xSquared = await call('tcp://localhost:5000', x);
 // throws ProcedureExecutionError: An unhandled exception was thrown during procedure execution.
 ```
 
@@ -200,7 +200,7 @@ const procedure = new Procedure(n => {
 ```
 ```js
 let x = { foo: 'bar' };
-let xSquared = await Procedure.call('tcp://localhost:5000', x);
+let xSquared = await call('tcp://localhost:5000', x);
 // throws ProcedureExecutionError: Expected n to be a number, got 'object'
 ```
 
@@ -217,7 +217,7 @@ const procedure = new Procedure(n => {
 ```js
 let x = { foo: 'bar' }, xSquared;
 try {
-    xSquared = await Procedure.call('tcp://localhost:5000', x);
+    xSquared = await call('tcp://localhost:5000', x);
 } catch (e) {
     console.error(e?.name, '-', e?.message, e?.data);
 }
@@ -235,7 +235,7 @@ The full API reference for procedure.js is [available on GitHub Pages](https://p
 - [Initializing a procedure](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#constructor)
   - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureDefinitionOptions.html)
 - [Binding a procedure to an endpoint](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#bind)
-- [Calling a procedure](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#call)
+- [Calling a procedure](https://procedure-rpc.github.io/procedure.js/functions/procedure.call.html)
   - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureCallOptions.html)
 
 ## Transports: More than just TCP!
@@ -302,8 +302,8 @@ If you do need to make breaking changes to a procedure, it is recommended to eit
   ```
 
   ```js
-  const v1Result = await Procedure.call('tcp://localhost:33000'); // returns false
-  const v2Result = await Procedure.call('tcp://localhost:33001'); // returns undefined
+  const v1Result = await call('tcp://localhost:33000'); // returns false
+  const v2Result = await call('tcp://localhost:33001'); // returns undefined
   ```
 - use a parameter or property to specify a version modifier, defaulting to the original when unspecified:
   ```js
@@ -331,8 +331,8 @@ If you do need to make breaking changes to a procedure, it is recommended to eit
   ```
 
   ```js
-  const v1Result = await Procedure.call('tcp://localhost:33000'); // returns false
-  const v2Result = await Procedure.call('tcp://localhost:33000', { version: 2 }); //returns undefined
+  const v1Result = await call('tcp://localhost:33000'); // returns false
+  const v2Result = await call('tcp://localhost:33000', { version: 2 }); //returns undefined
   ```
 
   You may prefer to use a [semver](https://www.npmjs.com/package/semver) compatible string for versioning.
