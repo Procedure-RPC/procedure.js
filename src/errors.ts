@@ -24,7 +24,7 @@ export enum ProcedureErrorCodes {
 }
 
 /** 
- * Defines the interface of errors relating to procedures.
+ * A base abstraction of an error relating to a procedure.
  * @internal
  * @remarks Intended for internal use; may not be exported in future.
  */
