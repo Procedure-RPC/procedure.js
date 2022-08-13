@@ -9,6 +9,7 @@ on:
   pull_request:
     branches: ['main']
     paths: ['**.ts', '.github/workflows/npm-test.yml']
+    types: ['opened', 'ready_for_review', 'reopened', 'synchronize', 'review_requested']
   workflow_dispatch:
 
 jobs:
