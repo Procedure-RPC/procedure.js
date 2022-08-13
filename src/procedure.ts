@@ -1,3 +1,4 @@
+// TODO: rework pings to be enabled by default, but with a variable (default 60 second) cache for successful pings by endpoint for the best of both worlds. for parallelisation, when one successful ping occurs, ideally it would make any pending pings immediately resolve. ping cache should be emptied if endpoint times out on a call
 // TODO: add and test ipv6 support
 
 /// <reference types='node' />
