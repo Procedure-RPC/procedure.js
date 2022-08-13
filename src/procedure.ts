@@ -349,10 +349,10 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     async #tryGetCallbackResponse(input: Input): Promise<Response<Output>> {
         try {
             return {
-                output: await this.callback(input
+                output: (await this.callback(input
                     ?? <Input>(this.optionalParameterSupport
                         ? undefined
-                        : input))
+                        : input))) ?? null
             };
         } catch (e) {
             const message = 'Procedure encountered an error while executing callback';
@@ -546,8 +546,8 @@ export type Callback<Input extends Nullable = undefined, Output extends Nullable
  * If the call returned successfully, the response will be of shape `{ output: Output }`, otherwise `{ error: ProcedureError }`.
  */
 export type Response<Output extends Nullable = undefined>
-    = { output: Output, error?: never, pong?: never }
-    | { output?: never, error: ProcedureError | undefined, pong?: never }
+    = { output: Output | null | undefined, error?: never, pong?: never }
+    | { output?: never, error: ProcedureError | null | undefined, pong?: never }
     | { output?: never, error?: never, pong: string };
 
 /**
