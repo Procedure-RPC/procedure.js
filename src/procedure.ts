@@ -23,7 +23,8 @@ const uuidNamespace = uuidv5(homepage, uuidv5.URL);
  * @template Input Type of input parameter the procedure accepts. Defaults to `undefined`.
  * @template Output Type of output value the procedure returns. Defaults to `undefined`.
  */
-export class Procedure<Input extends Nullable = undefined, Output extends Nullable = undefined> extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureDefinitionOptions {
+export class Procedure<Input extends Nullable = undefined, Output extends Nullable = undefined>
+    extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureDefinitionOptions {
     #endpoint?: string;
     /** 
      * The endpoint at which the {@link Procedure}, when {@link bind bound}, can be {@link Procedure.call called}.
@@ -149,7 +150,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
      * Asynchronously calls a {@link Procedure} at a given {@link endpoint} with given a {@link input}.
      * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
      * @param {Nullable} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
-     * @param {ProcedureCallOptions} [options={}] Options for calling a {@link Procedure}. Defaults to `{}`.
+     * @param {Partial<ProcedureCallOptions>} [options={}] Options for calling a {@link Procedure}. Defaults to `{}`.
      * @returns {Promise<Output>} A {@link Promise} which when resolved passes the output value to the {@link Promise.then then} handler(s).
      * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
      * @see {@link Procedure.endpoint}
@@ -198,7 +199,8 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
      * Defaults to `1000`.
      * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
      * Defaults to `undefined`.
-     * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle {@link Procedure.call calls}.
+     * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle
+     * {@link Procedure.call calls}.
      */
     static async ping(endpoint: string, timeout = 1000, signal?: AbortSignal): Promise<void> {
         try {
@@ -225,14 +227,15 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
      * If any errors are thrown, absorbs them and returns `void`.
      * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
      * @param {Nullable} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
-     * @param {ProcedureCallOptions} [options={}] Options for calling a {@link Procedure}. Defaults to `{}`.
-     * @returns {Promise<Output | void>} A {@link Promise} which when resolved passes the output value to the {@link Promise.then then} handler(s). If errors were thrown,
-     * resolves to `void` (`undefined`) rather than rejecting.
+     * @param {Partial<ProcedureCallOptions>} [options={}] Options for calling a {@link Procedure}. Defaults to `{}`.
+     * @returns {Promise<Output | void>} A {@link Promise} which when resolved passes the output value to the {@link Promise.then then} handler(s).
+     * If errors were thrown, resolves to `void` (`undefined`) rather than rejecting.
      * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
      * @see {@link Procedure.endpoint}
      * @see {@link Procedure.ping}
      */
-    static async tryCall<Output extends Nullable = unknown>(endpoint: string, input?: Nullable, options: Partial<ProcedureCallOptions> = {}): Promise<Output | void> {
+    static async tryCall<Output extends Nullable = unknown>(endpoint: string, input?: Nullable, options: Partial<ProcedureCallOptions> = {})
+        : Promise<Output | void> {
         try {
             return await Procedure.call<Output>(endpoint, input, options);
         } catch {
@@ -251,7 +254,8 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
      * Defaults to `1000`.
      * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
      * Defaults to `undefined`.
-     * @returns {Promise<void>} A {@link Promise} which when resolved indicated whether the {@link endpoint} is available and ready to handle {@link Procedure.call calls}.
+     * @returns {Promise<void>} A {@link Promise} which when resolved indicated whether the {@link endpoint} is available and ready to handle
+     * {@link Procedure.call calls}.
      * If errors were thrown, resolves to `false` instead of rejecting.
      */
     static async tryPing(endpoint: string, timeout = 1000, signal?: AbortSignal): Promise<boolean> {
@@ -264,11 +268,13 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     }
 
     /**
-     * 
-     * @param endpoint 
-     * @param input 
-     * @param options 
-     * @returns 
+     * Asynchronously encodes and transmits the given {@link input} to the {@link endpoint} and retrieves the response.
+     * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
+     * @param {Nullable} input An input parameter to pass to the {@link Procedure}.
+     * @param {ProcedureCallOptions} options Options for calling a {@link Procedure}.
+     * @returns {Promise<Response<Output>>} A {@link Promise} which when resolved passes the {@link Response<Output> response} to the
+     * {@link Promise.then then} handler(s).
+     * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
      */
     static async #getResponse<Output extends Nullable = unknown>(endpoint: string, input: Nullable, options: ProcedureCallOptions): Promise<Response<Output>> {
         let socket: Socket | undefined;
