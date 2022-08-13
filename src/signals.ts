@@ -16,7 +16,7 @@ export class AggregateSignal {
 
         if (signals.length === 1) {
             this.signal = signals[0];
-        } else if (signals.filter(s => s.aborted).length > 0) {
+        } else if (signals.some(s => s.aborted)) {
             this.signal = signals.filter(s => s.aborted)[0];
         } else if (signals.length > 1) {
             const ac = new AbortController();

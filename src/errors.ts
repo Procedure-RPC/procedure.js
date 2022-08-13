@@ -33,16 +33,19 @@ export abstract class ProcedureError implements Error {
     abstract name: string;
     /** The code used to identify the error type. */
     abstract code: ProcedureErrorCodes;
-    /** A message indicating the cause of the error. */
-    abstract message: string;
+    /** A string indicating the cause of the error. */
+    message: string;
     /** An optional dictionary of data which will be passed to a procedure's caller when thrown. */
     data?: Record<string, unknown>;
 
     /**
      * Initializes a new instance of {@link ProcedureError}
+     * @param {string} message A string indicating the cause of the error.
      * @param {Record<string, unknown>} [data] An optional dictionary of data which will be passed to a procedure's caller when thrown.
      */
-    constructor(data?: Record<string, unknown>) {
+    constructor(message: string, data?: Record<string, unknown>) {
+        this.message = message;
+
         if (data) {
             this.data = data;
         }
@@ -53,96 +56,112 @@ export abstract class ProcedureError implements Error {
 export class ProcedureUnknownError extends ProcedureError {
     name = 'ProcedureUnknownError';
     code = ProcedureErrorCodes.UNKNOWN_ERROR;
-    message = 'An unhandled exception of unknown origin was thrown while handling the request.';
     /**
      * Initializes an instance of {@link ProcedureUnknownError}.
+     * @param {string} [message] A string indicating the cause of the error.
      * @param {Record<string, unknown>} [data] An optional dictionary of data which will be passed to a procedure's caller when thrown.
      */
-    constructor(data?: Record<string, unknown>) { super(data) }
+    constructor(message = 'An unhandled exception of unknown origin was thrown while handling the request.', data?: Record<string, unknown>) {
+        super(message, data);
+    }
 }
 
 /** When thrown, indicates that an unhandled exception was thrown while attempting to call the procedure. */
 export class ProcedureInternalClientError extends ProcedureError {
     name = 'ProcedureInternalClientError';
     code = ProcedureErrorCodes.INTERNAL_CLIENT_ERROR;
-    message = 'An unhandled exception was thrown while attempting to call the procedure.';
     /**
      * Initializes an instance of {@link ProcedureInternalClientError}.
+     * @param {string} [message] A string indicating the cause of the error.
      * @param {Record<string, unknown>} [data] An optional dictionary of data which will be passed to a procedure's caller when thrown.
      */
-     constructor(data?: Record<string, unknown>) { super(data) }
+     constructor(message = 'An unhandled exception was thrown while attempting to call the procedure.', data?: Record<string, unknown>) {
+        super(message, data);
+    }
 }
 
 /** When thrown, indicates that the procedure could not be found at the stated endpoint. */
 export class ProcedureNotFoundError extends ProcedureError {
     name = 'ProcedureNotFoundError';
     code = ProcedureErrorCodes.NOT_FOUND;
-    message = 'The procedure could not be found at the stated endpoint.';
     /**
      * Initializes an instance of {@link ProcedureNotFoundError}.
+     * @param {string} [message] A string indicating the cause of the error.
      * @param {Record<string, unknown>} [data] An optional dictionary of data which will be passed to a procedure's caller when thrown.
      */
-     constructor(data?: Record<string, unknown>) { super(data) }
+    constructor(message = 'The procedure could not be found at the stated endpoint.', data?: Record<string, unknown>) {
+        super(message, data);
+    }
 }
 
 /** When thrown, indicates that the operation was cancelled by the client. */
 export class ProcedureCancelledError extends ProcedureError {
     name = 'ProcedureCancelledError';
     code = ProcedureErrorCodes.CANCELLED;
-    message = 'The operation was cancelled by the client.';
     /**
      * Initializes an instance of {@link ProcedureCancelledError}.
+     * @param {string} [message] A string indicating the cause of the error.
      * @param {Record<string, unknown>} [data] An optional dictionary of data which will be passed to a procedure's caller when thrown.
      */
-     constructor(data?: Record<string, unknown>) { super(data) }
+    constructor(message = 'The operation was cancelled by the client.', data?: Record<string, unknown>) {
+        super(message, data);
+    }
 }
 
 /** When thrown, indicates that the request timed out waiting for the operation to complete. */
 export class ProcedureTimedOutError extends ProcedureError {
     name = 'ProcedureTimedOutError';
     code = ProcedureErrorCodes.TIMED_OUT;
-    message = 'Timed out waiting for the operation to complete.';
     /**
      * Initializes an instance of {@link ProcedureTimedOutError}.
+     * @param {string} [message] A string indicating the cause of the error.
      * @param {Record<string, unknown>} [data] An optional dictionary of data which will be passed to a procedure's caller when thrown.
      */
-     constructor(data?: Record<string, unknown>) { super(data) }
+    constructor(message = 'Timed out waiting for the operation to complete.', data?: Record<string, unknown>) {
+        super(message, data);
+    }
 }
 
 /** When thrown, indicates that the response from the server was invalid. */
 export class ProcedureInvalidResponseError extends ProcedureError {
     name = 'ProcedureInvalidResponseError';
     code = ProcedureErrorCodes.INVALID_RESPONSE;
-    message = 'The response from the server was invalid.';
     /**
      * Initializes an instance of {@link ProcedureInvalidResponseError}.
+     * @param {string} [message] A string indicating the cause of the error.
      * @param {Record<string, unknown>} [data] An optional dictionary of data which will be passed to a procedure's caller when thrown.
      */
-     constructor(data?: Record<string, unknown>) { super(data) }
+    constructor(message = 'The response from the server was invalid.', data?: Record<string, unknown>) {
+        super(message, data);
+    }
 }
 
 /** When thrown, indicates that an unhandled exception was thrown while attempting to handle the procedure. */
 export class ProcedureInternalServerError extends ProcedureError {
     name = 'ProcedureInternalServerError';
     code = ProcedureErrorCodes.INTERNAL_SERVER_ERROR;
-    message = 'An unhandled exception was thrown while attempting to handle the procedure.';
     /**
      * Initializes an instance of {@link ProcedureInternalServerError}.
+     * @param {string} [message] A string indicating the cause of the error.
      * @param {Record<string, unknown>} [data] An optional dictionary of data which will be passed to a procedure's caller when thrown.
      */
-     constructor(data?: Record<string, unknown>) { super(data) }
+    constructor(message = 'An unhandled exception was thrown while attempting to handle the procedure.', data?: Record<string, unknown>) {
+        super(message, data);
+    }
 }
 
 /** When thrown, indicates that an unhandled exception was thrown during procedure execution. */
 export class ProcedureExecutionError extends ProcedureError {
     name = 'ProcedureExecutionError';
     code = ProcedureErrorCodes.EXECUTION_ERROR;
-    message = 'An unhandled exception was thrown during procedure execution.';
     /**
      * Initializes an instance of {@link ProcedureExecutionError}.
+     * @param {string} [message] A string indicating the cause of the error.
      * @param {Record<string, unknown>} [data] An optional dictionary of data which will be passed to a procedure's caller when thrown.
      */
-     constructor(data?: Record<string, unknown>) { super(data) }
+    constructor(message = 'An unhandled exception was thrown during procedure execution.', data?: Record<string, unknown>) {
+        super(message, data);
+    }
 }
 
 /**
