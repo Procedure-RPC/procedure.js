@@ -223,27 +223,6 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     }
 
     /**
-     * Asynchronously calls a {@link Procedure} at a given {@link endpoint} with given a {@link input}.
-     * If any errors are thrown, absorbs them and returns `void`.
-     * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
-     * @param {Nullable} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
-     * @param {Partial<ProcedureCallOptions>} [options={}] Options for calling a {@link Procedure}. Defaults to `{}`.
-     * @returns {Promise<Output | void>} A {@link Promise} which when resolved passes the output value to the {@link Promise.then then} handler(s).
-     * If errors were thrown, resolves to `void` (`undefined`) rather than rejecting.
-     * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
-     * @see {@link Procedure.endpoint}
-     * @see {@link Procedure.ping}
-     */
-    static async tryCall<Output extends Nullable = unknown>(endpoint: string, input?: Nullable, options: Partial<ProcedureCallOptions> = {})
-        : Promise<Output | void> {
-        try {
-            return await Procedure.call<Output>(endpoint, input, options);
-        } catch {
-            return;
-        }
-    }
-
-    /**
      * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link Procedure.call called}.
      * If any errors are thrown, absorbs them and returns `false`.
      * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
