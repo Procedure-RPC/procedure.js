@@ -1,5 +1,3 @@
-import { isSignal } from './utils';
-
 /**
  * A helper class to create an {@link AbortSignal} which aborts as soon as any of the signals passed to its constructor do.
  */
@@ -59,4 +57,32 @@ export class TimeoutSignal {
             this.timeout = setTimeout(() => ac.abort(), timeout); // abort after the given number of milliseconds
         }
     }
+}
+
+/**
+ * Type guard for determining whether a given object is an {@link AbortSignal} instance.
+ * @param {unknown} object The object.
+ * @returns {object is AbortSignal} `true` if {@link object} is determined to be an {@link AbortSignal}, otherwise `false`.
+ */
+ export function isAbortSignal(object: unknown): object is AbortSignal {
+    return object instanceof AbortSignal;
+}
+
+/**
+ * A helpful interface to allow use of {@link AbortSignal AbortSignal's} {@link EventTarget} interface when TypeScript hates us.
+ */
+export interface Signal {
+    addEventListener: (event: 'abort', callback: () => void) => void;
+    removeEventListener: (event: 'abort') => void;
+    readonly aborted: boolean;
+}
+
+/**
+ * Type guard for determining whether a given object conforms to the {@link Signal} interface.
+ * @param {unknown} object The object.
+ * @returns {object is Signal} `true` if {@link object} conforms to the {@link Signal} interface, otherwise `false`.
+ */
+export function isSignal(object: unknown): object is Signal {
+    return isAbortSignal(object) && 'addEventListener' in object && 'removeEventListener' in object
+        && typeof (<Signal>object).addEventListener === 'function' && typeof (<Signal>object).removeEventListener === 'function';
 }

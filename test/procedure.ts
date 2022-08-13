@@ -2,8 +2,9 @@ import 'mocha'
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import chaiAsPromised from 'chai-as-promised'
-import Procedure, { Callback } from '../src'
+import Procedure, { Callback, isPing } from '../src'
 import { ExtensionCodec } from '@msgpack/msgpack'
+import { ProcedureInternalServerError } from '../src/errors'
 
 chai.use(spies);
 chai.use(chaiAsPromised);
@@ -91,7 +92,11 @@ describe('Procedure', () => {
             beforeEach(() => instance = new Procedure(x => x));
 
             describe('instance', () => it('should emit: \'error\'', () => {
-                const error = chai.spy((error: unknown) => { expect(error).to.be.instanceof(Error) });
+                const error = chai.spy((error: unknown) => {
+                    expect(error).to.be.instanceof(ProcedureInternalServerError)
+                        .and.to.have.property('data');
+                    expect((<ProcedureInternalServerError>error).data).to.have.property('error');
+                });
                 instance.on('error', error).bind('');
                 expect(error).to.have.been.called.once;
             }));
@@ -236,7 +241,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 context('when input: \'foo\'', () => {
                     beforeEach(() => input = 'foo');
 
-                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.be.rejectedWith('Expected a number'));
+                    it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input))
+                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
 
                     afterEach(() => input = undefined);
                 });
@@ -252,7 +258,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 context('when input: undefined', () => {
                     beforeEach(() => input = undefined);
 
-                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.be.rejectedWith('Expected a number'));
+                    it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input))
+                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
                 });
 
                 context('when ping: 100', () => {
@@ -294,7 +301,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                     context('when input: \'foo\'', () => {
                         beforeEach(() => input = 'foo');
 
-                        it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+                        it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 }))
+                            .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
 
                         afterEach(() => input = undefined);
                     });
@@ -310,7 +318,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                     context('when input: undefined', () => {
                         beforeEach(() => input = undefined);
 
-                        it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+                        it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 }))
+                            .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
                     });
                 });
 
@@ -392,7 +401,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 context('when input: \'foo\'', () => {
                     beforeEach(() => input = 'foo');
 
-                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.be.rejectedWith('Expected a number'));
+                    it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input))
+                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
 
                     afterEach(() => input = undefined);
                 });
@@ -408,7 +418,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 context('when input: undefined', () => {
                     beforeEach(() => input = undefined);
 
-                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.be.rejectedWith('Expected a number'));
+                    it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input))
+                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
                 });
 
                 context('when ping: 100', () => {
@@ -450,7 +461,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                     context('when input: \'foo\'', () => {
                         beforeEach(() => input = 'foo');
 
-                        it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+                        it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 }))
+                            .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
 
                         afterEach(() => input = undefined);
                     });
@@ -466,7 +478,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                     context('when input: undefined', () => {
                         beforeEach(() => input = undefined);
 
-                        it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+                        it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 }))
+                            .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
                     });
                 });
 
@@ -480,12 +493,6 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
     });
 
     context('TCP tests', () => {
-        // before(function () {
-        //     if (process.platform !== 'win32') {
-        //         this.skip();
-        //     }
-        // });
-
         context('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
             beforeEach(() => {
                 let i = 0;
@@ -543,7 +550,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 context('when input: \'foo\'', () => {
                     beforeEach(() => input = 'foo');
 
-                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.be.rejectedWith('Expected a number'));
+                    it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input))
+                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
 
                     afterEach(() => input = undefined);
                 });
@@ -559,7 +567,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 context('when input: undefined', () => {
                     beforeEach(() => input = undefined);
 
-                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.be.rejectedWith('Expected a number'));
+                    it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input))
+                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
                 });
 
                 context('when ping: 100', () => {
@@ -601,7 +610,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                     context('when input: \'foo\'', () => {
                         beforeEach(() => input = 'foo');
 
-                        it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+                        it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 }))
+                            .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
 
                         afterEach(() => input = undefined);
                     });
@@ -617,7 +627,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                     context('when input: undefined', () => {
                         beforeEach(() => input = undefined);
 
-                        it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+                        it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 }))
+                            .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
                     });
                 });
 
@@ -631,12 +642,6 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
     });
 
     context('WS tests', () => {
-        // before(function () {
-        //     if (process.platform !== 'win32') {
-        //         this.skip();
-        //     }
-        // });
-
         context('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
             beforeEach(() => {
                 let i = 0;
@@ -694,7 +699,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 context('when input: \'foo\'', () => {
                     beforeEach(() => input = 'foo');
 
-                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.be.rejectedWith('Expected a number'));
+                    it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input))
+                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
 
                     afterEach(() => input = undefined);
                 });
@@ -710,7 +716,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                 context('when input: undefined', () => {
                     beforeEach(() => input = undefined);
 
-                    it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input)).to.be.rejectedWith('Expected a number'));
+                    it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input))
+                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
                 });
 
                 context('when ping: 100', () => {
@@ -752,7 +759,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                     context('when input: \'foo\'', () => {
                         beforeEach(() => input = 'foo');
 
-                        it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+                        it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 }))
+                            .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
 
                         afterEach(() => input = undefined);
                     });
@@ -768,7 +776,8 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
                     context('when input: undefined', () => {
                         beforeEach(() => input = undefined);
 
-                        it('should throw: TypeError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 })).to.be.rejectedWith('Expected a number'));
+                        it('should throw: ProcedureExecutionError', async () => await expect(Procedure.call(<string>callEndpoint, input, { ping: 100 }))
+                            .to.be.rejectedWith('An unhandled exception was thrown during procedure execution'));
                     });
                 });
 
@@ -781,8 +790,6 @@ describe('Procedure.call(endpoint: string, input: Input | null, options: Partial
         });
     });
 });
-
-
 
 describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<boolean>', () => {
     let func: Callback<unknown, unknown>;
@@ -817,7 +824,7 @@ describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, si
                 expect(data).to.have.been.called.exactly(0);
             });
 
-            it('should return: true', async () => await expect(Procedure.ping(<string>pingEndpoint)).to.eventually.equal(true));
+            it('should not be rejected', async () => await expect(Procedure.ping(<string>pingEndpoint)).to.not.be.rejected);
 
             context('when signal: already aborted AbortSignal', () => {
                 let ac: AbortController;
@@ -827,7 +834,8 @@ describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, si
                     ac.abort();
                 });
 
-                it('should throw: Error', async () => await expect(Procedure.ping(<string>pingEndpoint, 500, ac.signal)).to.be.rejectedWith('signal was aborted'));
+                it('should throw: ProcedureCancelledError', async () => await expect(Procedure.ping(<string>pingEndpoint, 500, ac.signal))
+                    .to.be.rejectedWith('The operation was cancelled by the client'));
             });
         });
 
@@ -838,3 +846,34 @@ describe('Procedure.ping(endpoint: string, timeout: number | undefined = 100, si
         afterEach(() => procedure.unbind());
     });
 });
+
+describe('isPing(object: unknown): object is Ping', () => {
+    let object: unknown;
+
+    context('when object: { ping: \'foobar\' }', () => {
+        beforeEach(() => object = { ping: 'foobar' });
+        it('should return: true', () => expect(isPing(object)).to.be.true);
+    });
+
+    context('when object: undefined', () => {
+        beforeEach(() => object = undefined);
+        it('should return: false', () => expect(isPing(object)).to.be.false);
+    });
+
+    context('when object: null', () => {
+        beforeEach(() => object = null);
+        it('should return: false', () => expect(isPing(object)).to.be.false);
+    });
+
+    context('when object: instanceof TypeError', () => {
+        beforeEach(() => object = new TypeError());
+        it('should return: true', () => expect(isPing(object)).to.be.false);
+    });
+
+    context('when object: { name: \'Foo\', message: \'Bar\' }', () => {
+        beforeEach(() => object = { name: 'Foo', message: 'Bar' });
+        it('should return: false', () => expect(isPing(object)).to.be.false);
+    });
+});
+
+// TODO: test connecting to a Procedure's bound endpoint with a socket and throwing random data at it
