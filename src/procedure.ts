@@ -659,15 +659,18 @@ export type ProcedureEvents<Input extends Nullable = undefined> = {
 /**
  * A simple interface representing a ping.
  * @internal
+ * @remarks Intended for internal use; may not be exported in future.
  */
 export interface Ping {
     ping: string;
 }
 
 /**
- * Type guard for determining whether a given object conforms to the `Ping` interface.
+ * Type guard for determining whether a given {@link object} conforms to the {@link Ping} interface.
  * @param {unknown} object The object.
- * @returns {object is Ping} `true` if the object conforms to the `Ping` interface, otherwise `false`.
+ * @returns {object is Ping} `true` if the {@link object} conforms to the {@link Ping} interface, otherwise `false`.
+ * @internal
+ * @remarks Intended for internal use; may not be exported in future.
  */
 export function isPing(object: unknown): object is Ping {
     return typeof object === 'object' && object !== null && 'ping' in object && typeof (object as { ping: unknown }).ping === 'string';
