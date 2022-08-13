@@ -45,6 +45,8 @@ With [implementations in multiple languages](#language-implementations), applica
         - [`null` and `undefined` properties](#null-and-undefined-properties)
       - [Pass by reference?](#pass-by-reference)
     - [Error handling](#error-handling)
+      - [Custom error messages](#custom-error-messages)
+      - [Custom error data](#custom-error-data)
   - [API reference](#api-reference)
     - [Quick links](#quick-links)
   - [Transports: More than just TCP!](#transports-more-than-just-tcp)
@@ -168,15 +170,66 @@ console.log(obj); // outputs '{ foo: 123 }'
 The `obj` object would remain unchanged, because the procedure is acting on a *clone* of the object, not the object itself. First, the object is encoded for transmission by msgpack, then sent across the wire by nanomsg, and finally decoded by msgpack at the other end into a brand new object.
 
 ### Error handling
-Errors are thrown back to the caller, enabling you to react to and handle them the way you would as if the functions were defined locally:
+When unhandled exceptions occur during execution of a procedure, the procedure safely passes an error message back to be thrown at the callsite:
+```js
+const procedure = new Procedure((n) => n ** 2)
+procedure.bind('tcp://*:5000');
+```
 ```js
 let x = { foo: 'bar' };
 let xSquared = await Procedure.call('tcp://localhost:5000', x);
-// throws `SyntaxError: expected expression, got '**'
+// throws ProcedureExecutionError: An unhandled exception was thrown during procedure execution.
+```
+
+There are a number of custom ProcedureErrors, all relating to a specific class of error, e.g.
+- the procedure was not found at the endpoint,
+- the request timed out while waiting for a response,
+- the request was cancelled by the client,
+- an unhandled exception was thrown internally by either the server or the client,
+- etc.
+
+#### Custom error messages
+In the event that you want to expose more detailed information back to the caller when an error occurs, you can simply throw a ProcedureError yourself:
+```js
+const procedure = new Procedure(n => {
+    if (typeof n !== 'number') {
+        throw new ProcedureExecutionError(`Expected n to be a number, got '${typeof n}'`);
+    }
+    return n ** 2;
+}).bind('tcp://*:5000');
+```
+```js
+let x = { foo: 'bar' };
+let xSquared = await Procedure.call('tcp://localhost:5000', x);
+// throws ProcedureExecutionError: Expected n to be a number, got 'object'
+```
+
+#### Custom error data
+You can optionally pass an object into the constructor of a ProcedureError and it will be attached to the `data` property of the thrown error:
+```js
+const procedure = new Procedure(n => {
+    if (typeof n !== 'number') {
+        throw new ProcedureExecutionError(`Expected n to be a number, got '${typeof n}'`, { n });
+    }
+    return n ** 2;
+}).bind('tcp://*:5000');
+```
+```js
+let x = { foo: 'bar' }, xSquared;
+try {
+    xSquared = await Procedure.call('tcp://localhost:5000', x);
+} catch (e) {
+    console.error(e?.name, '-', e?.message, e?.data);
+}
+// outputs ProcedureExecutionError - Expected n to be a number, got 'object' {
+//     n: {
+//         foo: 'bar'
+//     }
+// }
 ```
 
 ## API reference
-Full API reference [available on GitHub Pages](https://procedure-rpc.github.io/procedure.js).
+The full API reference for procedure.js is [available on GitHub Pages](https://procedure-rpc.github.io/procedure.js).
 
 ### Quick links
 - [Initializing a procedure](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#constructor)
