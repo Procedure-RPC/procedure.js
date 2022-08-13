@@ -79,7 +79,50 @@ describe('Procedure', () => {
         });
     });
 
-    // TODO: test workers, extensionCodec, optionalParameterSupport & ignoreUndefinedProperties accessors
+    describe('set extensionCodec(value: ExtensionCodec | undefined)', () => {
+        let instance: Procedure;
+        beforeEach(() => instance = new Procedure(x => x));
+
+        context('when value: undefined', () => {
+            beforeEach(() => instance.extensionCodec = undefined);
+            describe('extensionCodec', () => it('should be: undefined', () => expect(instance.extensionCodec).to.be.undefined));
+        })
+
+        context('when value: instanceof ExtensionCodec', () => {
+            beforeEach(() => instance.extensionCodec = new ExtensionCodec());
+            describe('extensionCodec', () => it('should be: instanceof ExtensionCodec', () => expect(instance.extensionCodec).to.be.instanceof(ExtensionCodec)));
+        });
+    });
+
+    describe('set optionalParameterSupport(value: boolean)', () => {
+        let instance: Procedure;
+        beforeEach(() => instance = new Procedure(x => x));
+
+        context('when value: true', () => {
+            beforeEach(() => instance.optionalParameterSupport = true);
+            describe('verbose', () => it('should be: true', () => expect(instance.optionalParameterSupport).to.be.true));
+        });
+
+        context('when value: false', () => {
+            beforeEach(() => instance.optionalParameterSupport = false);
+            describe('verbose', () => it('should be: false', () => expect(instance.optionalParameterSupport).to.be.false));
+        });
+    });
+
+    describe('set ignoreUndefinedProperties(value: boolean)', () => {
+        let instance: Procedure;
+        beforeEach(() => instance = new Procedure(x => x));
+
+        context('when value: true', () => {
+            beforeEach(() => instance.ignoreUndefinedProperties = true);
+            describe('verbose', () => it('should be: true', () => expect(instance.ignoreUndefinedProperties).to.be.true));
+        });
+
+        context('when value: false', () => {
+            beforeEach(() => instance.ignoreUndefinedProperties = false);
+            describe('verbose', () => it('should be: false', () => expect(instance.ignoreUndefinedProperties).to.be.false));
+        });
+    });
 
     describe('bind(): this', () => {
         let instance: Procedure;
