@@ -85,6 +85,7 @@ console.log(typeof xSquared); // outputs 'number'
 ### `async`/`await`
 Asynchronous functions are fully supported:
 ```js
+const { ProcedureExcecutionError } = require('@procedure-rpc/procedure.js/errors');
 const procedure = new Procedure(async () => {
     const response = await fetch('https://catfact.ninja/fact');
     if (response.ok) {
