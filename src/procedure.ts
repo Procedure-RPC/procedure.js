@@ -291,7 +291,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
         try {
             return { input: Procedure.#decode<Input | Ping>(buffer, this.extensionCodec) };
         } catch (e) {
-            const error = new ProcedureInternalServerError({ error: e });
+            const error = new ProcedureInternalServerError(undefined, { error: e });
             this.#emitAndLogError('Procedure input data could not be decoded', error);
             delete error.data;
             return { error };
@@ -317,7 +317,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
                 this.#emitAndLogError(message, e);
                 return { error: e };
             } else {
-                const error = new ProcedureExecutionError({ error: e });
+                const error = new ProcedureExecutionError(undefined, { error: e });
                 this.#emitAndLogError(message, error);
                 delete error.data;
                 return { error };
@@ -334,7 +334,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
         try {
             return Procedure.#encode(response, this.extensionCodec, this.ignoreUndefinedProperties);
         } catch (e) {
-            const error = new ProcedureInternalServerError({ error: e });
+            const error = new ProcedureInternalServerError(undefined, { error: e });
             this.#emitAndLogError('Procedure response could not be encoded for transmission', error);
             delete error.data;
             return this.#tryEncodeResponse({ // As the response could not be encoded, encode and return a new response containing the thrown error
@@ -356,7 +356,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
             socket.send(buffer);
             return true;
         } catch (error) {
-            this.#emitAndLogError('Procedure response could not be sent', new ProcedureInternalServerError({ error }));
+            this.#emitAndLogError('Procedure response could not be sent', new ProcedureInternalServerError(undefined, { error }));
             return false;
         }
     }
@@ -419,7 +419,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
      * @see {@link Socket}
      */
     #onRepSocketError(error: unknown): void {
-        this.#emitAndLogError('Socket encountered an error', new ProcedureInternalServerError({ error }));
+        this.#emitAndLogError('Socket encountered an error', new ProcedureInternalServerError(undefined, { error }));
     }
 
     /**
