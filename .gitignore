@@ -131,3 +131,6 @@ dist
 
 #typescript declarations
 types
+
+#typedoc docs
+docs
