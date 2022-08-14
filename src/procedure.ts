@@ -455,7 +455,7 @@ export interface ProcedureCallOptions extends ProcedureOptions {
      * The number of milliseconds after which the {@link call} will automatically be aborted.
      * Set to {@link Infinity} or {@link NaN} to never timeout.
      * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
-     * Defaults to `10000`.
+     * Defaults to `1000`.
      */
     timeout: number;
     /** 
@@ -529,7 +529,7 @@ export async function call<Output extends Nullable = unknown>(endpoint: string, 
         // parse options into defaults
         const opts: ProcedureCallOptions = {
             ...{
-                timeout: 10000,
+                timeout: 1000,
                 ping: 1000,
                 pingCacheLength: 60000,
                 optionalParameterSupport: true,
