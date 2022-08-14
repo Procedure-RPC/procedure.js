@@ -2,8 +2,9 @@
 
 /// <reference types='node' />
 import {
-    isProcedureError,
-    ProcedureCancelledError, ProcedureInvalidResponseError, ProcedureInternalClientError, ProcedureInternalServerError, ProcedureExecutionError, ProcedureError, isError
+    isProcedureError, isError,
+    ProcedureCancelledError, ProcedureInvalidResponseError, ProcedureInternalClientError, ProcedureInternalServerError,
+    ProcedureExecutionError, ProcedureNotFoundError, ProcedureTimedOutError, ProcedureError
 } from './errors';
 import { AggregateSignal, TimeoutSignal } from './signals';
 import { createSocket, Socket } from 'nanomsg';
@@ -210,7 +211,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
      */
     #tryEncodeResponse(response: Response<Output>): Buffer {
         try {
-            return encode(response, this.extensionCodec, this.ignoreUndefinedProperties);
+            return encode(response, this.ignoreUndefinedProperties, this.extensionCodec);
         } catch (e) {
             const error = new ProcedureInternalServerError(undefined, { error: e });
             this.#emitAndLogError('Procedure response could not be encoded for transmission', error);
@@ -463,8 +464,10 @@ export interface ProcedureCallOptions extends ProcedureOptions {
      * {@link NaN} or {@link Infinity infinite} numbers will result in the ping never timing out if no response is received, unless
      * {@link signal} is a valid {@link AbortSignal} and gets aborted.
      * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
+     * Default to `1000`.
      */
     ping?: number | undefined;
+    pingCacheLength?: number | undefined;
     /** An optional msgpack {@link ExtensionCodec} to use for encoding and decoding messages. */
     extensionCodec?: ExtensionCodec | undefined;
     /** An optional {@link AbortSignal} which will be used to abort the Procedure call. */
@@ -523,26 +526,39 @@ export function isPing(object: unknown): object is Ping {
  */
 export async function call<Output extends Nullable = unknown>(endpoint: string, input?: Nullable, options: Partial<ProcedureCallOptions> = {}): Promise<Output> {
     try {
+        // parse options into defaults
         const opts: ProcedureCallOptions = {
             ...{
                 timeout: 1000,
+                ping: 1000,
+                pingCacheLength: 60000,
                 optionalParameterSupport: true,
                 ignoreUndefinedProperties: true
             },
             ...options
         };
 
+        // first check the endpoint is ready
         if (opts.ping !== undefined) {
-            await ping(endpoint, opts.ping, opts.signal);
+            try {
+                await (opts.pingCacheLength === undefined 
+                    ? ping(endpoint, opts.ping, opts.signal)
+                    : cachedPing(endpoint, opts.ping, opts.pingCacheLength, opts.signal));
+            } catch (error) {
+                throw error instanceof ProcedureTimedOutError
+                    ? new ProcedureNotFoundError() // timeout on ping = not found
+                    : error;
+            }
         }
 
+        // call the endpoint and get response
         const response = await getResponse<Output>(endpoint, input, opts);
 
-        if ('output' in response && !('error' in response)) {
+        if ('output' in response && !('error' in response)) { // success!
             return response.output ?? <Output>(opts.optionalParameterSupport
-                ? undefined
+                ? undefined // coerce null to undefined
                 : response.output);
-        } else if (isProcedureError(response.error)) {
+        } else if (isProcedureError(response.error)) { // response indicates an error happened server-side
             throw response.error;
         } else {
             throw new ProcedureInvalidResponseError();
@@ -550,7 +566,7 @@ export async function call<Output extends Nullable = unknown>(endpoint: string, 
     } catch (error) {
         throw isProcedureError(error)
             ? error
-            : new ProcedureInternalClientError();
+            : new ProcedureInternalClientError(undefined, { error });
     }
 }
 
@@ -583,8 +599,41 @@ export async function ping(endpoint: string, timeout = 1000, signal?: AbortSigna
     } catch (error) {
         throw isProcedureError(error)
             ? error
-            : new ProcedureInternalClientError();
+            : new ProcedureInternalClientError(undefined, { error });
     }
+}
+
+/**
+ * Wraps calls to {@link ping}, deferring to cached results for a given {@link endpoint} when available.
+ * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
+ * @param {number} timeout How long to wait for a response before timing out.
+ * @param {number} cacheLength The length of the cache in milliseconds.
+ * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
+ * Defaults to `undefined`.
+ * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle
+ * {@link call calls}.
+ */
+async function cachedPing(endpoint: string, timeout: number, cacheLength: number, signal?: AbortSignal): ReturnType<typeof ping> {
+    if (isNaN(cacheLength) || !isFinite(cacheLength)) { // number is invalid, skip the cache
+        return ping(endpoint, timeout, signal);
+    }
+
+    cachedPingsByEndpoint[endpoint] = cachedPingsByEndpoint[endpoint] ?? {}; // create an entry for the endpoint in the cache if none exists
+    const { timestamp } = cachedPingsByEndpoint[endpoint]; // retrieve the last successful ping timestamp from the cache
+
+    if (timestamp !== undefined && timestamp <= Date.now() + cacheLength) {
+        return; // timestamp is within supplied cache length - immediately return without pinging
+    }
+
+    // if a ping for the same endpoint is currently in progress, await on either it or the a new ping to resolve
+    cachedPingsByEndpoint[endpoint].resolving = cachedPingsByEndpoint[endpoint].resolving !== undefined
+        ? Promise.any<void>([cachedPingsByEndpoint[endpoint].resolving, ping(endpoint, timeout, signal)])
+        : ping(endpoint, timeout, signal);
+
+    await cachedPingsByEndpoint[endpoint].resolving;
+
+    delete cachedPingsByEndpoint[endpoint].resolving; // ping(s) successfully resolved, remove from cache
+    cachedPingsByEndpoint[endpoint].timestamp = Date.now(); // add successful resolution timestamp to cache
 }
 
 /**
@@ -624,6 +673,7 @@ export async function tryPing(endpoint: string, timeout = 1000, signal?: AbortSi
 async function getResponse<Output extends Nullable = unknown>(endpoint: string, input: Nullable, options: ProcedureCallOptions): Promise<Response<Output>> {
     let socket: Socket | undefined;
     let timeoutSignal: TimeoutSignal | undefined = undefined;
+    let aggregateSignal: AggregateSignal | undefined = undefined;
 
     try {
         if (options.signal?.aborted) {
@@ -631,11 +681,12 @@ async function getResponse<Output extends Nullable = unknown>(endpoint: string, 
         }
 
         timeoutSignal = new TimeoutSignal(options.timeout);
-        const signal = new AggregateSignal(options.signal, timeoutSignal.signal).signal;
+        aggregateSignal = new AggregateSignal(options.signal, timeoutSignal.signal);
+        const { signal } = aggregateSignal;
 
         socket = createSocket('req');
         socket.connect(endpoint);
-        socket.send(encode(input, options.extensionCodec, options.ignoreUndefinedProperties)); // send the encoded input data to the endpoint
+        socket.send(encode(input, options.ignoreUndefinedProperties, options.extensionCodec)); // send the encoded input data to the endpoint
 
         const [buffer]: [Buffer] = await once(socket, 'data', { signal }) as [Buffer]; // await buffered response
         return decode<Response<Output>>(buffer, options.extensionCodec); // decode response from buffer
@@ -643,7 +694,9 @@ async function getResponse<Output extends Nullable = unknown>(endpoint: string, 
         if (isProcedureError(e)) {
             throw e;
         } else if (isError(e) && e.name === 'AbortError') {
-            throw new ProcedureCancelledError();
+            throw aggregateSignal?.abortedSignal === timeoutSignal
+                ? new ProcedureTimedOutError()
+                : new ProcedureCancelledError();
         } else {
             throw new ProcedureInternalClientError();
         }
@@ -656,11 +709,11 @@ async function getResponse<Output extends Nullable = unknown>(endpoint: string, 
 /**
  * Encodes a given value for transmission.
  * @param {unknown} value The value to be encoded.
+ * @param {boolean} ignoreUndefinedProperties Whether to strip `undefined` properties from objects or not.
  * @param {ExtensionCodec} [extensionCodec] The {@link ExtensionCodec} to use for encoding.
- * @param {boolean} [ignoreUndefinedProperties=false] Whether to strip `undefined` properties from objects or not.
  * @returns {Buffer} A {@link Buffer} containing the encoded value.
  */
-function encode(value: unknown, extensionCodec?: ExtensionCodec, ignoreUndefinedProperties = false): Buffer {
+function encode(value: unknown, ignoreUndefinedProperties: boolean, extensionCodec?: ExtensionCodec): Buffer {
     const encoded = msgpackEncode(value, { extensionCodec, ignoreUndefined: ignoreUndefinedProperties });
     return Buffer.from(encoded.buffer, encoded.byteOffset, encoded.byteLength);
 }
@@ -675,3 +728,5 @@ function encode(value: unknown, extensionCodec?: ExtensionCodec, ignoreUndefined
 function decode<T = unknown>(buffer: Buffer, extensionCodec?: ExtensionCodec): T {
     return msgpackDecode(buffer, { extensionCodec }) as T;
 }
+
+const cachedPingsByEndpoint: Record<string, { timestamp?: number, resolving?: ReturnType<typeof ping> }> = {};
