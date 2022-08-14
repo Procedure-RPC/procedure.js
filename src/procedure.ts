@@ -26,7 +26,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureDefinitionOptions {
     #endpoint?: string;
     /** 
-     * The endpoint at which the {@link Procedure}, when {@link bind bound}, can be {@link Procedure.call called}.
+     * The endpoint at which the {@link Procedure}, when {@link bind bound}, can be {@link call called}.
     */
     get endpoint() { return this.#endpoint; }
     protected set endpoint(value) { this.#endpoint = value; }
@@ -104,7 +104,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     }
 
     /**
-     * Binds the {@link Procedure} to an {@link endpoint}, making it available to be {@link Procedure.call called}.
+     * Binds the {@link Procedure} to an {@link endpoint}, making it available to be {@link call called}.
      * @param {string} [endpoint=undefined] The endpoint at which the procedure will be callable. Defaults to {@link Procedure.endpoint}.
      * @returns {this} The bound {@link Procedure} for method chaining.
      * @see {@link unbind}
@@ -377,7 +377,7 @@ export type Nullable = unknown | null | undefined;
 export type Callback<Input extends Nullable = undefined, Output extends Nullable = undefined> = (input: Input) => Output;
 
 /**
- * A response from a {@link Procedure.call Procedure call}.
+ * A response from a {@link call Procedure call}.
  * If the call returned successfully, the response will be of shape `{ output: Output }`, otherwise `{ error: ProcedureError }`.
  */
 export type Response<Output extends Nullable = undefined>
@@ -393,8 +393,8 @@ export type Response<Output extends Nullable = undefined>
 export interface ProcedureOptions {
     /**
      * Whether or not to enable optional parameter support. Defaults to `true`.
-     * When `true` on a {@link Procedure Procedure definition}, a `null` input parameter will be coerced to `undefined`.
-     * When `true` for a {@link Procedure.call Procedure call}, a `null` return value will be coerced to `undefined`.
+     * When `true` on a {@link Procedure}, a `null` input parameter will be coerced to `undefined`.
+     * When `true` for a {@link call}, a `null` return value will be coerced to `undefined`.
      * 
      * @remarks
      * The {@link https://procedure-rpc.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
@@ -412,8 +412,8 @@ export interface ProcedureOptions {
     optionalParameterSupport: boolean;
     /**
      * Whether or not to ignore `undefined` properties of objects passed to or from a {@link Procedure}. Defaults to `true`.
-     * When `true` on a {@link Procedure Procedure definition}, only affects properties of input parameters.
-     * When `true` on a {@link Procedure.call Procedure call}, only affects properties of the return value.
+     * When `true` on a {@link Procedure}, only affects properties of input parameters.
+     * When `true` on a {@link call}, only affects properties of the return value.
      * 
      * @remarks
      * The {@link https://procedure-rpc.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
@@ -447,11 +447,11 @@ export interface ProcedureDefinitionOptions extends ProcedureOptions {
 }
 
 /**
- * Options for {@link Procedure.call calling} a {@link Procedure}.
+ * Options for {@link call calling} a {@link Procedure}.
  */
 export interface ProcedureCallOptions extends ProcedureOptions {
     /** 
-     * The number of milliseconds after which the {@link Procedure.call Procedure call} will automatically be aborted.
+     * The number of milliseconds after which the {@link call} will automatically be aborted.
      * Set to {@link Infinity} or {@link NaN} to never timeout.
      * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
      * Defaults to `1000`.
@@ -459,7 +459,7 @@ export interface ProcedureCallOptions extends ProcedureOptions {
     timeout: number;
     /** 
      * The number of milliseconds to wait for a ping-pong from the endpoint before calling the remote procedure.
-     * When set, if a ping-pong is not received in the given time, the {@link Procedure.call Procedure call} will be aborted.
+     * When set, if a ping-pong is not received in the given time, the {@link call} will be aborted.
      * {@link NaN} or {@link Infinity infinite} numbers will result in the ping never timing out if no response is received, unless
      * {@link signal} is a valid {@link AbortSignal} and gets aborted.
      * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
@@ -519,7 +519,7 @@ export function isPing(object: unknown): object is Ping {
  * @returns {Promise<Output>} A {@link Promise} which when resolved passes the output value to the {@link Promise.then then} handler(s).
  * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
  * @see {@link Procedure.endpoint}
- * @see {@link Procedure.ping}
+ * @see {@link ping}
  */
 export async function call<Output extends Nullable = unknown>(endpoint: string, input?: Nullable, options: Partial<ProcedureCallOptions> = {}): Promise<Output> {
     try {
@@ -533,7 +533,7 @@ export async function call<Output extends Nullable = unknown>(endpoint: string, 
         };
 
         if (opts.ping !== undefined) {
-            await Procedure.ping(endpoint, opts.ping, opts.signal);
+            await ping(endpoint, opts.ping, opts.signal);
         }
 
         const response = await getResponse<Output>(endpoint, input, opts);
@@ -555,7 +555,7 @@ export async function call<Output extends Nullable = unknown>(endpoint: string, 
 }
 
 /**
- * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link Procedure.call called}.
+ * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link call called}.
  * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
  * @param {number} [timeout=1000] How long to wait for a response before timing out.
  * {@link NaN} or {@link Infinity infinite} values will result in the ping never timing out if no response is received, unless
@@ -565,7 +565,7 @@ export async function call<Output extends Nullable = unknown>(endpoint: string, 
  * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
  * Defaults to `undefined`.
  * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle
- * {@link Procedure.call calls}.
+ * {@link call calls}.
  */
 export async function ping(endpoint: string, timeout = 1000, signal?: AbortSignal): Promise<void> {
     try {
@@ -588,7 +588,7 @@ export async function ping(endpoint: string, timeout = 1000, signal?: AbortSigna
 }
 
 /**
- * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link Procedure.call called}.
+ * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link call called}.
  * If any errors are thrown, absorbs them and returns `false`.
  * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
  * @param {number} [timeout=1000] How long to wait for a response before timing out.
@@ -599,7 +599,7 @@ export async function ping(endpoint: string, timeout = 1000, signal?: AbortSigna
  * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
  * Defaults to `undefined`.
  * @returns {Promise<void>} A {@link Promise} which when resolved indicated whether the {@link endpoint} is available and ready to handle
- * {@link Procedure.call calls}.
+ * {@link call calls}.
  * If errors were thrown, resolves to `false` instead of rejecting.
  */
 export async function tryPing(endpoint: string, timeout = 1000, signal?: AbortSignal): Promise<boolean> {
