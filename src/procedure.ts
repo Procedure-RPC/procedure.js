@@ -3,8 +3,9 @@
 
 /// <reference types='node' />
 import {
-    isProcedureError,
-    ProcedureCancelledError, ProcedureInvalidResponseError, ProcedureInternalClientError, ProcedureInternalServerError, ProcedureExecutionError, ProcedureError, isError
+    isProcedureError, isError,
+    ProcedureCancelledError, ProcedureInvalidResponseError, ProcedureInternalClientError, ProcedureInternalServerError,
+    ProcedureExecutionError, ProcedureNotFoundError, ProcedureTimedOutError, ProcedureError
 } from './errors';
 import { AggregateSignal, TimeoutSignal } from './signals';
 import { createSocket, Socket } from 'nanomsg';
@@ -534,7 +535,13 @@ export async function call<Output extends Nullable = unknown>(endpoint: string, 
         };
 
         if (opts.ping !== undefined) {
-            await ping(endpoint, opts.ping, opts.signal);
+            try {
+                await ping(endpoint, opts.ping, opts.signal);
+            } catch (error) {
+                throw error instanceof ProcedureTimedOutError
+                    ? new ProcedureNotFoundError()
+                    : error;
+            }
         }
 
         const response = await getResponse<Output>(endpoint, input, opts);
@@ -625,6 +632,7 @@ export async function tryPing(endpoint: string, timeout = 1000, signal?: AbortSi
 async function getResponse<Output extends Nullable = unknown>(endpoint: string, input: Nullable, options: ProcedureCallOptions): Promise<Response<Output>> {
     let socket: Socket | undefined;
     let timeoutSignal: TimeoutSignal | undefined = undefined;
+    let aggregateSignal: AggregateSignal | undefined = undefined;
 
     try {
         if (options.signal?.aborted) {
@@ -632,7 +640,8 @@ async function getResponse<Output extends Nullable = unknown>(endpoint: string, 
         }
 
         timeoutSignal = new TimeoutSignal(options.timeout);
-        const signal = new AggregateSignal(options.signal, timeoutSignal.signal).signal;
+        aggregateSignal = new AggregateSignal(options.signal, timeoutSignal.signal);
+        const { signal } = aggregateSignal;
 
         socket = createSocket('req');
         socket.connect(endpoint);
@@ -644,7 +653,9 @@ async function getResponse<Output extends Nullable = unknown>(endpoint: string, 
         if (isProcedureError(e)) {
             throw e;
         } else if (isError(e) && e.name === 'AbortError') {
-            throw new ProcedureCancelledError();
+            throw aggregateSignal?.abortedSignal === timeoutSignal
+                ? new ProcedureTimedOutError()
+                : new ProcedureCancelledError();
         } else {
             throw new ProcedureInternalClientError();
         }
