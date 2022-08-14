@@ -158,14 +158,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     /**
      * @deprecated alias of {@link tryPing}. Slated for removal from API by v1.0
      */
-    static async tryPing(endpoint: string, timeout = 1000, signal?: AbortSignal): Promise<boolean> {
-        try {
-            await Procedure.ping(endpoint, timeout, signal);
-            return true;
-        } catch {
-            return false;
-        }
-    }
+    static tryPing = tryPing;
 
     /**
      * Attempts to decode the given {@link Buffer}.
