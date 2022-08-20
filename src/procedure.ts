@@ -1,14 +1,12 @@
-// TODO: add and test ipv6 support
-// TODO: rework error handling to throw a generic error with status code, and optionally an object containing an error message and relevant data - look at grpc for examples
-
 /// <reference types='node' />
 import {
-    isProcedureError,
-    ProcedureCancelledError, ProcedureInvalidResponseError, ProcedureInternalClientError, ProcedureInternalServerError, ProcedureExecutionError, ProcedureError, isError
+    isProcedureError, isError,
+    ProcedureCancelledError, ProcedureInvalidResponseError, ProcedureInternalClientError, ProcedureInternalServerError,
+    ProcedureExecutionError, ProcedureNotFoundError, ProcedureTimedOutError, ProcedureError
 } from './errors';
 import { AggregateSignal, TimeoutSignal } from './signals';
 import { createSocket, Socket } from 'nanomsg';
-import { encode, decode, ExtensionCodec } from '@msgpack/msgpack'
+import { encode as msgpackEncode, decode as msgpackDecode, ExtensionCodec } from '@msgpack/msgpack'
 import { once, EventEmitter } from 'events'
 import TypedEmitter from 'typed-emitter'
 import { v5 as uuidv5 } from 'uuid';
@@ -27,7 +25,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     extends (EventEmitter as { new <Input>(): TypedEmitter<ProcedureEvents<Input>> })<Input> implements ProcedureDefinitionOptions {
     #endpoint?: string;
     /** 
-     * The endpoint at which the {@link Procedure}, when {@link bind bound}, can be {@link Procedure.call called}.
+     * The endpoint at which the {@link Procedure}, when {@link bind bound}, can be {@link call called}.
     */
     get endpoint() { return this.#endpoint; }
     protected set endpoint(value) { this.#endpoint = value; }
@@ -105,26 +103,23 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     }
 
     /**
-     * Binds the {@link Procedure} to an {@link endpoint}, making it available to be {@link Procedure.call called}.
-     * @param {string} [endpoint=undefined] The endpoint at which the procedure will be callable. Defaults to {@link Procedure.endpoint}.
+     * Binds the {@link Procedure} to an {@link endpoint}, making it available to be {@link call called}.
+     * @param {string} endpoint The endpoint at which the procedure will be callable.
+     * @param {boolean} [ipv6=false] Whether the endpoint requires ipv6 support. Defaults to `false`.
      * @returns {this} The bound {@link Procedure} for method chaining.
      * @see {@link unbind}
      */
-    bind(endpoint?: string): this {
-        endpoint = endpoint ?? this.endpoint;
-
-        if (typeof endpoint === 'string') {
-            this.unbind();
-            this.uuid = uuidv5(endpoint, uuidNamespace);
-            this.endpoint = endpoint;
-            for (let i = 0; i < this.workers; i++) {
-                const socket = this.sockets[this.sockets.push(createSocket('rep')) - 1];
-                socket
-                    .on('data', (data: Buffer) => this.#onRepSocketData(data, socket))
-                    .on('error', (error: unknown) => this.#onRepSocketError(error))
-                    .once('close', () => this.#onRepSocketClose())
-                    .bind(endpoint); // bind the socket to the endpoint
-            }
+    bind(endpoint: string, ipv6 = false): this {
+        this.unbind();
+        this.uuid = uuidv5(endpoint, uuidNamespace);
+        this.endpoint = endpoint;
+        for (let i = 0; i < this.workers; i++) {
+            const socket = this.sockets[this.sockets.push(createSocket('rep', { ipv6 })) - 1];
+            socket
+                .on('data', (data: Buffer) => this.#onRepSocketData(data, socket))
+                .on('error', (error: unknown) => this.#onRepSocketError(error))
+                .once('close', () => this.#onRepSocketClose())
+                .bind(endpoint); // bind the socket to the endpoint
         }
 
         return this;
@@ -147,168 +142,19 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     }
 
     /**
-     * Asynchronously calls a {@link Procedure} at a given {@link endpoint} with given a {@link input}.
-     * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
-     * @param {Nullable} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
-     * @param {Partial<ProcedureCallOptions>} [options={}] Options for calling a {@link Procedure}. Defaults to `{}`.
-     * @returns {Promise<Output>} A {@link Promise} which when resolved passes the output value to the {@link Promise.then then} handler(s).
-     * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
-     * @see {@link Procedure.endpoint}
-     * @see {@link Procedure.ping}
+     * @deprecated alias of {@link call}. Slated for removal from API by v1.0
      */
-    static async call<Output extends Nullable = unknown>(endpoint: string, input?: Nullable, options: Partial<ProcedureCallOptions> = {}): Promise<Output> {
-        try {
-            const opts: ProcedureCallOptions = {
-                ...{
-                    timeout: 1000,
-                    optionalParameterSupport: true,
-                    ignoreUndefinedProperties: true
-                },
-                ...options
-            };
-
-            if (opts.ping !== undefined) {
-                await Procedure.ping(endpoint, opts.ping, opts.signal);
-            }
-
-            const response = await Procedure.#getResponse<Output>(endpoint, input, opts);
-
-            if ('output' in response && !('error' in response)) {
-                return response.output ?? <Output>(opts.optionalParameterSupport
-                    ? undefined
-                    : response.output);
-            } else if (isProcedureError(response.error)) {
-                throw response.error;
-            } else {
-                throw new ProcedureInvalidResponseError();
-            }
-        } catch (error) {
-            throw isProcedureError(error)
-                ? error
-                : new ProcedureInternalClientError();
-        }
-    }
+    static call = call;
 
     /**
-     * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link Procedure.call called}.
-     * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
-     * @param {number} [timeout=1000] How long to wait for a response before timing out.
-     * {@link NaN} or {@link Infinity infinite} values will result in the ping never timing out if no response is received, unless
-     * {@link signal} is a valid {@link AbortSignal} and gets aborted.
-     * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
-     * Defaults to `1000`.
-     * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
-     * Defaults to `undefined`.
-     * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle
-     * {@link Procedure.call calls}.
+     * @deprecated alias of {@link ping}. Slated for removal from API by v1.0
      */
-    static async ping(endpoint: string, timeout = 1000, signal?: AbortSignal): Promise<void> {
-        try {
-            const ping = uuidv5(endpoint, uuidNamespace);
-            const response = await Procedure.#getResponse<{ pong: string }>(endpoint, { ping }, {
-                timeout,
-                signal,
-                ignoreUndefinedProperties: false,
-                optionalParameterSupport: false
-            });
-
-            if (response?.pong !== ping) {
-                throw new ProcedureInvalidResponseError();
-            }
-        } catch (error) {
-            throw isProcedureError(error)
-                ? error
-                : new ProcedureInternalClientError();
-        }
-    }
+    static ping = ping;
 
     /**
-     * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link Procedure.call called}.
-     * If any errors are thrown, absorbs them and returns `false`.
-     * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
-     * @param {number} [timeout=1000] How long to wait for a response before timing out.
-     * {@link NaN} or {@link Infinity infinite} values will result in the ping never timing out if no response is received, unless
-     * {@link signal} is a valid {@link AbortSignal} and gets aborted.
-     * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
-     * Defaults to `1000`.
-     * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
-     * Defaults to `undefined`.
-     * @returns {Promise<void>} A {@link Promise} which when resolved indicated whether the {@link endpoint} is available and ready to handle
-     * {@link Procedure.call calls}.
-     * If errors were thrown, resolves to `false` instead of rejecting.
+     * @deprecated alias of {@link tryPing}. Slated for removal from API by v1.0
      */
-    static async tryPing(endpoint: string, timeout = 1000, signal?: AbortSignal): Promise<boolean> {
-        try {
-            await Procedure.ping(endpoint, timeout, signal);
-            return true;
-        } catch {
-            return false;
-        }
-    }
-
-    /**
-     * Asynchronously encodes and transmits the given {@link input} to the {@link endpoint} and retrieves the response.
-     * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
-     * @param {Nullable} input An input parameter to pass to the {@link Procedure}.
-     * @param {ProcedureCallOptions} options Options for calling a {@link Procedure}.
-     * @returns {Promise<Response<Output>>} A {@link Promise} which when resolved passes the {@link Response<Output> response} to the
-     * {@link Promise.then then} handler(s).
-     * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
-     */
-    static async #getResponse<Output extends Nullable = unknown>(endpoint: string, input: Nullable, options: ProcedureCallOptions): Promise<Response<Output>> {
-        let socket: Socket | undefined;
-        let timeoutSignal: TimeoutSignal | undefined = undefined;
-
-        try {
-            if (options.signal?.aborted) {
-                throw new ProcedureCancelledError();
-            }
-
-            timeoutSignal = new TimeoutSignal(options.timeout);
-            const signal = new AggregateSignal(options.signal, timeoutSignal.signal).signal;
-
-            socket = createSocket('req');
-            socket.connect(endpoint);
-            socket.send(Procedure.#encode(input, options.extensionCodec, options.ignoreUndefinedProperties)); // send the encoded input data to the endpoint
-
-            const [buffer]: [Buffer] = await once(socket, 'data', { signal }) as [Buffer]; // await buffered response
-            return Procedure.#decode<Response<Output>>(buffer, options.extensionCodec); // decode response from buffer
-        } catch (e) {
-            if (isProcedureError(e)) {
-                throw e;
-            } else if (isError(e) && e.name === 'AbortError') {
-                throw new ProcedureCancelledError();
-            } else {
-                throw new ProcedureInternalClientError();
-            }
-        } finally {
-            clearTimeout(timeoutSignal?.timeout); // clear the TimeoutSignal's timeout, if any
-            socket?.removeAllListeners().close(); // clear all listeners and close the socket
-        }
-    }
-
-    /**
-     * Encodes a given value for transmission.
-     * @param {unknown} value The value to be encoded.
-     * @param {ExtensionCodec} [extensionCodec] The {@link ExtensionCodec} to use for encoding.
-     * @param {boolean} [ignoreUndefinedProperties=false] Whether to strip `undefined` properties from objects or not.
-     * @returns {Buffer} A {@link Buffer} containing the encoded value.
-     */
-    static #encode(value: unknown, extensionCodec?: ExtensionCodec, ignoreUndefinedProperties = false): Buffer {
-        const encoded = encode(value, { extensionCodec, ignoreUndefined: ignoreUndefinedProperties });
-        return Buffer.from(encoded.buffer, encoded.byteOffset, encoded.byteLength);
-    }
-
-    /**
-     * Decodes a given {@link Buffer} and casts it as {@link T}.
-     * @param {Buffer} buffer The {@link Buffer} to be decoded.
-     * @param {ExtensionCodec} [extensionCodec] The {@link ExtensionCodec} to use for decoding.
-     * @returns {T} The buffer, decoded and cast to type {@link T}.
-     * @template T The type the decoded value should be cast to.
-     */
-    static #decode <T = unknown>(buffer: Buffer, extensionCodec?: ExtensionCodec): T {
-        return decode(buffer, { extensionCodec }) as T;
-    }
+    static tryPing = tryPing;
 
     /**
      * Attempts to decode the given {@link Buffer}.
@@ -317,7 +163,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
      */
     #tryDecodeInput(buffer: Buffer): { input: Input | Ping, error?: never } | { input?: never, error: ProcedureInternalServerError } {
         try {
-            return { input: Procedure.#decode<Input | Ping>(buffer, this.extensionCodec) };
+            return { input: decode<Input | Ping>(buffer, this.extensionCodec) };
         } catch (e) {
             const error = new ProcedureInternalServerError(undefined, { error: e });
             this.#emitAndLogError('Procedure input data could not be decoded', error);
@@ -360,7 +206,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
      */
     #tryEncodeResponse(response: Response<Output>): Buffer {
         try {
-            return Procedure.#encode(response, this.extensionCodec, this.ignoreUndefinedProperties);
+            return encode(response, this.ignoreUndefinedProperties, this.extensionCodec);
         } catch (e) {
             const error = new ProcedureInternalServerError(undefined, { error: e });
             this.#emitAndLogError('Procedure response could not be encoded for transmission', error);
@@ -527,7 +373,7 @@ export type Nullable = unknown | null | undefined;
 export type Callback<Input extends Nullable = undefined, Output extends Nullable = undefined> = (input: Input) => Output;
 
 /**
- * A response from a {@link Procedure.call Procedure call}.
+ * A response from a {@link call Procedure call}.
  * If the call returned successfully, the response will be of shape `{ output: Output }`, otherwise `{ error: ProcedureError }`.
  */
 export type Response<Output extends Nullable = undefined>
@@ -543,8 +389,8 @@ export type Response<Output extends Nullable = undefined>
 export interface ProcedureOptions {
     /**
      * Whether or not to enable optional parameter support. Defaults to `true`.
-     * When `true` on a {@link Procedure Procedure definition}, a `null` input parameter will be coerced to `undefined`.
-     * When `true` for a {@link Procedure.call Procedure call}, a `null` return value will be coerced to `undefined`.
+     * When `true` on a {@link Procedure}, a `null` input parameter will be coerced to `undefined`.
+     * When `true` for a {@link call}, a `null` return value will be coerced to `undefined`.
      * 
      * @remarks
      * The {@link https://procedure-rpc.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
@@ -562,8 +408,8 @@ export interface ProcedureOptions {
     optionalParameterSupport: boolean;
     /**
      * Whether or not to ignore `undefined` properties of objects passed to or from a {@link Procedure}. Defaults to `true`.
-     * When `true` on a {@link Procedure Procedure definition}, only affects properties of input parameters.
-     * When `true` on a {@link Procedure.call Procedure call}, only affects properties of the return value.
+     * When `true` on a {@link Procedure}, only affects properties of input parameters.
+     * When `true` on a {@link call}, only affects properties of the return value.
      * 
      * @remarks
      * The {@link https://procedure-rpc.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
@@ -597,11 +443,11 @@ export interface ProcedureDefinitionOptions extends ProcedureOptions {
 }
 
 /**
- * Options for {@link Procedure.call calling} a {@link Procedure}.
+ * Options for {@link call calling} a {@link Procedure}.
  */
 export interface ProcedureCallOptions extends ProcedureOptions {
     /** 
-     * The number of milliseconds after which the {@link Procedure.call Procedure call} will automatically be aborted.
+     * The number of milliseconds after which the {@link call} will automatically be aborted.
      * Set to {@link Infinity} or {@link NaN} to never timeout.
      * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
      * Defaults to `1000`.
@@ -609,16 +455,20 @@ export interface ProcedureCallOptions extends ProcedureOptions {
     timeout: number;
     /** 
      * The number of milliseconds to wait for a ping-pong from the endpoint before calling the remote procedure.
-     * When set, if a ping-pong is not received in the given time, the {@link Procedure.call Procedure call} will be aborted.
+     * When set, if a ping-pong is not received in the given time, the {@link call} will be aborted.
      * {@link NaN} or {@link Infinity infinite} numbers will result in the ping never timing out if no response is received, unless
      * {@link signal} is a valid {@link AbortSignal} and gets aborted.
      * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
+     * Defaults to `1000`.
      */
     ping?: number | undefined;
+    pingCacheLength?: number | undefined;
     /** An optional msgpack {@link ExtensionCodec} to use for encoding and decoding messages. */
     extensionCodec?: ExtensionCodec | undefined;
     /** An optional {@link AbortSignal} which will be used to abort the Procedure call. */
     signal?: AbortSignal | undefined;
+    /** Whether the endpoint requires ipv6 support. Defaults to `false`. */
+    ipv6: boolean;
 }
 
 /**
@@ -660,3 +510,224 @@ export interface Ping {
 export function isPing(object: unknown): object is Ping {
     return typeof object === 'object' && object !== null && 'ping' in object && typeof (object as { ping: unknown }).ping === 'string';
 }
+
+/**
+ * Asynchronously calls a {@link Procedure} at a given {@link endpoint} with given a {@link input}.
+ * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
+ * @param {Nullable} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
+ * @param {Partial<ProcedureCallOptions>} [options={}] Options for calling a {@link Procedure}. Defaults to `{}`.
+ * @returns {Promise<Output>} A {@link Promise} which when resolved passes the output value to the {@link Promise.then then} handler(s).
+ * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
+ * @see {@link Procedure.endpoint}
+ * @see {@link ping}
+ */
+export async function call<Output extends Nullable = unknown>(endpoint: string, input?: Nullable, options: Partial<ProcedureCallOptions> = {}): Promise<Output> {
+    try {
+        // parse options into defaults
+        const opts: ProcedureCallOptions = {
+            ...{
+                timeout: 1000,
+                ping: 1000,
+                pingCacheLength: 60000,
+                optionalParameterSupport: true,
+                ignoreUndefinedProperties: true,
+                ipv6: false
+            },
+            ...options
+        };
+
+        // first check the endpoint is ready
+        if (opts.ping !== undefined) {
+            try {
+                await (opts.pingCacheLength === undefined
+                    ? ping(endpoint, opts.ping, opts.ipv6, opts.signal)
+                    : cachedPing(endpoint, opts.ping, opts.pingCacheLength, opts.ipv6, opts.signal));
+            } catch (error) {
+                throw error instanceof ProcedureTimedOutError
+                    ? new ProcedureNotFoundError() // timeout on ping = not found
+                    : error;
+            }
+        }
+
+        // call the endpoint and get response
+        const response = await getResponse<Output>(endpoint, input, opts);
+
+        if ('output' in response && !('error' in response)) { // success!
+            return response.output ?? <Output>(opts.optionalParameterSupport
+                ? undefined // coerce null to undefined
+                : response.output);
+        } else if (isProcedureError(response.error)) { // response indicates an error happened server-side
+            throw response.error;
+        } else {
+            throw new ProcedureInvalidResponseError();
+        }
+    } catch (error) {
+        throw isProcedureError(error)
+            ? error
+            : new ProcedureInternalClientError(undefined, { error });
+    }
+}
+
+/**
+ * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link call called}.
+ * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
+ * @param {number} [timeout=1000] How long to wait for a response before timing out.
+ * {@link NaN} or {@link Infinity infinite} values will result in the ping never timing out if no response is received, unless
+ * {@link signal} is a valid {@link AbortSignal} and gets aborted.
+ * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
+ * Defaults to `1000`.
+ * @param {boolean} [ipv6=false] Whether the endpoint requires ipv6 support. Defaults to `false`.
+ * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
+ * Defaults to `undefined`.
+ * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle
+ * {@link call calls}.
+ */
+export async function ping(endpoint: string, timeout = 1000, ipv6 = false, signal?: AbortSignal): Promise<void> {
+    try {
+        const ping = uuidv5(endpoint, uuidNamespace);
+        const response = await getResponse<{ pong: string }>(endpoint, { ping }, {
+            timeout,
+            signal,
+            ignoreUndefinedProperties: false,
+            optionalParameterSupport: false,
+            ipv6
+        });
+
+        if (response?.pong !== ping) {
+            throw new ProcedureInvalidResponseError();
+        }
+    } catch (error) {
+        throw isProcedureError(error)
+            ? error
+            : new ProcedureInternalClientError(undefined, { error });
+    }
+}
+
+/**
+ * Wraps calls to {@link ping}, deferring to cached results for a given {@link endpoint} when available.
+ * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
+ * @param {number} timeout How long to wait for a response before timing out.
+ * @param {number} cacheLength The length of the cache in milliseconds.
+ * @param {boolean} ipv6 Whether the endpoint requires ipv6 support.
+ * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
+ * Defaults to `undefined`.
+ * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle
+ * {@link call calls}.
+ */
+async function cachedPing(endpoint: string, timeout: number, cacheLength: number, ipv6: boolean, signal?: AbortSignal): ReturnType<typeof ping> {
+    if (isNaN(cacheLength) || !isFinite(cacheLength)) { // number is invalid, skip the cache
+        return ping(endpoint, timeout, ipv6, signal);
+    }
+
+    cachedPingsByEndpoint[endpoint] = cachedPingsByEndpoint[endpoint] ?? {}; // create an entry for the endpoint in the cache if none exists
+    const { timestamp } = cachedPingsByEndpoint[endpoint]; // retrieve the last successful ping timestamp from the cache
+
+    if (timestamp !== undefined && timestamp <= Date.now() + cacheLength) {
+        return; // timestamp is within supplied cache length - immediately return without pinging
+    }
+
+    // if a ping for the same endpoint is currently in progress, await on either it or the a new ping to resolve
+    cachedPingsByEndpoint[endpoint].resolving = cachedPingsByEndpoint[endpoint].resolving !== undefined
+        ? Promise.any<void>([cachedPingsByEndpoint[endpoint].resolving, ping(endpoint, timeout, ipv6, signal)])
+        : ping(endpoint, timeout, ipv6, signal);
+
+    await cachedPingsByEndpoint[endpoint].resolving;
+
+    delete cachedPingsByEndpoint[endpoint].resolving; // ping(s) successfully resolved, remove from cache
+    cachedPingsByEndpoint[endpoint].timestamp = Date.now(); // add successful resolution timestamp to cache
+}
+
+/**
+ * Asynchonously pings a {@link Procedure} at a given {@link endpoint} to check that it is available and ready to be {@link call called}.
+ * If any errors are thrown, absorbs them and returns `false`.
+ * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
+ * @param {number} [timeout=1000] How long to wait for a response before timing out.
+ * {@link NaN} or {@link Infinity infinite} values will result in the ping never timing out if no response is received, unless
+ * {@link signal} is a valid {@link AbortSignal} and gets aborted.
+ * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
+ * Defaults to `1000`.
+ * @param {boolean} [ipv6=false] Whether the endpoint requires ipv6 support. Defaults to `false`.
+ * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
+ * Defaults to `undefined`.
+ * @returns {Promise<void>} A {@link Promise} which when resolved indicated whether the {@link endpoint} is available and ready to handle
+ * {@link call calls}.
+ * If errors were thrown, resolves to `false` instead of rejecting.
+ */
+export async function tryPing(endpoint: string, timeout = 1000, ipv6 = false, signal?: AbortSignal): Promise<boolean> {
+    try {
+        await ping(endpoint, timeout, ipv6, signal);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Asynchronously encodes and transmits the given {@link input} to the {@link endpoint} and retrieves the response.
+ * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
+ * @param {Nullable} input An input parameter to pass to the {@link Procedure}.
+ * @param {ProcedureCallOptions} options Options for calling a {@link Procedure}.
+ * @returns {Promise<Response<Output>>} A {@link Promise} which when resolved passes the {@link Response<Output> response} to the
+ * {@link Promise.then then} handler(s).
+ * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
+ */
+async function getResponse<Output extends Nullable = unknown>(endpoint: string, input: Nullable, options: ProcedureCallOptions): Promise<Response<Output>> {
+    let socket: Socket | undefined;
+    let timeoutSignal: TimeoutSignal | undefined = undefined;
+    let aggregateSignal: AggregateSignal | undefined = undefined;
+
+    try {
+        if (options.signal?.aborted) {
+            throw new ProcedureCancelledError();
+        }
+
+        timeoutSignal = new TimeoutSignal(options.timeout);
+        aggregateSignal = new AggregateSignal(options.signal, timeoutSignal.signal);
+        const { signal } = aggregateSignal;
+
+        socket = createSocket('req', { ipv6: options.ipv6 });
+        socket.connect(endpoint);
+        socket.send(encode(input, options.ignoreUndefinedProperties, options.extensionCodec)); // send the encoded input data to the endpoint
+
+        const [buffer]: [Buffer] = await once(socket, 'data', { signal }) as [Buffer]; // await buffered response
+        return decode<Response<Output>>(buffer, options.extensionCodec); // decode response from buffer
+    } catch (e) {
+        if (isProcedureError(e)) {
+            throw e;
+        } else if (isError(e) && e.name === 'AbortError') {
+            throw aggregateSignal?.abortedSignal === timeoutSignal
+                ? new ProcedureTimedOutError()
+                : new ProcedureCancelledError();
+        } else {
+            throw new ProcedureInternalClientError();
+        }
+    } finally {
+        clearTimeout(timeoutSignal?.timeout); // clear the TimeoutSignal's timeout, if any
+        socket?.removeAllListeners().close(); // clear all listeners and close the socket
+    }
+}
+
+/**
+ * Encodes a given value for transmission.
+ * @param {unknown} value The value to be encoded.
+ * @param {boolean} ignoreUndefinedProperties Whether to strip `undefined` properties from objects or not.
+ * @param {ExtensionCodec} [extensionCodec] The {@link ExtensionCodec} to use for encoding.
+ * @returns {Buffer} A {@link Buffer} containing the encoded value.
+ */
+function encode(value: unknown, ignoreUndefinedProperties: boolean, extensionCodec?: ExtensionCodec): Buffer {
+    const encoded = msgpackEncode(value, { extensionCodec, ignoreUndefined: ignoreUndefinedProperties });
+    return Buffer.from(encoded.buffer, encoded.byteOffset, encoded.byteLength);
+}
+
+/**
+ * Decodes a given {@link Buffer} and casts it as {@link T}.
+ * @param {Buffer} buffer The {@link Buffer} to be decoded.
+ * @param {ExtensionCodec} [extensionCodec] The {@link ExtensionCodec} to use for decoding.
+ * @returns {T} The buffer, decoded and cast to type {@link T}.
+ * @template T The type the decoded value should be cast to.
+ */
+function decode<T = unknown>(buffer: Buffer, extensionCodec?: ExtensionCodec): T {
+    return msgpackDecode(buffer, { extensionCodec }) as T;
+}
+
+const cachedPingsByEndpoint: Record<string, { timestamp?: number, resolving?: ReturnType<typeof ping> }> = {};

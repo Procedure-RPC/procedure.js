@@ -1,7 +1,7 @@
 # procedure.js 🔗
 The simple RPC framework for Node.js.
 
-[![npm package version](https://img.shields.io/npm/v/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on npm") [![npm package downloads](https://img.shields.io/npm/dw/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on npm") [![API docs](https://img.shields.io/badge/docs-v0.4-informational.svg)](https://procedure-rpc.github.io/procedure.js "Read the documentation on Github Pages") [![Code coverage](https://img.shields.io/codecov/c/github/procedure-rpc/procedure.js?label=code%20coverage)](https://codecov.io/gh/procedure-rpc/procedure.js "View code coverage on Codecov") [![code quality](https://img.shields.io/codefactor/grade/github/procedure-rpc/procedure.js.svg)](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js "Check code quality on CodeFactor") <!-- [![Coverity Scan build status](https://img.shields.io/coverity/scan/.svg)](https://scan.coverity.com/projects/procedure-rpc-procedure.js "View build status on Coverity Scan") --> <!-- ![nyc code coverage](https://img.shields.io/nycrc/procedure-rpc/procedure.js.svg)] -->
+[![npm package version](https://img.shields.io/npm/v/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on npm") [![npm package downloads](https://img.shields.io/npm/dw/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on npm") [![API docs](https://img.shields.io/badge/docs-v0.5-informational.svg)](https://procedure-rpc.github.io/procedure.js "Read the documentation on Github Pages") [![Code coverage](https://img.shields.io/codecov/c/github/procedure-rpc/procedure.js?label=code%20coverage)](https://codecov.io/gh/procedure-rpc/procedure.js "View code coverage on Codecov") [![code quality](https://img.shields.io/codefactor/grade/github/procedure-rpc/procedure.js.svg)](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js "Check code quality on CodeFactor") <!-- [![Coverity Scan build status](https://img.shields.io/coverity/scan/.svg)](https://scan.coverity.com/projects/procedure-rpc-procedure.js "View build status on Coverity Scan") --> <!-- ![nyc code coverage](https://img.shields.io/nycrc/procedure-rpc/procedure.js.svg)] -->
 
 [![npm test](https://github.com/Procedure-RPC/procedure.js/actions/workflows/npm-test.yml/badge.svg)](https://github.com/Procedure-RPC/procedure.js/actions/workflows/npm-test.yml "View npm test on GitHub Actions") [![publish package](https://github.com/Procedure-RPC/procedure.js/actions/workflows/publish-package.yml/badge.svg)](https://github.com/Procedure-RPC/procedure.js/actions/workflows/publish-package.yml "View publish package on GitHub Actions") [![publish docs](https://github.com/Procedure-RPC/procedure.js/actions/workflows/publish-docs.yml/badge.svg)](https://github.com/Procedure-RPC/procedure.js/actions/workflows/publish-docs.yml "View publish docks on GitHub Actions")
 
@@ -21,7 +21,7 @@ const procedure = new Procedure((n) => n ** 2).bind('tcp://*:5000');
 // some-other-app/index.js
 
 // calling the procedure to find the square of 8
-let squared = await Procedure.call('tcp://localhost:5000', 8);
+let squared = await call('tcp://localhost:5000', 8);
 console.log(squared); // outputs 64
 ```
 
@@ -77,7 +77,7 @@ procedure.bind('tcp://*:5000');
 And calling it is just as easy:
 ```js
 let x = 8;
-let xSquared = await Procedure.call('tcp://localhost:5000', x);
+let xSquared = await call('tcp://localhost:5000', x);
 console.log(xSquared); // outputs 64
 console.log(typeof xSquared); // outputs 'number'
 ```
@@ -113,11 +113,11 @@ const procedure = new Procedure(params => myFunction(...params))
 ```
 Which can then be called like so:
 ```js
-Procedure.call('tcp://localhost:30666', [1, 2, 3]);
+call('tcp://localhost:30666', [1, 2, 3]);
 ```
 For functions where you have optional parameters, it might make more sense to use object literals/property bags instead of arrays.
 
-Functions which accept multiple parameters where only the first is required (or none) will work as is, but you will only be able to pass the first parameter via `Procedure.call`.
+Functions which accept multiple parameters where only the first is required (or none) will work as is, but you will only be able to pass the first parameter via `call`.
 
 #### A note about `null` and `undefined`
 ##### Optional parameter support
@@ -136,7 +136,7 @@ const procedure = new Procedure(x => { ... }, { optionalParameterSupport: false 
 ```
 
 ```js
-await Procedure.call('tcp://*:54321', x, { optionalParameterSupport: false });
+await call('tcp://*:54321', x, { optionalParameterSupport: false });
 ```
 Note that disabling at the definition will not affect the return value, and disabling at the call will not affect the input parameter.
 
@@ -152,7 +152,7 @@ const procedure = new Procedure(x => { ... }, { ignoreUndefinedProperties: false
 ```
 
 ```js
-await Procedure.call('tcp://*:54321', x, { ignoreUndefinedProperties: false });
+await call('tcp://*:54321', x, { ignoreUndefinedProperties: false });
 ```
 Note that disabling at the definition will not affect the return value, and disabling at the call will not affect the input parameter.
 
@@ -167,7 +167,7 @@ const procedure = new Procedure(x => x.foo = 'bar')
 And then call it like so:
 ```js
 let obj = { foo: 123 };
-await Procedure.call('tcp://*:33333', obj);
+await call('tcp://*:33333', obj);
 console.log(obj); // outputs '{ foo: 123 }'
 ```
 The `obj` object would remain unchanged, because the procedure is acting on a *clone* of the object, not the object itself. First, the object is encoded for transmission by msgpack, then sent across the wire by nanomsg, and finally decoded by msgpack at the other end into a brand new object.
@@ -180,7 +180,7 @@ procedure.bind('tcp://*:5000');
 ```
 ```js
 let x = { foo: 'bar' };
-let xSquared = await Procedure.call('tcp://localhost:5000', x);
+let xSquared = await call('tcp://localhost:5000', x);
 // throws ProcedureExecutionError: An unhandled exception was thrown during procedure execution.
 ```
 
@@ -204,7 +204,7 @@ const procedure = new Procedure(n => {
 ```
 ```js
 let x = { foo: 'bar' };
-let xSquared = await Procedure.call('tcp://localhost:5000', x);
+let xSquared = await call('tcp://localhost:5000', x);
 // throws ProcedureExecutionError: Expected n to be a number, got 'object'
 ```
 
@@ -222,7 +222,7 @@ const procedure = new Procedure(n => {
 ```js
 let x = { foo: 'bar' }, xSquared;
 try {
-    xSquared = await Procedure.call('tcp://localhost:5000', x);
+    xSquared = await call('tcp://localhost:5000', x);
 } catch (e) {
     console.error(e?.name, '-', e?.message, e?.data);
 }
@@ -240,7 +240,7 @@ The full API reference for procedure.js is [available on GitHub Pages](https://p
 - [Initializing a procedure](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#constructor)
   - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureDefinitionOptions.html)
 - [Binding a procedure to an endpoint](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#bind)
-- [Calling a procedure](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#call)
+- [Calling a procedure](https://procedure-rpc.github.io/procedure.js/functions/procedure.call.html)
   - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureCallOptions.html)
 
 ## Transports: More than just TCP!
@@ -261,7 +261,7 @@ On POSIX compliant systems (ubuntu, macOS, etc.), UNIX domain sockets are used a
 On Windows, named pipes are used and IPC addresses are arbitrary case-insensitive strings containing any characters except backslash (`\`).
 
 ### TCP: intra/inter-network over TCP/IP
-Call functions between processes across TCP with support for both IPv4 addresses and DNS names*. IPv6 support coming soon!
+Call functions between processes across TCP with support for IPv4 and IPv6 addresses and DNS names*.
 - `tcp://*:80`
 - `tcp://192.168.0.5:5600`
 - `tcp://localhost:33000`*
@@ -271,7 +271,7 @@ TLS (`tcp+tls://`) is not currently supported.
 _<sub>* DNS names are only supported when calling a procedure, not when defining.</sub>_
 
 ### WS: intra/inter-network over WebSockets
-Call functions between processes across WebSockets over TCP with support for both IPv4 address and DNS names*. IPv6 support coming soon!
+Call functions between processes across WebSockets over TCP with support for both IPv4 and IPv6 addresses and DNS names*.
 - `ws://*`
 - `ws://127.0.0.1:8080`
 - `ws://example.com`*
@@ -307,8 +307,8 @@ If you do need to make breaking changes to a procedure, it is recommended to eit
   ```
 
   ```js
-  const v1Result = await Procedure.call('tcp://localhost:33000'); // returns false
-  const v2Result = await Procedure.call('tcp://localhost:33001'); // returns undefined
+  const v1Result = await call('tcp://localhost:33000'); // returns false
+  const v2Result = await call('tcp://localhost:33001'); // returns undefined
   ```
 - use a parameter or property to specify a version modifier, defaulting to the original when unspecified:
   ```js
@@ -336,8 +336,8 @@ If you do need to make breaking changes to a procedure, it is recommended to eit
   ```
 
   ```js
-  const v1Result = await Procedure.call('tcp://localhost:33000'); // returns false
-  const v2Result = await Procedure.call('tcp://localhost:33000', { version: 2 }); //returns undefined
+  const v1Result = await call('tcp://localhost:33000'); // returns false
+  const v2Result = await call('tcp://localhost:33000', { version: 2 }); //returns undefined
   ```
 
   You may prefer to use a [semver](https://www.npmjs.com/package/semver) compatible string for versioning.
