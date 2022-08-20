@@ -695,7 +695,7 @@ async function getResponse<Output extends Nullable = unknown>(endpoint: string, 
         if (isProcedureError(e)) {
             throw e;
         } else if (isError(e) && e.name === 'AbortError') {
-            throw aggregateSignal?.abortedSignal === timeoutSignal
+            throw aggregateSignal?.abortedSignal === timeoutSignal?.signal
                 ? new ProcedureTimedOutError()
                 : new ProcedureCancelledError();
         } else {
