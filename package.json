@@ -1,6 +1,6 @@
 {
   "name": "@procedure-rpc/procedure.js",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "title": "procedure.js",
   "description": "The simple RPC framework for Node.js.",
   "main": "./dist/index",
@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.7.2",
+    "@procedure-rpc/signals": "^0.1.0",
     "nanomsg": "^4.2.0",
     "uuid": "^8.3.2"
   },
