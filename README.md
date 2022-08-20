@@ -261,7 +261,7 @@ On POSIX compliant systems (ubuntu, macOS, etc.), UNIX domain sockets are used a
 On Windows, named pipes are used and IPC addresses are arbitrary case-insensitive strings containing any characters except backslash (`\`).
 
 ### TCP: intra/inter-network over TCP/IP
-Call functions between processes across TCP with support for both IPv4 addresses and DNS names*. IPv6 support coming soon!
+Call functions between processes across TCP with support for IPv4 and IPv6 addresses and DNS names*.
 - `tcp://*:80`
 - `tcp://192.168.0.5:5600`
 - `tcp://localhost:33000`*
@@ -271,7 +271,7 @@ TLS (`tcp+tls://`) is not currently supported.
 _<sub>* DNS names are only supported when calling a procedure, not when defining.</sub>_
 
 ### WS: intra/inter-network over WebSockets
-Call functions between processes across WebSockets over TCP with support for both IPv4 address and DNS names*. IPv6 support coming soon!
+Call functions between processes across WebSockets over TCP with support for both IPv4 and IPv6 addresses and DNS names*.
 - `ws://*`
 - `ws://127.0.0.1:8080`
 - `ws://example.com`*
