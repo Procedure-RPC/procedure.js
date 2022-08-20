@@ -105,6 +105,7 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     /**
      * Binds the {@link Procedure} to an {@link endpoint}, making it available to be {@link call called}.
      * @param {string} endpoint The endpoint at which the procedure will be callable.
+     * @param {boolean} [ipv6=false] Whether the endpoint requires ipv6 support. Defaults to `false`.
      * @returns {this} The bound {@link Procedure} for method chaining.
      * @see {@link unbind}
      */
@@ -458,7 +459,7 @@ export interface ProcedureCallOptions extends ProcedureOptions {
      * {@link NaN} or {@link Infinity infinite} numbers will result in the ping never timing out if no response is received, unless
      * {@link signal} is a valid {@link AbortSignal} and gets aborted.
      * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
-     * Default to `1000`.
+     * Defaults to `1000`.
      */
     ping?: number | undefined;
     pingCacheLength?: number | undefined;
@@ -466,6 +467,7 @@ export interface ProcedureCallOptions extends ProcedureOptions {
     extensionCodec?: ExtensionCodec | undefined;
     /** An optional {@link AbortSignal} which will be used to abort the Procedure call. */
     signal?: AbortSignal | undefined;
+    /** Whether the endpoint requires ipv6 support. Defaults to `false`. */
     ipv6: boolean;
 }
 
@@ -574,6 +576,7 @@ export async function call<Output extends Nullable = unknown>(endpoint: string, 
  * {@link signal} is a valid {@link AbortSignal} and gets aborted.
  * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
  * Defaults to `1000`.
+ * @param {boolean} [ipv6=false] Whether the endpoint requires ipv6 support. Defaults to `false`.
  * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
  * Defaults to `undefined`.
  * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle
@@ -605,12 +608,13 @@ export async function ping(endpoint: string, timeout = 1000, ipv6 = false, signa
  * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
  * @param {number} timeout How long to wait for a response before timing out.
  * @param {number} cacheLength The length of the cache in milliseconds.
+ * @param {boolean} ipv6 Whether the endpoint requires ipv6 support.
  * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
  * Defaults to `undefined`.
  * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle
  * {@link call calls}.
  */
-async function cachedPing(endpoint: string, timeout: number, cacheLength: number, ipv6 = false, signal?: AbortSignal): ReturnType<typeof ping> {
+async function cachedPing(endpoint: string, timeout: number, cacheLength: number, ipv6: boolean, signal?: AbortSignal): ReturnType<typeof ping> {
     if (isNaN(cacheLength) || !isFinite(cacheLength)) { // number is invalid, skip the cache
         return ping(endpoint, timeout, ipv6, signal);
     }
@@ -642,6 +646,7 @@ async function cachedPing(endpoint: string, timeout: number, cacheLength: number
  * {@link signal} is a valid {@link AbortSignal} and gets aborted.
  * Non-{@link NaN}, finite values will be clamped between `0` and {@link Number.MAX_SAFE_INTEGER} inclusive.
  * Defaults to `1000`.
+ * @param {boolean} [ipv6=false] Whether the endpoint requires ipv6 support. Defaults to `false`.
  * @param {AbortSignal} [signal] An optional {@link AbortSignal} which, when passed, will be used to abort awaiting the ping.
  * Defaults to `undefined`.
  * @returns {Promise<void>} A {@link Promise} which when resolved indicated whether the {@link endpoint} is available and ready to handle
