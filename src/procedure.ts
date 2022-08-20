@@ -4,7 +4,7 @@ import {
     ProcedureCancelledError, ProcedureInvalidResponseError, ProcedureInternalClientError, ProcedureInternalServerError,
     ProcedureExecutionError, ProcedureNotFoundError, ProcedureTimedOutError, ProcedureError
 } from './errors';
-import { AggregateSignal, TimeoutSignal } from './signals';
+import { AggregateSignal, TimeoutSignal } from '@procedure-rpc/signals';
 import { createSocket, Socket } from 'nanomsg';
 import { encode as msgpackEncode, decode as msgpackDecode, ExtensionCodec } from '@msgpack/msgpack'
 import { once, EventEmitter } from 'events'
