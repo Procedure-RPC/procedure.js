@@ -1,18 +1,18 @@
 {
-    "extends": "@istanbuljs/nyc-config-typescript",
-    "all": true,
-    "check-coverage": true,
-    "reporter": [
-        "html",
-        "text",
-        "cobertura",
-        "json",
-        "lcovonly"
-    ],
-    "report-dir": "coverage",
-    "statements": "90",
-    "branches": "85",
-    "functions": "90",
-    "lines": "90",
-    "include": "src"
+  "extends": "@istanbuljs/nyc-config-typescript",
+  "all": true,
+  "check-coverage": true,
+  "reporter": [
+    "html",
+    "text",
+    "cobertura",
+    "json",
+    "lcovonly"
+  ],
+  "report-dir": "coverage",
+  "statements": "90",
+  "branches": "85",
+  "functions": "90",
+  "lines": "90",
+  "include": "src"
 }
