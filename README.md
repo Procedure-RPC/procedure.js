@@ -65,17 +65,21 @@ With [implementations in multiple languages](#language-implementations), applica
 ### [npm](https://www.npmjs.com/package/@procedure-rpc/procedure.js "npm is a package manager for JavaScript")
 - Install : `npm install --save @procedure-rpc/procedure.js`
 - Import: `import Procedure from '@procedure-rpc/procedure.js'`
-- Require: `const Procedure = require('@procedure-rpc/procedure.js')`
+- Require: `const { Procedure } = require('@procedure-rpc/procedure.js')`
 
 ## Usage
 With Procedure, setting up your function to be called from another process (whether remote or local) is remarkably simple:
 ```js
+const { Procedure } = require('@procedure-rpc/procedure.js');
+
 const procedure = new Procedure((n) => n ** 2)
 procedure.bind('tcp://*:5000');
 ```
 
 And calling it is just as easy:
 ```js
+const { call } = require('@procedure-rpc/procedure.js');
+
 let x = 8;
 let xSquared = await call('tcp://localhost:5000', x);
 console.log(xSquared); // outputs 64
@@ -86,6 +90,7 @@ console.log(typeof xSquared); // outputs 'number'
 Asynchronous functions are fully supported:
 ```js
 const { ProcedureExcecutionError } = require('@procedure-rpc/procedure.js/errors');
+
 const procedure = new Procedure(async () => {
     const response = await fetch('https://catfact.ninja/fact');
     if (response.ok) {
@@ -195,6 +200,7 @@ There are a number of custom ProcedureErrors, all relating to a specific class o
 In the event that you want to expose more detailed information back to the caller when an error occurs, you can simply throw a ProcedureError yourself:
 ```js
 const { ProcedureExecutionError } = require('@procedure-rpc/procedure.js/errors');
+
 const procedure = new Procedure(n => {
     if (typeof n !== 'number') {
         throw new ProcedureExecutionError(`Expected n to be a number, got '${typeof n}'`);
@@ -212,6 +218,7 @@ let xSquared = await call('tcp://localhost:5000', x);
 You can optionally pass an object into the constructor of a ProcedureError and it will be attached to the `data` property of the thrown error:
 ```js
 const { ProcedureExecutionError } = require('@procedure-rpc/procedure.js/errors');
+
 const procedure = new Procedure(n => {
     if (typeof n !== 'number') {
         throw new ProcedureExecutionError(`Expected n to be a number, got '${typeof n}'`, { n });
