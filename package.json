@@ -13,6 +13,7 @@
     "https://paypal.me/tobeyblaber"
   ],
   "license": "MIT",
+  "sideEffects": false,
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --ext .ts",
