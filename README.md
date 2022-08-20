@@ -418,4 +418,4 @@ Procedure is currently implemented in the following languages:
 If you would like to contribute a Procedure implementation in another language, please feel free! Create a GitHub repository for the language implementation and open an issue with us once it's ready for review! 💜
 
 ## License
-procedure.js is licensed under [MIT](https://github.com/procedure-rpc/procedure.js/blob/main/LICENSE).
+procedure.js is licensed under [MIT](https://github.com/procedure-rpc/procedure.js/blob/HEAD/LICENSE) © 2022 Tobey Blaber.
