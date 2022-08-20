@@ -180,7 +180,7 @@ The `obj` object would remain unchanged, because the procedure is acting on a *c
 ### Error handling
 When unhandled exceptions occur during execution of a procedure, the procedure safely passes an error message back to be thrown at the callsite:
 ```js
-const procedure = new Procedure((n) => n ** 2)
+const procedure = new Procedure((n) => n ** 2);
 procedure.bind('tcp://*:5000');
 ```
 ```js
