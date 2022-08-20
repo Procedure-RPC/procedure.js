@@ -45,6 +45,7 @@ jobs:
 
       - name: Generate code coverage reports
         run: npm run test:coverage
+        continue-on-error: true
 
       - name: Publish code coverage to codecov 🚀
         uses: codecov/codecov-action@v3
