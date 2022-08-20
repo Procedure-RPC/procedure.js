@@ -72,7 +72,7 @@ With Procedure, setting up your function to be called from another process (whet
 ```js
 const { Procedure } = require('@procedure-rpc/procedure.js');
 
-const procedure = new Procedure((n) => n ** 2)
+const procedure = new Procedure((n) => n ** 2);
 procedure.bind('tcp://*:5000');
 ```
 
