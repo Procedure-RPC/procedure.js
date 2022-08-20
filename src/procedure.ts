@@ -1,5 +1,3 @@
-// TODO: add and test ipv6 support
-
 /// <reference types='node' />
 import {
     isProcedureError, isError,
@@ -106,25 +104,21 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
 
     /**
      * Binds the {@link Procedure} to an {@link endpoint}, making it available to be {@link call called}.
-     * @param {string} [endpoint=undefined] The endpoint at which the procedure will be callable. Defaults to {@link Procedure.endpoint}.
+     * @param {string} endpoint The endpoint at which the procedure will be callable.
      * @returns {this} The bound {@link Procedure} for method chaining.
      * @see {@link unbind}
      */
-    bind(endpoint?: string): this {
-        endpoint = endpoint ?? this.endpoint;
-
-        if (typeof endpoint === 'string') {
-            this.unbind();
-            this.uuid = uuidv5(endpoint, uuidNamespace);
-            this.endpoint = endpoint;
-            for (let i = 0; i < this.workers; i++) {
-                const socket = this.sockets[this.sockets.push(createSocket('rep')) - 1];
-                socket
-                    .on('data', (data: Buffer) => this.#onRepSocketData(data, socket))
-                    .on('error', (error: unknown) => this.#onRepSocketError(error))
-                    .once('close', () => this.#onRepSocketClose())
-                    .bind(endpoint); // bind the socket to the endpoint
-            }
+    bind(endpoint: string, ipv6 = false): this {
+        this.unbind();
+        this.uuid = uuidv5(endpoint, uuidNamespace);
+        this.endpoint = endpoint;
+        for (let i = 0; i < this.workers; i++) {
+            const socket = this.sockets[this.sockets.push(createSocket('rep', { ipv6 })) - 1];
+            socket
+                .on('data', (data: Buffer) => this.#onRepSocketData(data, socket))
+                .on('error', (error: unknown) => this.#onRepSocketError(error))
+                .once('close', () => this.#onRepSocketClose())
+                .bind(endpoint); // bind the socket to the endpoint
         }
 
         return this;
@@ -472,6 +466,7 @@ export interface ProcedureCallOptions extends ProcedureOptions {
     extensionCodec?: ExtensionCodec | undefined;
     /** An optional {@link AbortSignal} which will be used to abort the Procedure call. */
     signal?: AbortSignal | undefined;
+    ipv6: boolean;
 }
 
 /**
@@ -533,7 +528,8 @@ export async function call<Output extends Nullable = unknown>(endpoint: string, 
                 ping: 1000,
                 pingCacheLength: 60000,
                 optionalParameterSupport: true,
-                ignoreUndefinedProperties: true
+                ignoreUndefinedProperties: true,
+                ipv6: false
             },
             ...options
         };
@@ -541,9 +537,9 @@ export async function call<Output extends Nullable = unknown>(endpoint: string, 
         // first check the endpoint is ready
         if (opts.ping !== undefined) {
             try {
-                await (opts.pingCacheLength === undefined 
-                    ? ping(endpoint, opts.ping, opts.signal)
-                    : cachedPing(endpoint, opts.ping, opts.pingCacheLength, opts.signal));
+                await (opts.pingCacheLength === undefined
+                    ? ping(endpoint, opts.ping, opts.ipv6, opts.signal)
+                    : cachedPing(endpoint, opts.ping, opts.pingCacheLength, opts.ipv6, opts.signal));
             } catch (error) {
                 throw error instanceof ProcedureTimedOutError
                     ? new ProcedureNotFoundError() // timeout on ping = not found
@@ -583,14 +579,15 @@ export async function call<Output extends Nullable = unknown>(endpoint: string, 
  * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle
  * {@link call calls}.
  */
-export async function ping(endpoint: string, timeout = 1000, signal?: AbortSignal): Promise<void> {
+export async function ping(endpoint: string, timeout = 1000, ipv6 = false, signal?: AbortSignal): Promise<void> {
     try {
         const ping = uuidv5(endpoint, uuidNamespace);
         const response = await getResponse<{ pong: string }>(endpoint, { ping }, {
             timeout,
             signal,
             ignoreUndefinedProperties: false,
-            optionalParameterSupport: false
+            optionalParameterSupport: false,
+            ipv6
         });
 
         if (response?.pong !== ping) {
@@ -613,9 +610,9 @@ export async function ping(endpoint: string, timeout = 1000, signal?: AbortSigna
  * @returns {Promise<void>} A {@link Promise} which when resolved indicates that the {@link endpoint} is available and ready to handle
  * {@link call calls}.
  */
-async function cachedPing(endpoint: string, timeout: number, cacheLength: number, signal?: AbortSignal): ReturnType<typeof ping> {
+async function cachedPing(endpoint: string, timeout: number, cacheLength: number, ipv6 = false, signal?: AbortSignal): ReturnType<typeof ping> {
     if (isNaN(cacheLength) || !isFinite(cacheLength)) { // number is invalid, skip the cache
-        return ping(endpoint, timeout, signal);
+        return ping(endpoint, timeout, ipv6, signal);
     }
 
     cachedPingsByEndpoint[endpoint] = cachedPingsByEndpoint[endpoint] ?? {}; // create an entry for the endpoint in the cache if none exists
@@ -627,8 +624,8 @@ async function cachedPing(endpoint: string, timeout: number, cacheLength: number
 
     // if a ping for the same endpoint is currently in progress, await on either it or the a new ping to resolve
     cachedPingsByEndpoint[endpoint].resolving = cachedPingsByEndpoint[endpoint].resolving !== undefined
-        ? Promise.any<void>([cachedPingsByEndpoint[endpoint].resolving, ping(endpoint, timeout, signal)])
-        : ping(endpoint, timeout, signal);
+        ? Promise.any<void>([cachedPingsByEndpoint[endpoint].resolving, ping(endpoint, timeout, ipv6, signal)])
+        : ping(endpoint, timeout, ipv6, signal);
 
     await cachedPingsByEndpoint[endpoint].resolving;
 
@@ -651,15 +648,14 @@ async function cachedPing(endpoint: string, timeout: number, cacheLength: number
  * {@link call calls}.
  * If errors were thrown, resolves to `false` instead of rejecting.
  */
-export async function tryPing(endpoint: string, timeout = 1000, signal?: AbortSignal): Promise<boolean> {
+export async function tryPing(endpoint: string, timeout = 1000, ipv6 = false, signal?: AbortSignal): Promise<boolean> {
     try {
-        await ping(endpoint, timeout, signal);
+        await ping(endpoint, timeout, ipv6, signal);
         return true;
     } catch {
         return false;
     }
 }
-
 
 /**
  * Asynchronously encodes and transmits the given {@link input} to the {@link endpoint} and retrieves the response.
@@ -684,7 +680,7 @@ async function getResponse<Output extends Nullable = unknown>(endpoint: string, 
         aggregateSignal = new AggregateSignal(options.signal, timeoutSignal.signal);
         const { signal } = aggregateSignal;
 
-        socket = createSocket('req');
+        socket = createSocket('req', { ipv6: options.ipv6 });
         socket.connect(endpoint);
         socket.send(encode(input, options.ignoreUndefinedProperties, options.extensionCodec)); // send the encoded input data to the endpoint
 

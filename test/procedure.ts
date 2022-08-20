@@ -131,7 +131,7 @@ describe('Procedure', () => {
         beforeEach(() => instance = new Procedure(x => x));
         afterEach(() => { instance.unbind().removeAllListeners(); });
 
-        it('should return: this', () => expect(instance.bind()).to.equal(instance));
+        it('should return: this', () => expect(instance.bind('inproc://foo')).to.equal(instance));
 
         context('when endpoint: \'\'', () => {
             beforeEach(() => instance = new Procedure(x => x));
@@ -176,7 +176,7 @@ describe('Procedure', () => {
                 beforeEach(() => instance.bind('inproc://Procedure'));
                 describe('instance', () => it('should emit: \'unbind\'', () => {
                     const unbind = chai.spy(() => { return });
-                    instance.on('unbind', unbind).bind();
+                    instance.on('unbind', unbind).bind('inproc://Procedure');
                     expect(unbind).to.have.been.called.once;
                 }));
             });
@@ -2079,7 +2079,7 @@ describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: Abo
                     ac.abort();
                 });
 
-                it('should throw: ProcedureCancelledError', async () => await expect(ping(<string>pingEndpoint, 500, ac.signal))
+                it('should throw: ProcedureCancelledError', async () => await expect(ping(<string>pingEndpoint, 500, false, ac.signal))
                     .to.be.rejectedWith('The operation was cancelled by the client'));
             });
         });
@@ -2135,7 +2135,7 @@ describe('tryPing(endpoint: string, timeout: number | undefined = 100, signal?: 
                     ac.abort();
                 });
 
-                it('should resolve: false', async () => await expect(tryPing(<string>pingEndpoint, 500, ac.signal))
+                it('should resolve: false', async () => await expect(tryPing(<string>pingEndpoint, 500, false, ac.signal))
                     .to.eventually.be.false.and.to.not.be.rejected);
             });
         });
