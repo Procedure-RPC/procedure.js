@@ -1,12 +1,6 @@
-import chai, { expect } from 'chai';
-import spies from 'chai-spies';
-import chaiAsPromised from 'chai-as-promised';
 import { ExtensionCodec } from '@msgpack/msgpack';
 import Procedure, { call, ping, tryPing, isPing, Callback } from '../src';
 import { ProcedureInternalServerError } from '../src/errors';
-
-chai.use(spies);
-chai.use(chaiAsPromised);
 
 describe('Procedure', () => {
     describe('constructor(endpoint: string, callback: Callback, options: Partial<ProcedureOptions>)', () => {
@@ -14,49 +8,49 @@ describe('Procedure', () => {
 
         describe('when options.verbose: true', () => {
             beforeEach(() => { instance = new Procedure(x => x, { verbose: true }) });
-            describe('verbose', () => it('should be: true', () => { expect(instance.verbose).to.be.true }));
+            describe('verbose', () => it('should be: true', () => { expect(instance.verbose).toEqual(true) }));
         });
 
         describe('when options.verbose is false', () => {
             beforeEach(() => { instance = new Procedure(x => x, { verbose: false }) });
-            describe('verbose', () => it('should be: false', () => { expect(instance.verbose).to.be.false }));
+            describe('verbose', () => it('should be: false', () => { expect(instance.verbose).toEqual(false) }));
         });
 
         describe('when options.verbose: undefined', () => {
             beforeEach(() => { instance = new Procedure(x => x) });
-            describe('verbose', () => it('should be: false', () => { expect(instance.verbose).to.be.false }));
+            describe('verbose', () => it('should be: false', () => { expect(instance.verbose).toEqual(false) }));
         });
 
         describe('when options.workers: undefined', () => {
             beforeEach(() => { instance = new Procedure(x => x) });
-            describe('workers', () => it('should be: 1', () => { expect(instance.workers).to.equal(1) }));
+            describe('workers', () => it('should be: 1', () => { expect(instance.workers).toEqual(1) }));
         });
 
         describe('when options.workers: NaN', () => {
             beforeEach(() => { instance = new Procedure(x => x, { workers: NaN }) });
-            describe('workers', () => it('should be: 1', () => { expect(instance.workers).to.equal(1) }));
+            describe('workers', () => it('should be: 1', () => { expect(instance.workers).toEqual(1) }));
         });
 
         describe('when options.workers: Infinity', () => {
             beforeEach(() => { instance = new Procedure(x => x, { workers: Infinity }) });
-            describe('workers', () => it('should be: 1', () => { expect(instance.workers).to.equal(1) }));
+            describe('workers', () => it('should be: 1', () => { expect(instance.workers).toEqual(1) }));
         });
 
         describe('when options.workers: < 1', () => {
             beforeEach(() => { instance = new Procedure(x => x, { workers: 0.8 }) });
-            describe('workers', () => it('should be: 1', () => { expect(instance.workers).to.equal(1) }));
+            describe('workers', () => it('should be: 1', () => { expect(instance.workers).toEqual(1) }));
         });
 
         describe('when options.workers: 10', () => {
             beforeEach(() => { instance = new Procedure(x => x, { workers: 10 }) });
-            describe('workers', () => it('should be: 10', () => { expect(instance.workers).to.equal(10) }));
+            describe('workers', () => it('should be: 10', () => { expect(instance.workers).toEqual(10) }));
         });
 
         describe('when options.extensionCodec: undefined', () => {
             beforeEach(() => { instance = new Procedure(x => x) });
             describe('extensionCodec', () => it(
                 'should be: undefined',
-                () => { expect(instance.extensionCodec).to.be.undefined }
+                () => { expect(instance.extensionCodec).toBeUndefined() }
             ));
         })
 
@@ -66,7 +60,7 @@ describe('Procedure', () => {
             );
             describe('extensionCodec', () => it(
                 'should be: instanceof ExtensionCodec',
-                () => { expect(instance.extensionCodec).to.be.instanceof(ExtensionCodec) }
+                () => { expect(instance.extensionCodec).toBeInstanceOf(ExtensionCodec) }
             ));
         });
     });
@@ -77,12 +71,12 @@ describe('Procedure', () => {
 
         describe('when value: true', () => {
             beforeEach(() => { instance.verbose = true });
-            describe('verbose', () => it('should be: true', () => { expect(instance.verbose).to.be.true }));
+            describe('verbose', () => it('should be: true', () => { expect(instance.verbose).toEqual(true) }));
         });
 
         describe('when value: false', () => {
             beforeEach(() => { instance.verbose = false });
-            describe('verbose', () => it('should be: false', () => { expect(instance.verbose).to.be.false }));
+            describe('verbose', () => it('should be: false', () => { expect(instance.verbose).toEqual(false) }));
         });
     });
 
@@ -94,7 +88,7 @@ describe('Procedure', () => {
             beforeEach(() => { instance.extensionCodec = undefined });
             describe('extensionCodec', () => it(
                 'should be: undefined',
-                () => { expect(instance.extensionCodec).to.be.undefined }
+                () => { expect(instance.extensionCodec).toBeUndefined() }
             ));
         })
 
@@ -102,7 +96,7 @@ describe('Procedure', () => {
             beforeEach(() => { instance.extensionCodec = new ExtensionCodec() });
             describe('extensionCodec', () => it(
                 'should be: instanceof ExtensionCodec',
-                () => { expect(instance.extensionCodec).to.be.instanceof(ExtensionCodec) }
+                () => { expect(instance.extensionCodec).toBeInstanceOf(ExtensionCodec) }
             ));
         });
     });
@@ -115,7 +109,7 @@ describe('Procedure', () => {
             beforeEach(() => { instance.optionalParameterSupport = true });
             describe('verbose', () => it(
                 'should be: true',
-                () => { expect(instance.optionalParameterSupport).to.be.true }
+                () => { expect(instance.optionalParameterSupport).toEqual(true) }
             ));
         });
 
@@ -123,7 +117,7 @@ describe('Procedure', () => {
             beforeEach(() => instance.optionalParameterSupport = false);
             describe('verbose', () => it(
                 'should be: false',
-                () => { expect(instance.optionalParameterSupport).to.be.false }
+                () => { expect(instance.optionalParameterSupport).toEqual(false) }
             ));
         });
     });
@@ -136,7 +130,7 @@ describe('Procedure', () => {
             beforeEach(() => instance.ignoreUndefinedProperties = true);
             describe('verbose', () => it(
                 'should be: true',
-                () => { expect(instance.ignoreUndefinedProperties).to.be.true }
+                () => { expect(instance.ignoreUndefinedProperties).toEqual(true) }
             ));
         });
 
@@ -144,7 +138,7 @@ describe('Procedure', () => {
             beforeEach(() => instance.ignoreUndefinedProperties = false);
             describe('verbose', () => it(
                 'should be: false',
-                () => { expect(instance.ignoreUndefinedProperties).to.be.false }
+                () => { expect(instance.ignoreUndefinedProperties).toEqual(false) }
             ));
         });
     });
@@ -156,36 +150,36 @@ describe('Procedure', () => {
 
         it(
             'should return: this',
-            () => { expect(instance.bind('inproc://foo')).to.equal(instance) }
+            () => { expect(instance.bind('inproc://foo')).toEqual(instance) }
         );
 
         describe('when endpoint: \'\'', () => {
             beforeEach(() => instance = new Procedure(x => x));
 
             describe('instance', () => it('should emit: \'error\'', () => {
-                const error = chai.spy((error: unknown) => {
-                    expect(error).to.be.instanceof(ProcedureInternalServerError)
-                        .and.to.have.property('data');
-                    expect((<ProcedureInternalServerError>error).data).to.have.property('error');
+                const error = jest.fn((error: unknown) => {
+                    expect(error).toBeInstanceOf(ProcedureInternalServerError);
+                    expect(error).toHaveProperty('data');
+                    expect((<ProcedureInternalServerError>error).data).toHaveProperty('error');
                 });
                 instance.on('error', error).bind('');
-                expect(error).to.have.been.called.once;
+                expect(error).toHaveBeenCalledTimes(1);
             }));
 
             describe('when verbose: true', () => {
-                const sandbox = chai.spy.sandbox();
+                let error: jest.SpyInstance;
                 beforeEach(() => {
                     instance = new Procedure(x => x);
                     instance.verbose = true;
-                    sandbox.on(console, 'error', () => { return })
+                    error = jest.spyOn(console, 'error').mockImplementation();
                 });
                 describe('instance', () => it('should call console.error', () => {
                     instance.bind('');
-                    expect(console.error).to.have.been.called.once;
+                    expect(error).toHaveBeenCalledTimes(1);
                 }));
                 afterEach(() => {
                     instance.verbose = false;
-                    sandbox.restore();
+                    error.mockReset();
                 });
             });
         });
@@ -193,17 +187,17 @@ describe('Procedure', () => {
         describe('when endpoint: \'inproc://Procedure\'', () => {
             beforeEach(() => instance = new Procedure(x => x));
             describe('instance', () => it('should not emit: \'error\'', () => {
-                const error = chai.spy(() => { return });
+                const error = jest.fn();
                 instance.on('error', error).bind('inproc://Procedure');
-                expect(error).to.not.have.been.called();
+                expect(error).not.toHaveBeenCalled();
             }));
 
             describe('when already bound', () => {
                 beforeEach(() => instance.bind('inproc://Procedure'));
                 describe('instance', () => it('should emit: \'unbind\'', () => {
-                    const unbind = chai.spy(() => { return });
+                    const unbind = jest.fn();
                     instance.on('unbind', unbind).bind('inproc://Procedure');
-                    expect(unbind).to.have.been.called.once;
+                    expect(unbind).toHaveBeenCalledTimes(1);
                 }));
             });
         });
@@ -213,7 +207,7 @@ describe('Procedure', () => {
         let instance: Procedure;
         beforeEach(() => instance = new Procedure(x => x));
 
-        it('should return: this', () => { expect(instance.unbind()).to.equal(instance) });
+        it('should return: this', () => { expect(instance.unbind()).toEqual(instance) });
 
         describe('when instance bound to endpoint: \'inproc://Procedure\'', () => {
             beforeEach(() => {
@@ -221,25 +215,25 @@ describe('Procedure', () => {
                 instance.bind('inproc://Procedure');
             });
             describe('instance', () => it('should emit: \'unbind\'', () => {
-                const unbind = chai.spy(() => { return });
+                const unbind = jest.fn();
                 instance.on('unbind', unbind).unbind();
-                expect(unbind).to.have.been.called.once;
+                expect(unbind).toHaveBeenCalledTimes(1);
             }));
 
             describe('when verbose: true', () => {
-                const sandbox = chai.spy.sandbox();
+                let log: jest.SpyInstance;
 
                 beforeEach(() => {
                     instance.verbose = true;
-                    sandbox.on(console, 'log', () => { return });
+                    log = jest.spyOn(console, 'log').mockImplementation();
                 });
                 describe('instance', () => it('should call console.log', () => {
                     instance.unbind();
-                    expect(console.log).to.have.been.called.twice;
+                    expect(log).toHaveBeenCalledTimes(2);
                 }));
                 afterEach(() => {
                     instance.verbose = false;
-                    sandbox.restore();
+                    log.mockReset();
                 });
             });
         });
@@ -247,8 +241,7 @@ describe('Procedure', () => {
 });
 
 describe('call(endpoint: string, input: Input | null, options: Partial<ProcedureCallOptions>): Promise<Output>', () => {
-    let func: Callback<unknown, unknown>;
-    let spy: ChaiSpies.SpyFunc1<unknown, unknown>;
+    let fn: Callback<unknown, unknown>;
     let procedure: Procedure<unknown, unknown>;
     let procedureEndpoint: string;
     let input: unknown;
@@ -260,16 +253,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             () => {
                 beforeEach(() => {
                     let i = 0;
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return i += n;
-                    });
-                    spy = chai.spy(func);
+                    }));
                     procedureEndpoint = 'inproc://Procedure/Add';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -281,35 +273,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: 0',
-                            async () => { await expect(call(<string>callEndpoint, input)).to.eventually.equal(0) }
+                            async () => { await expect(call(<string>callEndpoint, input)).resolves.toEqual(0) }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -321,7 +313,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -333,7 +325,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it(
                             'should resolve: 1000',
-                            async () => { await expect(call(<string>callEndpoint, input)).to.eventually.equal(input) }
+                            async () => { await expect(call(<string>callEndpoint, input)).resolves.toEqual(input) }
                         );
 
                         afterEach(() => input = undefined);
@@ -346,7 +338,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -357,35 +349,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: 0',
-                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(0) }
+                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).resolves.toEqual(0) }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -397,7 +389,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -409,7 +401,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it(
                                 'should resolve: 1000',
-                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(input) }
+                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).resolves.toEqual(input) }
                             );
 
                             afterEach(() => input = undefined);
@@ -422,7 +414,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -441,16 +433,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             'when procedure callback: Callback<number, null> (testing nullish returns)',
             () => {
                 beforeEach(() => {
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return null;
-                    });
-                    spy = chai.spy(func);
+                    }));
                     procedureEndpoint = 'inproc://Procedure/ReturnsNull';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -462,38 +453,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -505,7 +496,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -519,7 +510,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
@@ -533,7 +524,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -544,38 +535,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -587,7 +578,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -601,7 +592,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
@@ -615,7 +606,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -634,16 +625,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             'when procedure callback: Callback<number, void> (testing nullish returns)',
             () => {
                 beforeEach(() => {
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return;
-                    });
-                    spy = chai.spy(func);
+                    }));
                     procedureEndpoint = 'inproc://Procedure/ReturnsVoid';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -655,38 +645,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -698,7 +688,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -712,7 +702,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
@@ -726,7 +716,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -737,38 +727,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -780,7 +770,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -794,7 +784,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
@@ -808,7 +798,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -837,16 +827,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             () => {
                 beforeEach(() => {
                     let i = 0;
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return i += n;
-                    });
-                    spy = chai.spy(func);
+                    }));
                     procedureEndpoint = 'ipc://procedure/add';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -858,35 +847,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: 0',
-                            async () => { await expect(call(<string>callEndpoint, input)).to.eventually.equal(0) }
+                            async () => { await expect(call(<string>callEndpoint, input)).resolves.toEqual(0) }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -898,7 +887,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -910,7 +899,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it(
                             'should resolve: 1000',
-                            async () => { await expect(call(<string>callEndpoint, input)).to.eventually.equal(input) }
+                            async () => { await expect(call(<string>callEndpoint, input)).resolves.toEqual(input) }
                         );
 
                         afterEach(() => input = undefined);
@@ -923,7 +912,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -934,35 +923,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: 0',
-                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(0) }
+                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).resolves.toEqual(0) }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -974,7 +963,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -986,7 +975,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it(
                                 'should resolve: 1000',
-                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(input) }
+                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).resolves.toEqual(input) }
                             );
 
                             afterEach(() => input = undefined);
@@ -999,7 +988,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -1018,16 +1007,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             'when procedure callback: Callback<number, null> (testing nullish returns)',
             () => {
                 beforeEach(() => {
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return null;
-                    });
-                    spy = chai.spy(func);
+                    }));
                     procedureEndpoint = 'ipc://procedure/returnsnull';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -1039,38 +1027,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -1082,7 +1070,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -1096,7 +1084,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
@@ -1110,7 +1098,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -1121,38 +1109,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -1164,7 +1152,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -1178,7 +1166,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
@@ -1192,7 +1180,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -1211,16 +1199,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             'when procedure callback: Callback<number, void> (testing nullish returns)',
             () => {
                 beforeEach(() => {
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return;
-                    });
-                    spy = chai.spy(func);
+                    }));
                     procedureEndpoint = 'ipc://procedure/returnsvoid';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -1232,38 +1219,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -1275,7 +1262,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -1289,7 +1276,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
@@ -1303,7 +1290,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -1314,38 +1301,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -1357,7 +1344,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -1371,7 +1358,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
@@ -1385,7 +1372,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -1407,16 +1394,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             () => {
                 beforeEach(() => {
                     let i = 0;
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return i += n;
-                    });
-                    spy = chai.spy(func);
+                    }));
                     procedureEndpoint = 'tcp://127.0.0.1:33333';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -1428,35 +1414,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: 0',
-                            async () => { await expect(call(<string>callEndpoint, input)).to.eventually.equal(0) }
+                            async () => { await expect(call(<string>callEndpoint, input)).resolves.toEqual(0) }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -1468,7 +1454,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -1480,7 +1466,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it(
                             'should resolve: 1000',
-                            async () => { await expect(call(<string>callEndpoint, input)).to.eventually.equal(input) }
+                            async () => { await expect(call(<string>callEndpoint, input)).resolves.toEqual(input) }
                         );
 
                         afterEach(() => input = undefined);
@@ -1493,7 +1479,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -1504,35 +1490,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: 0',
-                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(0) }
+                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).resolves.toEqual(0) }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -1544,7 +1530,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -1556,7 +1542,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it(
                                 'should resolve: 1000',
-                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(input) }
+                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).resolves.toEqual(input) }
                             );
 
                             afterEach(() => input = undefined);
@@ -1569,7 +1555,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -1588,16 +1574,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             'when procedure callback: Callback<number, null> (testing nullish returns)',
             () => {
                 beforeEach(() => {
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return null;
-                    });
-                    spy = chai.spy(func);
+                    }));
                     procedureEndpoint = 'tcp://127.0.0.1:33334';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -1609,38 +1594,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -1652,7 +1637,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -1666,7 +1651,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
@@ -1680,7 +1665,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -1691,38 +1676,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -1734,7 +1719,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -1748,7 +1733,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
@@ -1762,7 +1747,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -1781,16 +1766,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             'when procedure callback: Callback<number, void> (testing nullish returns)',
             () => {
                 beforeEach(() => {
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return;
-                    });
-                    spy = chai.spy(func);
+                    }));
                     procedureEndpoint = 'tcp://127.0.0.1:33335';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -1802,38 +1786,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -1845,7 +1829,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -1859,7 +1843,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
@@ -1873,7 +1857,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -1884,38 +1868,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -1927,7 +1911,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -1941,7 +1925,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
@@ -1955,7 +1939,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -1977,16 +1961,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             () => {
                 beforeEach(() => {
                     let i = 0;
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return i += n;
-                    });
-                    spy = chai.spy(func);
+                    }));
                     procedureEndpoint = 'ws://127.0.0.1:33333';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -1998,35 +1981,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: 0',
-                            async () => { await expect(call(<string>callEndpoint, input)).to.eventually.equal(0) }
+                            async () => { await expect(call(<string>callEndpoint, input)).resolves.toEqual(0) }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -2038,7 +2021,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -2050,7 +2033,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it(
                             'should resolve: 1000',
-                            async () => { await expect(call(<string>callEndpoint, input)).to.eventually.equal(input) }
+                            async () => { await expect(call(<string>callEndpoint, input)).resolves.toEqual(input) }
                         );
 
                         afterEach(() => input = undefined);
@@ -2063,7 +2046,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -2074,35 +2057,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: 0',
-                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(0) }
+                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).resolves.toEqual(0) }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -2114,7 +2097,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -2126,7 +2109,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it(
                                 'should resolve: 1000',
-                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).to.eventually.equal(input) }
+                                async () => { await expect(call(<string>callEndpoint, input, { ping: 100 })).resolves.toEqual(input) }
                             );
 
                             afterEach(() => input = undefined);
@@ -2139,7 +2122,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -2158,16 +2141,16 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             'when procedure callback: Callback<number, null> (testing nullish returns)',
             () => {
                 beforeEach(() => {
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return null;
-                    });
-                    spy = chai.spy(func);
+                    }));
+
                     procedureEndpoint = 'ws://127.0.0.1:33334';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -2179,38 +2162,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -2222,7 +2205,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -2236,7 +2219,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
@@ -2250,7 +2233,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -2261,38 +2244,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -2304,7 +2287,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -2318,7 +2301,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
@@ -2332,7 +2315,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -2351,16 +2334,16 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             'when procedure callback: Callback<number, void> (testing nullish returns)',
             () => {
                 beforeEach(() => {
-                    func = <Callback<unknown, unknown>>((n: number) => {
+                    fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                         if (typeof n !== 'number') {
                             throw new TypeError('Expected a number');
                         }
 
                         return;
-                    });
-                    spy = chai.spy(func);
+                    }));
+
                     procedureEndpoint = 'ws://127.0.0.1:33335';
-                    procedure = new Procedure(spy, { workers: 3 });
+                    procedure = new Procedure(fn, { workers: 3 });
                     procedure.bind(procedureEndpoint);
                 });
 
@@ -2372,38 +2355,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
-                            const data = chai.spy((data: unknown) => x = data);
+                            const data = jest.fn((data: unknown) => x = data);
                             procedure.on('data', data);
                             await call(<string>callEndpoint, input);
-                            expect(data).to.have.been.called.once;
-                            expect(x).to.equal(0);
+                            expect(data).toHaveBeenCalledTimes(1);
+                            expect(x).toEqual(0);
                         });
 
                         it(
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
                         afterEach(() => input = undefined);
 
                         describe('when verbose: true', () => {
-                            const sandbox = chai.spy.sandbox();
+                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                sandbox.on(console, 'log', () => { return });
+                                log = jest.spyOn(console, 'log').mockImplementation();
                             });
 
                             it('should call console.log', async () => {
                                 await call(<string>callEndpoint, input);
-                                expect(console.log).to.have.been.called.exactly(3);
+                                expect(log).toHaveBeenCalledTimes(3);
                             });
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                sandbox.restore();
+                                log.mockReset();
                             });
                         });
                     });
@@ -2415,7 +2398,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
 
@@ -2429,7 +2412,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should resolve: undefined',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.eventually.be.undefined
+                                    .resolves.toBeUndefined()
                             }
                         );
 
@@ -2443,7 +2426,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                             }
                         );
                     });
@@ -2454,38 +2437,38 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             it('should emit: data, with parameter: 0', async () => {
                                 let x: unknown = undefined;
-                                const data = chai.spy((data: unknown) => x = data);
+                                const data = jest.fn((data: unknown) => x = data);
                                 procedure.on('data', data);
                                 await call(<string>callEndpoint, input, { ping: 100 });
-                                expect(data).to.have.been.called.once;
-                                expect(x).to.equal(0);
+                                expect(data).toHaveBeenCalledTimes(1);
+                                expect(x).toEqual(0);
                             });
 
                             it(
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
                             afterEach(() => input = undefined);
 
                             describe('when verbose: true', () => {
-                                const sandbox = chai.spy.sandbox();
+                                let log: jest.SpyInstance;
                                 beforeEach(() => {
                                     procedure.verbose = true;
-                                    sandbox.on(console, 'log', () => { return });
+                                    log = jest.spyOn(console, 'log').mockImplementation();
                                 });
 
                                 it('should call console.log', async () => {
                                     await call(<string>callEndpoint, input, { ping: 100 });
-                                    expect(console.log).to.have.been.called();
+                                    expect(log).toHaveBeenCalled();
                                 });
 
                                 afterEach(() => {
                                     procedure.verbose = false;
-                                    sandbox.restore();
+                                    log.mockReset();
                                 });
                             });
                         });
@@ -2497,7 +2480,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
 
@@ -2511,7 +2494,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should resolve: undefined',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.eventually.be.undefined
+                                        .resolves.toBeUndefined()
                                 }
                             );
 
@@ -2525,7 +2508,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .to.be.rejectedWith('An unhandled exception was thrown during procedure execution')
+                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
                                 }
                             );
                         });
@@ -2543,8 +2526,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 });
 
 describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<boolean>', () => {
-    let func: Callback<unknown, unknown>;
-    let spy: ChaiSpies.SpyFunc1<unknown, unknown>;
+    let fn: Callback<unknown, unknown>;
     let procedure: Procedure<unknown, unknown>;
     let procedureEndpoint: string;
     let pingEndpoint: string | undefined;
@@ -2554,16 +2536,16 @@ describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: Abo
         () => {
             beforeEach(() => {
                 let i = 0;
-                func = <Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return i += n;
-                });
-                spy = chai.spy(func);
+                }));
+
                 procedureEndpoint = 'inproc://Procedure/Add';
-                procedure = new Procedure(spy, { workers: 3 });
+                procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
             });
 
@@ -2571,15 +2553,15 @@ describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: Abo
                 beforeEach(() => pingEndpoint = procedureEndpoint);
 
                 it('should not emit: data', async () => {
-                    const data = chai.spy(() => { return });
+                    const data = jest.fn();
                     procedure.on('data', data);
                     await ping(<string>pingEndpoint);
-                    expect(data).to.have.been.called.exactly(0);
+                    expect(data).not.toHaveBeenCalled();
                 });
 
                 it(
                     'should not be rejected',
-                    async () => { await expect(ping(<string>pingEndpoint)).to.not.be.rejected }
+                    async () => { await expect(ping(<string>pingEndpoint)).resolves.toBeUndefined() }
                 );
 
                 describe('when signal: already aborted AbortSignal', () => {
@@ -2594,7 +2576,7 @@ describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: Abo
                         'should throw: ProcedureCancelledError',
                         async () => {
                             await expect(ping(<string>pingEndpoint, 500, false, ac.signal))
-                                .to.be.rejectedWith('The operation was cancelled by the client')
+                                .rejects.toMatchObject({ message: 'The operation was cancelled by the client.' })
                         }
                     );
                 });
@@ -2610,8 +2592,8 @@ describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: Abo
 });
 
 describe('tryPing(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<boolean>', () => {
-    let func: Callback<unknown, unknown>;
-    let spy: ChaiSpies.SpyFunc1<unknown, unknown>;
+    let fn: Callback<unknown, unknown>;
+
     let procedure: Procedure<unknown, unknown>;
     let procedureEndpoint: string;
     let pingEndpoint: string | undefined;
@@ -2621,16 +2603,16 @@ describe('tryPing(endpoint: string, timeout: number | undefined = 100, signal?: 
         () => {
             beforeEach(() => {
                 let i = 0;
-                func = <Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return i += n;
-                });
-                spy = chai.spy(func);
+                }));
+
                 procedureEndpoint = 'inproc://Procedure/Add';
-                procedure = new Procedure(spy, { workers: 3 });
+                procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
             });
 
@@ -2638,15 +2620,15 @@ describe('tryPing(endpoint: string, timeout: number | undefined = 100, signal?: 
                 beforeEach(() => pingEndpoint = procedureEndpoint);
 
                 it('should not emit: data', async () => {
-                    const data = chai.spy(() => { return });
+                    const data = jest.fn();
                     procedure.on('data', data);
                     await tryPing(<string>pingEndpoint);
-                    expect(data).to.have.been.called.exactly(0);
+                    expect(data).not.toHaveBeenCalled();
                 });
 
                 it(
                     'should resolve: true',
-                    async () => { await expect(tryPing(<string>pingEndpoint)).to.eventually.be.true.and.to.not.be.rejected }
+                    async () => { await expect(tryPing(<string>pingEndpoint)).resolves.toEqual(true) }
                 );
 
                 describe('when signal: already aborted AbortSignal', () => {
@@ -2661,7 +2643,7 @@ describe('tryPing(endpoint: string, timeout: number | undefined = 100, signal?: 
                         'should resolve: false',
                         async () => {
                             await expect(tryPing(<string>pingEndpoint, 500, false, ac.signal))
-                                .to.eventually.be.false.and.to.not.be.rejected
+                                .resolves.toEqual(false)
                         }
                     );
                 });
@@ -2683,27 +2665,27 @@ describe('isPing(object: unknown): object is Ping', () => {
 
     describe('when object: { ping: \'foobar\' }', () => {
         beforeEach(() => object = { ping: 'foobar' });
-        it('should return: true', () => { expect(isPing(object)).to.be.true });
+        it('should return: true', () => { expect(isPing(object)).toEqual(true) });
     });
 
     describe('when object: undefined', () => {
         beforeEach(() => object = undefined);
-        it('should return: false', () => { expect(isPing(object)).to.be.false });
+        it('should return: false', () => { expect(isPing(object)).toEqual(false) });
     });
 
     describe('when object: null', () => {
         beforeEach(() => object = null);
-        it('should return: false', () => { expect(isPing(object)).to.be.false });
+        it('should return: false', () => { expect(isPing(object)).toEqual(false) });
     });
 
     describe('when object: instanceof TypeError', () => {
         beforeEach(() => object = new TypeError());
-        it('should return: true', () => { expect(isPing(object)).to.be.false });
+        it('should return: true', () => { expect(isPing(object)).toEqual(false) });
     });
 
     describe('when object: { name: \'Foo\', message: \'Bar\' }', () => {
         beforeEach(() => object = { name: 'Foo', message: 'Bar' });
-        it('should return: false', () => { expect(isPing(object)).to.be.false });
+        it('should return: false', () => { expect(isPing(object)).toEqual(false) });
     });
 });
 
