@@ -1,9 +1,9 @@
 {
   "name": "@procedure-rpc/procedure.js",
-  "version": "0.8.0-alpha.2",
+  "version": "0.8.0-alpha.3",
   "title": "procedure.js",
   "description": "The simple RPC framework for Node.js.",
-  "main": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./types/index.d.mts",
   "author": "Tobey Blaber (https://github.com/toebeann)",
@@ -60,10 +60,10 @@
     "typescript": "^4.7.4"
   },
   "files": [
-    "dist/**/*.mjs",
-    "dist/**/*.mjs.map",
-    "types/**/*.d.mts",
-    "types/**/*.d.mts.map"
+    "dist/**/*.*js",
+    "dist/**/*.*js.map",
+    "types/**/*.d.*ts",
+    "types/**/*.d.*ts.map"
   ],
   "keywords": [
     "RPC",
