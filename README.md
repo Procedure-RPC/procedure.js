@@ -3,7 +3,7 @@
 # procedure.js 🔗
 The simple RPC framework for Node.js.
 
-[![npm package version](https://img.shields.io/npm/v/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on npm") [![npm package downloads](https://img.shields.io/npm/dw/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on npm") [![API docs](https://img.shields.io/badge/docs-v0.7.0-informational.svg)](https://procedure-rpc.github.io/procedure.js "Read the documentation on Github Pages")
+[![npm package version](https://img.shields.io/npm/v/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on npm") [![npm package downloads](https://img.shields.io/npm/dw/@procedure-rpc/procedure.js.svg)](https://npmjs.org/package/@procedure-rpc/procedure.js "View procedure.js on npm") [![API docs](https://img.shields.io/badge/docs-v0.8.0-informational.svg)](https://procedure-rpc.github.io/procedure.js "Read the documentation on Github Pages")
 
 [![Code coverage](https://img.shields.io/codecov/c/github/procedure-rpc/procedure.js?label=code%20coverage)](https://codecov.io/gh/procedure-rpc/procedure.js "View code coverage on Codecov") [![code quality](https://img.shields.io/codefactor/grade/github/procedure-rpc/procedure.js.svg)](https://www.codefactor.io/repository/github/procedure-rpc/procedure.js "Check code quality on CodeFactor") [![minzip](https://img.shields.io/bundlephobia/minzip/@procedure-rpc/procedure.js.svg)](https://bundlephobia.com/package/@procedure-rpc/procedure.js "View procedure.js on Bundlephobia")
 
