@@ -8,8 +8,7 @@
     "declarationDir": "./types",
     "sourceMap": true,
     "strictNullChecks": true,
-    "isolatedModules": true,
-    "module": "es6"
+    "isolatedModules": true
   },
   "include": [
     "./src"
