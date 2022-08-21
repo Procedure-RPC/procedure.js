@@ -1,6 +1,6 @@
 {
   "name": "@procedure-rpc/procedure.js",
-  "version": "0.8.0-alpha.1",
+  "version": "0.8.0-alpha.2",
   "title": "procedure.js",
   "description": "The simple RPC framework for Node.js.",
   "main": "./dist/index.mjs",
