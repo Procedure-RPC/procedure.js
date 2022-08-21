@@ -1,13 +1,16 @@
 {
   "name": "@procedure-rpc/procedure.js",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "title": "procedure.js",
   "description": "The simple RPC framework for Node.js.",
   "main": "./dist/index.js",
   "types": "./types/index.d.ts",
   "author": "Tobey Blaber (https://github.com/toebeann)",
   "homepage": "https://procedure-rpc.github.io/procedure.js",
-  "repository": "github:procedure-rpc/procedure.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/procedure-rpc/procedure.js.git"
+  },
   "funding": [
     "https://github.com/sponsors/toebeann",
     "https://paypal.me/tobeyblaber"
