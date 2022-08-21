@@ -69,7 +69,7 @@ With [implementations in multiple languages](#language-implementations), applica
 ## Install
 
 ### [npm](https://www.npmjs.com/package/@procedure-rpc/procedure.js "npm is a package manager for JavaScript")
-- Install : `npm install --save @procedure-rpc/procedure.js`
+- Install : `npm install @procedure-rpc/procedure.js`
 - Import: `import Procedure from '@procedure-rpc/procedure.js'`
 - Require: `const { Procedure } = require('@procedure-rpc/procedure.js')`
 
