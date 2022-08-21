@@ -49,5 +49,8 @@ jobs:
         continue-on-error: true
         run: npm list
 
+      - name: Install dependencies
+        run: npm ci
+
       - name: Run tests
-        run: npm install-ci-test
+        run: npm test

@@ -44,7 +44,7 @@ jobs:
         run: npm ci
 
       - name: Generate code coverage reports
-        run: npm run test:coverage
+        run: npm test -- --coverage
         continue-on-error: true
 
       - name: Publish code coverage to codecov 🚀
