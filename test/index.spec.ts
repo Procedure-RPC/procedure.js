@@ -1,6 +1,6 @@
 import { ExtensionCodec } from '@msgpack/msgpack';
 import Procedure, { call, ping, tryPing, isPing, Callback } from '../src';
-import { ProcedureInternalServerError } from '../src/errors';
+import { ProcedureErrorCodes, ProcedureInternalServerError } from '../src/errors';
 
 describe('Procedure', () => {
     describe('constructor(endpoint: string, callback: Callback, options: Partial<ProcedureOptions>)', () => {
@@ -313,7 +313,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -338,7 +338,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -389,7 +389,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -414,7 +414,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -496,7 +496,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -524,7 +524,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -578,7 +578,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -606,7 +606,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -688,7 +688,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -716,7 +716,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -770,7 +770,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -798,7 +798,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -887,7 +887,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -912,7 +912,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -963,7 +963,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -988,7 +988,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -1070,7 +1070,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -1098,7 +1098,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -1152,7 +1152,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -1180,7 +1180,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -1262,7 +1262,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -1290,7 +1290,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -1344,7 +1344,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -1372,7 +1372,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -1454,7 +1454,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -1479,7 +1479,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -1530,7 +1530,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -1555,7 +1555,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -1637,7 +1637,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -1665,7 +1665,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -1719,7 +1719,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -1747,7 +1747,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -1829,7 +1829,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -1857,7 +1857,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -1911,7 +1911,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -1939,7 +1939,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -2021,7 +2021,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -2046,7 +2046,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -2097,7 +2097,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -2122,7 +2122,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -2205,7 +2205,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -2233,7 +2233,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -2287,7 +2287,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -2315,7 +2315,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -2398,7 +2398,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
 
@@ -2426,7 +2426,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             'should throw: ProcedureExecutionError',
                             async () => {
                                 await expect(call(<string>callEndpoint, input))
-                                    .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                    .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                             }
                         );
                     });
@@ -2480,7 +2480,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
 
@@ -2508,7 +2508,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                                 'should throw: ProcedureExecutionError',
                                 async () => {
                                     await expect(call(<string>callEndpoint, input, { ping: 100 }))
-                                        .rejects.toMatchObject({ message: 'An unhandled exception was thrown during procedure execution.' })
+                                        .rejects.toMatchObject({ code: ProcedureErrorCodes.EXECUTION_ERROR })
                                 }
                             );
                         });
@@ -2576,7 +2576,7 @@ describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: Abo
                         'should throw: ProcedureCancelledError',
                         async () => {
                             await expect(ping(<string>pingEndpoint, 500, false, ac.signal))
-                                .rejects.toMatchObject({ message: 'The operation was cancelled by the client.' })
+                                .rejects.toMatchObject({ code: ProcedureErrorCodes.CANCELLED })
                         }
                     );
                 });
