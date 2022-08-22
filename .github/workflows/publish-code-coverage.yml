@@ -2,8 +2,13 @@ name: publish code coverage
 
 on:
   push:
-    branches: ['main']
-    paths: ['**.ts', 'jest.config.js*', '.github/workflows/publish-code-coverage.yml']
+    branches: ["main"]
+    paths:
+      [
+        "**.ts",
+        "jest.config.js*",
+        ".github/workflows/publish-code-coverage.yml",
+      ]
   workflow_dispatch:
 
 jobs:
