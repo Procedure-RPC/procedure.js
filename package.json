@@ -83,7 +83,7 @@
     "procedurerpc"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=16.0.0"
   },
   "os": [
     "win32",
