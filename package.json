@@ -11,6 +11,9 @@
     "type": "git",
     "url": "https://github.com/procedure-rpc/procedure.js.git"
   },
+  "bugs": {
+    "url": "https://github.com/procedure-rpc/procedure.js/issues"
+  },
   "funding": [
     "https://github.com/sponsors/toebeann",
     "https://paypal.me/tobeyblaber"
