@@ -1,0 +1,7 @@
+{
+    "exclude": "**/*+(.spec|.test).ts",
+    "entryPoints": "src",
+    "out": "docs",
+    "entryPointStrategy": "expand"
+  }
+  

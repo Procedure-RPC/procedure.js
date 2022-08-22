@@ -24,7 +24,7 @@
     "build": "tsc",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-    "docs": "typedoc src --entryPointStrategy expand"
+    "docs": "typedoc"
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.7.2",
