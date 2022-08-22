@@ -67,7 +67,7 @@ With [implementations in multiple languages](#language-implementations), applica
 ## Install
 
 ### [npm](https://www.npmjs.com/package/@procedure-rpc/procedure.js "npm is a package manager for JavaScript")
-`npm install @procedure-rpc/procedure.js`
+`npm i @procedure-rpc/procedure.js`
 
 ## Usage
 With Procedure, setting up your function to be called from another process (whether remote or local) is remarkably simple:
