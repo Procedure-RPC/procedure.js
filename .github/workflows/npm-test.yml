@@ -2,11 +2,23 @@ name: npm test
 
 on:
   push:
-    branches: ['main']
-    paths: ['**.ts', 'package-lock.json', '.github/workflows/npm-test.yml']
+    branches: ["main"]
+    paths:
+      [
+        "**.ts",
+        "jest.config.js*",
+        "package-lock.json",
+        ".github/workflows/npm-test.yml",
+      ]
   pull_request:
-    branches: ['main']
-    paths: ['**.ts', 'package-lock.json', '.github/workflows/npm-test.yml']
+    branches: ["main"]
+    paths:
+      [
+        "**.ts",
+        "jest.config.js*",
+        "package-lock.json",
+        ".github/workflows/npm-test.yml",
+      ]
   workflow_dispatch:
 
 jobs:
