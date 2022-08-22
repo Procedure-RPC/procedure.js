@@ -48,13 +48,13 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     protected sockets: Socket[] = [];
 
     /**
-     * @inheritDoc ProcedureDefinitionOptions.verbose
+     * @inheritDoc
      */
     get verbose() { return this.options.verbose; }
     set verbose(value) { this.options.verbose = value; }
 
     /**
-     * @inheritDoc ProcedureDefinitionOptions.workers
+     * @inheritDoc
      */
     get workers() { return this.options.workers; }
     set workers(value) {
@@ -64,19 +64,19 @@ export class Procedure<Input extends Nullable = undefined, Output extends Nullab
     }
 
     /**
-     * @inheritDoc ProcedureDefinitionOptions.extensionCodec
+     * @inheritDoc
      */
     get extensionCodec() { return this.options.extensionCodec; }
     set extensionCodec(value) { this.options.extensionCodec = value; }
 
     /**
-     * @inheritDoc ProcedureOptions.optionalParameterSupport
+     * @inheritDoc
      */
     get optionalParameterSupport() { return this.options.optionalParameterSupport; }
     set optionalParameterSupport(value) { this.options.optionalParameterSupport = value; }
 
     /**
-     * @inheritDoc ProcedureOptions.ignoreUndefinedProperties
+     * @inheritDoc
      */
     get ignoreUndefinedProperties() { return this.options.ignoreUndefinedProperties; }
     set ignoreUndefinedProperties(value) { this.options.ignoreUndefinedProperties = value; }
