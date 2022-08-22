@@ -81,5 +81,13 @@
     "msgpack",
     "procedure-rpc",
     "procedurerpc"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "os": [
+    "win32",
+    "linux",
+    "darwin"
   ]
 }
