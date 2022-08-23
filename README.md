@@ -156,8 +156,8 @@ To handle these inconsistencies, we coerce a msgpack decoded `null` to `undefine
 To disable this behavior, you can [set `optionalParameterSupport` to `false`](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureOptions.html#optionalParameterSupport) for either procedure definitions or calls, or both:
 
 ```js
-const procedure = new Procedure(x => { ... }, { optionalParameterSupport: false });
-procedure.bind('tcp://*:54321');
+const procedure = new Procedure((x) => x, { optionalParameterSupport: false });
+procedure.bind("tcp://*:54321");
 ```
 
 ```js
@@ -175,8 +175,8 @@ This operation adds some overhead, and any code that relies on the presence of a
 To disable this behavior, you can [set `ignoreUndefinedProperties` to `false`](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureOptions.html#ignoreUndefinedProperties) for either procedure definitions or calls, or both:
 
 ```js
-const procedure = new Procedure(x => { ... }, { ignoreUndefinedProperties: false });
-procedure.bind('tcp://*:54321');
+const procedure = new Procedure((x) => x, { ignoreUndefinedProperties: false });
+procedure.bind("tcp://*:54321");
 ```
 
 ```js
@@ -359,9 +359,7 @@ If you do need to make breaking changes to a procedure, it is recommended to eit
 
   myFunctionV2(x) {
       if (isNaN(x)) {
-          ...
           // do stuff with x when it is NaN
-          ...
           return true;
       }
       // breaking change, we no longer return a boolean in all cases
@@ -385,9 +383,7 @@ If you do need to make breaking changes to a procedure, it is recommended to eit
 
   myFunctionV2(x) {
       if (isNaN(x)) {
-          ...
           // do stuff with x when it is NaN
-          ...
           return true;
       }
       // breaking change, we no longer return a boolean in all cases
