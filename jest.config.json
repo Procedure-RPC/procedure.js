@@ -1,13 +1,7 @@
 {
   "preset": "ts-jest",
   "testEnvironment": "node",
-  "coverageReporters": [
-    "html",
-    "text",
-    "cobertura",
-    "json",
-    "lcovonly"
-  ],
+  "coverageReporters": ["html", "text", "cobertura", "json", "lcovonly"],
   "coverageThreshold": {
     "global": {
       "statements": 90,
