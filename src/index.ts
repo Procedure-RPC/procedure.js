@@ -520,7 +520,7 @@ export function isPing(object: unknown): object is Ping {
 }
 
 /**
- * Asynchronously calls a {@link Procedure} at a given endpoint with given a input.
+ * Asynchronously calls a {@link Procedure} at a given endpoint with a given input.
  * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
  * @param {Nullable} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
  * @param {Partial<ProcedureCallOptions>} [options] Options for calling a {@link Procedure}. Defaults to `{}`.
