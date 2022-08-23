@@ -278,9 +278,9 @@ try {
   console.error(e?.name, "-", e?.message, e?.data);
 }
 // outputs ProcedureExecutionError - Expected n to be a number, got 'object' {
-//     n: {
-//         foo: 'bar'
-//     }
+//   n: {
+//     foo: 'bar'
+//   }
 // }
 ```
 
