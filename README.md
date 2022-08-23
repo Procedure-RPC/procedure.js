@@ -111,8 +111,7 @@ const procedure = new Procedure(async () => {
       `${response.status}: ${response.statusText}`
     );
   }
-});
-procedure.bind("tcp://127.0.0.1:8888");
+}).bind("tcp://127.0.0.1:8888");
 ```
 
 ### Parameters and return types
