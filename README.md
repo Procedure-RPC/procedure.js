@@ -246,11 +246,11 @@ try {
 The full API reference for procedure.js is [available on GitHub Pages](https://procedure-rpc.github.io/procedure.js).
 
 ### Quick links
-- [Initializing a procedure](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#constructor)
-  - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureDefinitionOptions.html)
-- [Binding a procedure to an endpoint](https://procedure-rpc.github.io/procedure.js/classes/procedure.Procedure.html#bind)
-- [Calling a procedure](https://procedure-rpc.github.io/procedure.js/functions/procedure.call.html)
-  - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureCallOptions.html)
+- [Initializing a procedure](https://procedure-rpc.github.io/procedure.js/classes/index.Procedure.html#constructor)
+  - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/index.ProcedureDefinitionOptions.html)
+- [Binding a procedure to an endpoint](https://procedure-rpc.github.io/procedure.js/classes/index.Procedure.html#bind)
+- [Calling a procedure](https://procedure-rpc.github.io/procedure.js/classes/index.Procedure.html#call)
+  - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/index.ProcedureCallOptions.html)
 
 ## Transports: More than just TCP!
 The examples in this readme all use TCP to demonstrate the most common use case for RPC. However, Procedure is built on top of [nanomsg](https://nanomsg.org/), which means it supports all of the same transports that nanomsg does:
