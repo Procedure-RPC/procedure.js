@@ -71,7 +71,9 @@ With [implementations in multiple languages](#language-implementations), applica
 
 ### [npm](https://www.npmjs.com/package/@procedure-rpc/procedure.js "npm is a package manager for JavaScript")
 
-`npm i @procedure-rpc/procedure.js`
+```shell
+npm i @procedure-rpc/procedure.js
+```
 
 ## Usage
 
