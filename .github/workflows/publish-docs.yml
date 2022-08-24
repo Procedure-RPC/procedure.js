@@ -22,6 +22,7 @@ jobs:
         run: |
           mv gh-pages/docs docs
           rm -rf gh-pages
+        continue-on-error: true
 
       - name: Setup node.js @ 16
         uses: actions/setup-node@v3
