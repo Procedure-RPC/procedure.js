@@ -9,8 +9,19 @@ jobs:
   deploy-docs:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout main
         uses: actions/checkout@v3
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: "./gh-pages"
+
+      - name: Fix folder structure
+        run: |
+          mv gh-pages/docs docs
+          rm -rf gh-pages
 
       - name: Setup node.js @ 16
         uses: actions/setup-node@v3
@@ -42,9 +53,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check build compiles
-        run: npm run build
-
       - name: Generate API reference
         run: npm run docs
 
@@ -52,3 +60,4 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: docs
+          target-folder: docs
