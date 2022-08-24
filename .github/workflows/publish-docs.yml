@@ -19,10 +19,11 @@ jobs:
           path: "./gh-pages"
 
       - name: Fix folder structure
-        run: |
-          mv gh-pages/docs docs
-          rm -rf gh-pages
+        run: mv gh-pages/docs docs
         continue-on-error: true
+
+      - name: Clean up gh-pages
+        run: rm -rf gh-pages
 
       - name: Setup node.js @ 16
         uses: actions/setup-node@v3
