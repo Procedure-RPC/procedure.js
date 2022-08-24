@@ -292,11 +292,11 @@ The full API reference for procedure.js is [available on GitHub Pages](https://p
 
 ### Quick links
 
-- [Initializing a procedure](https://procedure-rpc.github.io/procedure.js/classes/index.Procedure.html#constructor)
-  - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/index.ProcedureDefinitionOptions.html)
-- [Binding a procedure to an endpoint](https://procedure-rpc.github.io/procedure.js/classes/index.Procedure.html#bind)
-- [Calling a procedure](https://procedure-rpc.github.io/procedure.js/classes/index.Procedure.html#call)
-  - [Options](https://procedure-rpc.github.io/procedure.js/interfaces/index.ProcedureCallOptions.html)
+- [Initializing a procedure](https://procedure-rpc.github.io/procedure.js/stable/classes/index.Procedure.html#constructor)
+  - [Options](https://procedure-rpc.github.io/procedure.js/stable/interfaces/index.ProcedureDefinitionOptions.html)
+- [Binding a procedure to an endpoint](https://procedure-rpc.github.io/stable/procedure.js/classes/index.Procedure.html#bind)
+- [Calling a procedure](https://procedure-rpc.github.io/procedure.js/stable/classes/index.Procedure.html#call)
+  - [Options](https://procedure-rpc.github.io/procedure.js/stable/interfaces/index.ProcedureCallOptions.html)
 
 ## Transports: More than just TCP!
 
