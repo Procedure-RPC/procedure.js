@@ -633,7 +633,7 @@ export function isPing(object: unknown): object is Ping {
 /**
  * Asynchronously calls a {@link Procedure} at a given endpoint with a given input.
  * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
- * @param {Nullable} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
+ * @param {unknown} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
  * @param {Partial<ProcedureCallOptions>} [options] Options for calling a {@link Procedure}. Defaults to `{}`.
  * @returns {Promise<Output>} A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
  * which when resolved passes the output value to the
@@ -832,7 +832,7 @@ export async function tryPing(
 /**
  * Asynchronously encodes and transmits the given input to the endpoint and retrieves the response.
  * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
- * @param {Nullable} input An input parameter to pass to the {@link Procedure}.
+ * @param {unknown} input An input parameter to pass to the {@link Procedure}.
  * @param {ProcedureCallOptions} options Options for calling a {@link Procedure}.
  * @returns {Promise<Response<Output>>} A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
  * which when resolved passes the {@link Response<Output> response} to the
