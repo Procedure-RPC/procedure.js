@@ -193,21 +193,6 @@ export class Procedure<Input = undefined, Output = undefined>
     }
 
     /**
-     * @deprecated alias of {@link call}. Slated for removal from API by v1.0
-     */
-    static call = call;
-
-    /**
-     * @deprecated alias of {@link ping}. Slated for removal from API by v1.0
-     */
-    static ping = ping;
-
-    /**
-     * @deprecated alias of {@link tryPing}. Slated for removal from API by v1.0
-     */
-    static tryPing = tryPing;
-
-    /**
      * Attempts to decode the given [Buffer](https://nodejs.org/api/buffer.html#buffer).
      * @param {Buffer} buffer The [Buffer](https://nodejs.org/api/buffer.html#buffer) to decode.
      * @returns {{ input: Input, error?: never } | { input?: never, error: unknown }} If successful, an object of shape `{ input: Input | Ping }`, otherwise `{ error: unknown }`.
