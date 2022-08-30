@@ -1,5 +1,5 @@
 import { ExtensionCodec } from '@msgpack/msgpack';
-import Procedure, { call, ping, tryPing, isPing, Callback } from '../src';
+import Procedure, { call, ping, tryPing, isPing } from '../src';
 import {
     ProcedureErrorCodes,
     ProcedureInternalServerError,
@@ -329,7 +329,7 @@ describe('Procedure', () => {
 });
 
 describe('call(endpoint: string, input: Input | null, options: Partial<ProcedureCallOptions>): Promise<Output>', () => {
-    let fn: Callback<unknown, unknown>;
+    let fn: ReturnType<typeof jest.fn>;
     let procedure: Procedure<unknown, unknown>;
     let procedureEndpoint: string;
     let input: unknown;
@@ -339,13 +339,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
         describe('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
             beforeEach(() => {
                 let i = 0;
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return (i += n);
-                }));
+                });
                 procedureEndpoint = 'inproc://Procedure/Add';
                 procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
@@ -528,13 +528,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
         describe('when procedure callback: Callback<number, null> (testing nullish returns)', () => {
             beforeEach(() => {
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return null;
-                }));
+                });
                 procedureEndpoint = 'inproc://Procedure/ReturnsNull';
                 procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
@@ -717,13 +717,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
         describe('when procedure callback: Callback<number, void> (testing nullish returns)', () => {
             beforeEach(() => {
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return;
-                }));
+                });
                 procedureEndpoint = 'inproc://Procedure/ReturnsVoid';
                 procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
@@ -916,13 +916,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
         describe('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
             beforeEach(() => {
                 let i = 0;
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return (i += n);
-                }));
+                });
                 procedureEndpoint = 'ipc://procedure/add';
                 procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
@@ -1105,13 +1105,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
         describe('when procedure callback: Callback<number, null> (testing nullish returns)', () => {
             beforeEach(() => {
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return null;
-                }));
+                });
                 procedureEndpoint = 'ipc://procedure/returnsnull';
                 procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
@@ -1294,13 +1294,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
         describe('when procedure callback: Callback<number, void> (testing nullish returns)', () => {
             beforeEach(() => {
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return;
-                }));
+                });
                 procedureEndpoint = 'ipc://procedure/returnsvoid';
                 procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
@@ -1486,13 +1486,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
         describe('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
             beforeEach(() => {
                 let i = 0;
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return (i += n);
-                }));
+                });
                 procedureEndpoint = 'tcp://127.0.0.1:33333';
                 procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
@@ -1675,13 +1675,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
         describe('when procedure callback: Callback<number, null> (testing nullish returns)', () => {
             beforeEach(() => {
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return null;
-                }));
+                });
                 procedureEndpoint = 'tcp://127.0.0.1:33334';
                 procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
@@ -1864,13 +1864,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
         describe('when procedure callback: Callback<number, void> (testing nullish returns)', () => {
             beforeEach(() => {
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return;
-                }));
+                });
                 procedureEndpoint = 'tcp://127.0.0.1:33335';
                 procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
@@ -2056,13 +2056,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
         describe('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
             beforeEach(() => {
                 let i = 0;
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return (i += n);
-                }));
+                });
                 procedureEndpoint = 'ws://127.0.0.1:33333';
                 procedure = new Procedure(fn, { workers: 3 });
                 procedure.bind(procedureEndpoint);
@@ -2245,13 +2245,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
         describe('when procedure callback: Callback<number, null> (testing nullish returns)', () => {
             beforeEach(() => {
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return null;
-                }));
+                });
 
                 procedureEndpoint = 'ws://127.0.0.1:33334';
                 procedure = new Procedure(fn, { workers: 3 });
@@ -2435,13 +2435,13 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
         describe('when procedure callback: Callback<number, void> (testing nullish returns)', () => {
             beforeEach(() => {
-                fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+                fn = jest.fn((n: number) => {
                     if (typeof n !== 'number') {
                         throw new TypeError('Expected a number');
                     }
 
                     return;
-                }));
+                });
 
                 procedureEndpoint = 'ws://127.0.0.1:33335';
                 procedure = new Procedure(fn, { workers: 3 });
@@ -2626,7 +2626,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 });
 
 describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<boolean>', () => {
-    let fn: Callback<unknown, unknown>;
+    let fn: ReturnType<typeof jest.fn>;
     let procedure: Procedure<unknown, unknown>;
     let procedureEndpoint: string;
     let pingEndpoint: string | undefined;
@@ -2634,13 +2634,13 @@ describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: Abo
     describe('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
         beforeEach(() => {
             let i = 0;
-            fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+            fn = jest.fn((n: number) => {
                 if (typeof n !== 'number') {
                     throw new TypeError('Expected a number');
                 }
 
                 return (i += n);
-            }));
+            });
 
             procedureEndpoint = 'inproc://Procedure/Add';
             procedure = new Procedure(fn, { workers: 3 });
@@ -2690,8 +2690,7 @@ describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: Abo
 });
 
 describe('tryPing(endpoint: string, timeout: number | undefined = 100, signal?: AbortSignal): Promise<boolean>', () => {
-    let fn: Callback<unknown, unknown>;
-
+    let fn: ReturnType<typeof jest.fn>;
     let procedure: Procedure<unknown, unknown>;
     let procedureEndpoint: string;
     let pingEndpoint: string | undefined;
@@ -2699,13 +2698,13 @@ describe('tryPing(endpoint: string, timeout: number | undefined = 100, signal?: 
     describe('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
         beforeEach(() => {
             let i = 0;
-            fn = jest.fn(<Callback<unknown, unknown>>((n: number) => {
+            fn = jest.fn((n: number) => {
                 if (typeof n !== 'number') {
                     throw new TypeError('Expected a number');
                 }
 
                 return (i += n);
-            }));
+            });
 
             procedureEndpoint = 'inproc://Procedure/Add';
             procedure = new Procedure(fn, { workers: 3 });

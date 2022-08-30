@@ -126,13 +126,13 @@ export class Procedure<Input = undefined, Output = undefined>
 
     /**
      * Initializes a new {@link Procedure}.
-     * @param {Callback<Input, Output>} callback The underlying callback function powering the procedure itself. The callback may be asynchronous.
+     * @param {(input: Input) => Output} callback The underlying callback function powering the procedure itself. The callback may be asynchronous.
      * @param {Partial<ProcedureDefinitionOptions>} [options] Options for a {@link Procedure}. Defaults to `{}`.
      * @template Input Type of input parameter the procedure accepts. Defaults to `undefined`.
      * @template Output Type of output value the procedure returns. Defaults to `undefined`.
      */
     constructor(
-        protected callback: Callback<Input, Output>,
+        protected callback: (input: Input) => Output,
         options: Partial<ProcedureDefinitionOptions> = {}
     ) {
         super();
@@ -469,16 +469,6 @@ export class Procedure<Input = undefined, Output = undefined>
     }
 }
 export default Procedure;
-
-/**
- * Represents a simple callback function which can take a single input parameter.
- * @template Input The type of input parameter the callback accepts. Defaults to `undefined`.
- * @template Output The type of output value the callback returns. Defaults to `undefined`.
- * @see {@link Procedure}
- */
-export type Callback<Input = undefined, Output = undefined> = (
-    input: Input
-) => Output;
 
 /**
  * A response from a {@link call Procedure call}.
