@@ -31,14 +31,13 @@ const uuidNamespace = uuidv5(homepage, uuidv5.URL);
  * Allows you to turn a function or callback into a procedure, which can be called via the transport specified.
  * @template Input Type of input parameter the procedure accepts. Defaults to `undefined`.
  * @template Output Type of output value the procedure returns. Defaults to `undefined`.
- * @see [TypedEmitter](https://github.com/andywer/typed-emitter#readme)
+ * @see {@link https://github.com/andywer/typed-emitter#readme TypedEmitter}
  */
 export class Procedure<Input = undefined, Output = undefined>
     extends (EventEmitter as {
         new <Input>(): TypedEmitter<ProcedureEvents<Input>>;
     })<Input>
-    implements ProcedureDefinitionOptions
-{
+    implements ProcedureDefinitionOptions {
     #endpoint?: string;
     /**
      * The endpoint at which the {@link Procedure}, when {@link bind bound}, can be {@link call called}.
@@ -162,7 +161,7 @@ export class Procedure<Input = undefined, Output = undefined>
         for (let i = 0; i < this.workers; i++) {
             const socket =
                 this.sockets[
-                    this.sockets.push(createSocket('rep', { ipv6 })) - 1
+                this.sockets.push(createSocket('rep', { ipv6 })) - 1
                 ];
             socket
                 .on('data', (data: Buffer) =>
@@ -193,8 +192,8 @@ export class Procedure<Input = undefined, Output = undefined>
     }
 
     /**
-     * Attempts to decode the given [Buffer](https://nodejs.org/api/buffer.html#buffer).
-     * @param {Buffer} buffer The [Buffer](https://nodejs.org/api/buffer.html#buffer) to decode.
+     * Attempts to decode the given {@link https://nodejs.org/api/buffer.html#buffer Buffer}.
+     * @param {Buffer} buffer The {@link https://nodejs.org/api/buffer.html#buffer Buffer} to decode.
      * @returns {{ input: Input, error?: never } | { input?: never, error: unknown }} If successful, an object of shape `{ input: Input | Ping }`, otherwise `{ error: unknown }`.
      */
     #tryDecodeInput(
@@ -220,9 +219,9 @@ export class Procedure<Input = undefined, Output = undefined>
     /**
      * Attempts to asynchronously call the {@link Procedure.callback Procedure's callback} and return a response containing its output value.
      * @param {Input} input An input parameter to pass to the {@link Procedure.callback callback}.
-     * @returns {Promise<Response<Output>>} A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+     * @returns {Promise<Response<Output>>} A {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise Promise}
      * which when resolved passes the response to the
-     * [then](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then) handler(s).
+     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then then} handler(s).
      */
     async #tryGetCallbackResponse(input: Input): Promise<Response<Output>> {
         try {
@@ -230,9 +229,9 @@ export class Procedure<Input = undefined, Output = undefined>
                 output:
                     (await this.callback(
                         input ??
-                            ((this.optionalParameterSupport
-                                ? undefined
-                                : input) as Input)
+                        ((this.optionalParameterSupport
+                            ? undefined
+                            : input) as Input)
                     )) ?? null,
             };
         } catch (e) {
@@ -255,7 +254,7 @@ export class Procedure<Input = undefined, Output = undefined>
     /**
      * Attempts to encode the given response for transmission back to the {@link Procedure Procedure's} caller.
      * @param {Response<Output>} response The response to encode.
-     * @returns {Buffer} A [Buffer](https://nodejs.org/api/buffer.html#buffer) containing the encoded response.
+     * @returns {Buffer} A {@link https://nodejs.org/api/buffer.html#buffer Buffer} containing the encoded response.
      */
     #tryEncodeResponse(response: Response<Output>): Buffer {
         try {
@@ -285,9 +284,9 @@ export class Procedure<Input = undefined, Output = undefined>
 
     /**
      * Attempts to send the encoded buffer back to the {@link Procedure Procedure's} caller.
-     * @param {Buffer} buffer A [Buffer](https://nodejs.org/api/buffer.html#buffer) containing the encoded response.
+     * @param {Buffer} buffer A {@link https://nodejs.org/api/buffer.html#buffer Buffer} containing the encoded response.
      * @param {Socket} socket The socket through which to send the response.
-     * @returns {boolean} `true` when the encoded [Buffer](https://nodejs.org/api/buffer.html#buffer) was successfully sent, otherwise `false`.
+     * @returns {boolean} `true` when the encoded {@link https://nodejs.org/api/buffer.html#buffer Buffer} was successfully sent, otherwise `false`.
      */
     #trySendBuffer(buffer: Buffer, socket: Socket): boolean {
         try {
@@ -304,7 +303,7 @@ export class Procedure<Input = undefined, Output = undefined>
 
     /**
      * Asynchrously handles the socket's data event, representing requests to call the {@link Procedure}.
-     * @param {Buffer} data The encoded input [Buffer](https://nodejs.org/api/buffer.html#buffer).
+     * @param {Buffer} data The encoded input {@link https://nodejs.org/api/buffer.html#buffer Buffer}.
      * @param {Socket} socket The socket the data was received on.
      */
     async #onRepSocketData(data: Buffer, socket: Socket): Promise<void> {
@@ -515,12 +514,12 @@ export interface ProcedureDefinitionOptions extends ProcedureOptions {
     /**
      * The number of workers to spin up for the {@link Procedure}. Useful for procedures which may take a long time to complete.
      * Will be clamped between `1` and
-     * [Number.MAX_SAFE_INTEGER](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER) inclusive.
+     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER Number.MAX_SAFE_INTEGER} inclusive.
      * Defaults to `1`. */
     workers: number;
     /** Whether or not to output errors and events to the console. Defaults to `false`. */
     verbose: boolean;
-    /** An optional msgpack [ExtensionCodec](https://github.com/msgpack/msgpack-javascript#extension-types) to use for encoding and decoding messages. */
+    /** An optional msgpack {@link https://github.com/msgpack/msgpack-javascript#extension-types ExtensionCodec} to use for encoding and decoding messages. */
     extensionCodec?: ExtensionCodec | undefined;
 }
 
@@ -530,29 +529,29 @@ export interface ProcedureDefinitionOptions extends ProcedureOptions {
 export interface ProcedureCallOptions extends ProcedureOptions {
     /**
      * The number of milliseconds after which the {@link call} will automatically be aborted.
-     * Set to [Infinity](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity)
-     * or [NaN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN) to never timeout.
-     * Non-[NaN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN), finite values will be clamped between
-     * `0` and [Number.MAX_SAFE_INTEGER](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER) inclusive.
+     * Set to {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity Infinity}
+     * or {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN NaN} to never timeout.
+     * Non-{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN NaN}, finite values will be clamped between
+     * `0` and {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER Number.MAX_SAFE_INTEGER} inclusive.
      * Defaults to `1000`.
      */
     timeout: number;
     /**
      * The number of milliseconds to wait for a ping-pong from the endpoint before calling the remote procedure.
      * When set, if a ping-pong is not received in the given time, the {@link call} will be aborted.
-     * [NaN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN) or
-     * [infinite](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity) numbers will result in the ping
+     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN NaN} or
+     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity infinite} numbers will result in the ping
      * never timing out if no response is received, unless {@link signal} is a valid
-     * [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) and gets aborted.
-     * Non-[NaN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN), finite values will be clamped between
-     * `0` and [Number.MAX_SAFE_INTEGER](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER) inclusive.
+     * {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal AbortSignal} and gets aborted.
+     * Non-{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN NaN}, finite values will be clamped between
+     * `0` and {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER Number.MAX_SAFE_INTEGER} inclusive.
      * Defaults to `1000`.
      */
     ping?: number | undefined;
     pingCacheLength?: number | undefined;
-    /** An optional msgpack [ExtensionCodec](https://github.com/msgpack/msgpack-javascript#extension-types) to use for encoding and decoding messages. */
+    /** An optional msgpack {@link https://github.com/msgpack/msgpack-javascript#extension-types ExtensionCodec} to use for encoding and decoding messages. */
     extensionCodec?: ExtensionCodec | undefined;
-    /** An optional [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) which will be used to abort the Procedure call. */
+    /** An optional {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal AbortSignal} which will be used to abort the Procedure call. */
     signal?: AbortSignal | undefined;
     /** Whether the endpoint requires ipv6 support. Defaults to `false`. */
     ipv6: boolean;
@@ -561,7 +560,7 @@ export interface ProcedureCallOptions extends ProcedureOptions {
 /**
  * A map of the names of events emitted by {@link Procedure Procedures} and their function signatures.
  * @template Input The type of input parameter passed to the data event.
- * @see [TypedEmitter](https://github.com/andywer/typed-emitter#readme)
+ * @see {@link https://github.com/andywer/typed-emitter#readme TypedEmitter}
  */
 export type ProcedureEvents<Input = undefined> = {
     /**
@@ -608,9 +607,9 @@ export function isPing(object: unknown): object is Ping {
  * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
  * @param {unknown} [input] An input parameter to pass to the {@link Procedure}. Defaults to `undefined`.
  * @param {Partial<ProcedureCallOptions>} [options] Options for calling a {@link Procedure}. Defaults to `{}`.
- * @returns {Promise<Output>} A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+ * @returns {Promise<Output>} A {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise Promise}
  * which when resolved passes the output value to the
- * [then](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then) handler(s).
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then then} handler(s).
  * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
  * @see {@link Procedure.endpoint}
  * @see {@link ping}
@@ -639,12 +638,12 @@ export async function call<Output = unknown>(
             try {
                 await (opts.pingCacheLength
                     ? cachedPing(
-                          endpoint,
-                          opts.ping,
-                          opts.pingCacheLength,
-                          opts.ipv6,
-                          opts.signal
-                      )
+                        endpoint,
+                        opts.ping,
+                        opts.pingCacheLength,
+                        opts.ipv6,
+                        opts.signal
+                    )
                     : ping(endpoint, opts.ping, opts.ipv6, opts.signal));
             } catch (error) {
                 throw error instanceof ProcedureTimedOutError
@@ -659,8 +658,8 @@ export async function call<Output = unknown>(
         if ('output' in response && !('error' in response)) {
             // success!
             return response.output ?? <Output>(opts.optionalParameterSupport
-                    ? undefined // coerce null to undefined
-                    : response.output);
+                ? undefined // coerce null to undefined
+                : response.output);
         } else if (isProcedureError(response.error)) {
             // response indicates an error happened server-side
             throw response.error;
@@ -678,18 +677,18 @@ export async function call<Output = unknown>(
  * Asynchonously pings a {@link Procedure} at a given endpoint to check that it is available and ready to be {@link call called}.
  * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
  * @param {number} [timeout] How long to wait for a response before timing out.
- * [NaN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN) or
- * [infinite](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity) values will result in the ping
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN NaN} or
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity infinite} values will result in the ping
  * never timing out if no response is received, unless signal is a valid
- * [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) and gets aborted.
- * Non-[NaN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN), finite values will be clamped between
- * `0` and [Number.MAX_SAFE_INTEGER](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER) inclusive.
+ * {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal AbortSignal} and gets aborted.
+ * Non-{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN NaN}, finite values will be clamped between
+ * `0` and {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER Number.MAX_SAFE_INTEGER} inclusive.
  * Defaults to `1000`.
  * @param {boolean} [ipv6=false] Whether the endpoint requires ipv6 support. Defaults to `false`.
- * @param {AbortSignal} [signal] An optional [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) which,
+ * @param {AbortSignal} [signal] An optional {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal AbortSignal} which,
  * when passed, will be used to abort awaiting the ping.
  * Defaults to `undefined`.
- * @returns {Promise<void>} A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+ * @returns {Promise<void>} A {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise Promise}
  * which when resolved indicates that the endpoint is available and ready to handle {@link call calls}.
  */
 export async function ping(
@@ -728,10 +727,10 @@ export async function ping(
  * @param {number} timeout How long to wait for a response before timing out.
  * @param {number} cacheLength The length of the cache in milliseconds.
  * @param {boolean} ipv6 Whether the endpoint requires ipv6 support.
- * @param {AbortSignal} [signal] An optional [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) which,
+ * @param {AbortSignal} [signal] An optional {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal AbortSignal} which,
  * when passed, will be used to abort awaiting the ping.
  * Defaults to `undefined`.
- * @returns {Promise<void>} A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) which,
+ * @returns {Promise<void>} A {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise Promise} which,
  * when resolved, indicates that the endpoint is available and ready to handle {@link call calls}.
  */
 async function cachedPing(
@@ -757,9 +756,9 @@ async function cachedPing(
     cachedPingsByEndpoint[endpoint].resolving = cachedPingsByEndpoint[endpoint]
         .resolving
         ? Promise.any<void>([
-              cachedPingsByEndpoint[endpoint].resolving,
-              ping(endpoint, timeout, ipv6, signal),
-          ])
+            cachedPingsByEndpoint[endpoint].resolving,
+            ping(endpoint, timeout, ipv6, signal),
+        ])
         : ping(endpoint, timeout, ipv6, signal);
 
     await cachedPingsByEndpoint[endpoint].resolving;
@@ -773,18 +772,18 @@ async function cachedPing(
  * If any errors are thrown, absorbs them and returns `false`.
  * @param {string} endpoint The {@link Procedure.endpoint endpoint} to ping at which a {@link Procedure} is expected to be {@link Procedure.bind bound}.
  * @param {number} [timeout=1000] How long to wait for a response before timing out.
- * [NaN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN) or
- * [infinite](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity) values will result in the ping
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN NaN} or
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity infinite} values will result in the ping
  * never timing out if no response is received, unless signal is a valid
- * [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) and gets aborted.
- * Non-[NaN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN), finite values will be clamped between
- * `0` and [Number.MAX_SAFE_INTEGER](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER) inclusive.
+ * {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal AbortSignal} and gets aborted.
+ * Non-{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN NaN}, finite values will be clamped between
+ * `0` and {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER Number.MAX_SAFE_INTEGER} inclusive.
  * Defaults to `1000`.
  * @param {boolean} [ipv6=false] Whether the endpoint requires ipv6 support. Defaults to `false`.
- * @param {AbortSignal} [signal] An optional [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) which,
+ * @param {AbortSignal} [signal] An optional {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal AbortSignal} which,
  * when passed, will be used to abort awaiting the ping.
  * Defaults to `undefined`.
- * @returns {Promise<void>} A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+ * @returns {Promise<void>} A {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise Promise}
  * which when resolved indicated whether the endpoint is available and ready to handle {@link call calls}.
  * If errors were thrown, resolves to `false` instead of rejecting.
  */
@@ -807,9 +806,9 @@ export async function tryPing(
  * @param {string} endpoint The endpoint at which the {@link Procedure} is {@link Procedure.bind bound}.
  * @param {unknown} input An input parameter to pass to the {@link Procedure}.
  * @param {ProcedureCallOptions} options Options for calling a {@link Procedure}.
- * @returns {Promise<Response<Output>>} A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+ * @returns {Promise<Response<Output>>} A {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise Promise}
  * which when resolved passes the {@link Response<Output> response} to the
- * [then](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then) handler(s).
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then then} handler(s).
  * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
  */
 async function getResponse<Output = unknown>(
@@ -867,8 +866,8 @@ async function getResponse<Output = unknown>(
  * Encodes a given value for transmission.
  * @param {unknown} value The value to be encoded.
  * @param {boolean} ignoreUndefinedProperties Whether to strip `undefined` properties from objects or not.
- * @param {ExtensionCodec} [extensionCodec] The [ExtensionCodec](https://github.com/msgpack/msgpack-javascript#extension-types) to use for encoding.
- * @returns {Buffer} A [Buffer](https://nodejs.org/api/buffer.html#buffer) containing the encoded value.
+ * @param {ExtensionCodec} [extensionCodec] The {@link https://github.com/msgpack/msgpack-javascript#extension-types ExtensionCodec} to use for encoding.
+ * @returns {Buffer} A {@link https://nodejs.org/api/buffer.html#buffer Buffer} containing the encoded value.
  */
 function encode(
     value: unknown,
@@ -883,9 +882,9 @@ function encode(
 }
 
 /**
- * Decodes a given [Buffer](https://nodejs.org/api/buffer.html#buffer) and casts it as {@link T}.
- * @param {Buffer} buffer The [Buffer](https://nodejs.org/api/buffer.html#buffer) to be decoded.
- * @param {ExtensionCodec} [extensionCodec] The [ExtensionCodec](https://github.com/msgpack/msgpack-javascript#extension-types) to use for decoding.
+ * Decodes a given {@link https://nodejs.org/api/buffer.html#buffer Buffer} and casts it as {@link T}.
+ * @param {Buffer} buffer The {@link https://nodejs.org/api/buffer.html#buffer Buffer} to be decoded.
+ * @param {ExtensionCodec} [extensionCodec] The {@link https://github.com/msgpack/msgpack-javascript#extension-types ExtensionCodec} to use for decoding.
  * @returns {T} The buffer, decoded and cast to type {@link T}.
  * @template T The type the decoded value should be cast to.
  */
