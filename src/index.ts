@@ -33,10 +33,7 @@ const uuidNamespace = uuidv5(homepage, uuidv5.URL);
  * @template Output Type of output value the procedure returns. Defaults to `undefined`.
  * @see [TypedEmitter](https://github.com/andywer/typed-emitter#readme)
  */
-export class Procedure<
-        Input extends Nullable = undefined,
-        Output extends Nullable = undefined
-    >
+export class Procedure<Input = undefined, Output = undefined>
     extends (EventEmitter as {
         new <Input>(): TypedEmitter<ProcedureEvents<Input>>;
     })<Input>
@@ -474,26 +471,20 @@ export class Procedure<
 export default Procedure;
 
 /**
- * Represents a nullable value.
- */
-export type Nullable = unknown | null | undefined;
-
-/**
  * Represents a simple callback function which can take a single input parameter.
  * @template Input The type of input parameter the callback accepts. Defaults to `undefined`.
  * @template Output The type of output value the callback returns. Defaults to `undefined`.
  * @see {@link Procedure}
  */
-export type Callback<
-    Input extends Nullable = undefined,
-    Output extends Nullable = undefined
-> = (input: Input) => Output;
+export type Callback<Input = undefined, Output = undefined> = (
+    input: Input
+) => Output;
 
 /**
  * A response from a {@link call Procedure call}.
  * If the call returned successfully, the response will be of shape `{ output: Output }`, otherwise `{ error: ProcedureError }`.
  */
-export type Response<Output extends Nullable = undefined> =
+export type Response<Output = undefined> =
     | { output: Output | null | undefined; error?: never; pong?: never }
     | { output?: never; error: ProcedureError | null | undefined; pong?: never }
     | { output?: never; error?: never; pong: string };
@@ -599,7 +590,7 @@ export interface ProcedureCallOptions extends ProcedureOptions {
  * @template Input The type of input parameter passed to the data event.
  * @see [TypedEmitter](https://github.com/andywer/typed-emitter#readme)
  */
-export type ProcedureEvents<Input extends Nullable = undefined> = {
+export type ProcedureEvents<Input = undefined> = {
     /**
      * Signature for the data event.
      * @param {Input} data The input parameter which was passed to the {@link Procedure}.
@@ -651,9 +642,9 @@ export function isPing(object: unknown): object is Ping {
  * @see {@link Procedure.endpoint}
  * @see {@link ping}
  */
-export async function call<Output extends Nullable = unknown>(
+export async function call<Output = unknown>(
     endpoint: string,
-    input?: Nullable,
+    input?: unknown,
     options: Partial<ProcedureCallOptions> = {}
 ): Promise<Output> {
     try {
@@ -848,9 +839,9 @@ export async function tryPing(
  * [then](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then) handler(s).
  * @template Output The type of output value expected to be returned from the {@link Procedure}. Defaults to `unknown`.
  */
-async function getResponse<Output extends Nullable = unknown>(
+async function getResponse<Output = unknown>(
     endpoint: string,
-    input: Nullable,
+    input: unknown,
     options: ProcedureCallOptions
 ): Promise<Response<Output>> {
     let socket: Socket | undefined;
