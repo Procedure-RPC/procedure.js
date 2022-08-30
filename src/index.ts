@@ -23,7 +23,7 @@ import TypedEmitter from 'typed-emitter';
 import { v5 as uuidv5 } from 'uuid';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const homepage: string = require('../package.json').funding;
+const homepage: string = require('../package.json').homepage;
 const uuidNamespace = uuidv5(homepage, uuidv5.URL);
 
 /**
