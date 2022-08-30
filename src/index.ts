@@ -37,7 +37,8 @@ export class Procedure<Input = undefined, Output = undefined>
     extends (EventEmitter as {
         new <Input>(): TypedEmitter<ProcedureEvents<Input>>;
     })<Input>
-    implements ProcedureDefinitionOptions {
+    implements ProcedureDefinitionOptions
+{
     #endpoint?: string;
     /**
      * The endpoint at which the {@link Procedure}, when {@link bind bound}, can be {@link call called}.
@@ -161,7 +162,7 @@ export class Procedure<Input = undefined, Output = undefined>
         for (let i = 0; i < this.workers; i++) {
             const socket =
                 this.sockets[
-                this.sockets.push(createSocket('rep', { ipv6 })) - 1
+                    this.sockets.push(createSocket('rep', { ipv6 })) - 1
                 ];
             socket
                 .on('data', (data: Buffer) =>
@@ -229,9 +230,9 @@ export class Procedure<Input = undefined, Output = undefined>
                 output:
                     (await this.callback(
                         input ??
-                        ((this.optionalParameterSupport
-                            ? undefined
-                            : input) as Input)
+                            ((this.optionalParameterSupport
+                                ? undefined
+                                : input) as Input)
                     )) ?? null,
             };
         } catch (e) {
@@ -638,12 +639,12 @@ export async function call<Output = unknown>(
             try {
                 await (opts.pingCacheLength
                     ? cachedPing(
-                        endpoint,
-                        opts.ping,
-                        opts.pingCacheLength,
-                        opts.ipv6,
-                        opts.signal
-                    )
+                          endpoint,
+                          opts.ping,
+                          opts.pingCacheLength,
+                          opts.ipv6,
+                          opts.signal
+                      )
                     : ping(endpoint, opts.ping, opts.ipv6, opts.signal));
             } catch (error) {
                 throw error instanceof ProcedureTimedOutError
@@ -658,8 +659,8 @@ export async function call<Output = unknown>(
         if ('output' in response && !('error' in response)) {
             // success!
             return response.output ?? <Output>(opts.optionalParameterSupport
-                ? undefined // coerce null to undefined
-                : response.output);
+                    ? undefined // coerce null to undefined
+                    : response.output);
         } else if (isProcedureError(response.error)) {
             // response indicates an error happened server-side
             throw response.error;
@@ -756,9 +757,9 @@ async function cachedPing(
     cachedPingsByEndpoint[endpoint].resolving = cachedPingsByEndpoint[endpoint]
         .resolving
         ? Promise.any<void>([
-            cachedPingsByEndpoint[endpoint].resolving,
-            ping(endpoint, timeout, ipv6, signal),
-        ])
+              cachedPingsByEndpoint[endpoint].resolving,
+              ping(endpoint, timeout, ipv6, signal),
+          ])
         : ping(endpoint, timeout, ipv6, signal);
 
     await cachedPingsByEndpoint[endpoint].resolving;
