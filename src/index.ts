@@ -476,8 +476,8 @@ export interface ProcedureOptions {
      * When `true` for a {@link call}, a `null` return value will be coerced to `undefined`.
      *
      * @remarks
-     * The {@link https://procedure-rpc.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
-     * format for encoding JavaScript objects and values for transmission to and from remote {@link Procedure procedures}.
+     * The {@link https://procedure-rpc.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack}
+     * serialization format for encoding JavaScript objects and values for transmission to and from remote {@link Procedure procedures}.
      * The JavaScript implementation of msgpack {@link https://github.com/msgpack/msgpack-javascript#messagepack-mapping-table maps undefined to null}.
      * For procedures which accept optional parameters, this is problematic.
      * It could also be an issue if you depend on the return value of a procedure to conditionally be `undefined`,
@@ -495,8 +495,8 @@ export interface ProcedureOptions {
      * When `true` on a {@link call}, only affects properties of the return value.
      *
      * @remarks
-     * The {@link https://procedure-rpc.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack} serialization
-     * format for encoding JavaScript objects and values for transmission to and from remote {@link Procedure procedures}.
+     * The {@link https://procedure-rpc.github.io/procedure.js procedure.js} library uses the {@link https://github.com/msgpack/msgpack-javascript msgpack}
+     * serialization format for encoding JavaScript objects and values for transmission to and from remote {@link Procedure procedures}.
      * The JavaScript implementation of msgpack {@link https://github.com/msgpack/msgpack-javascript#messagepack-mapping-table maps undefined to null}.
      * This means that when passing objects in or out of a {@link Procedure} (i.e. as a parameter or return value), any properties defined as `undefined`
      * will evaluate to `null` on receipt.
@@ -637,17 +637,17 @@ export async function call<Output = unknown>(
         };
 
         // first check the endpoint is ready
-        if (opts.ping !== undefined) {
+        if (opts.ping) {
             try {
-                await (opts.pingCacheLength === undefined
-                    ? ping(endpoint, opts.ping, opts.ipv6, opts.signal)
-                    : cachedPing(
+                await (opts.pingCacheLength
+                    ? cachedPing(
                           endpoint,
                           opts.ping,
                           opts.pingCacheLength,
                           opts.ipv6,
                           opts.signal
-                      ));
+                      )
+                    : ping(endpoint, opts.ping, opts.ipv6, opts.signal));
             } catch (error) {
                 throw error instanceof ProcedureTimedOutError
                     ? new ProcedureNotFoundError() // timeout on ping = not found
@@ -751,18 +751,18 @@ async function cachedPing(
     cachedPingsByEndpoint[endpoint] = cachedPingsByEndpoint[endpoint] ?? {}; // create an entry for the endpoint in the cache if none exists
     const { timestamp } = cachedPingsByEndpoint[endpoint]; // retrieve the last successful ping timestamp from the cache
 
-    if (timestamp !== undefined && timestamp <= Date.now() + cacheLength) {
+    if (timestamp && timestamp <= Date.now() + cacheLength) {
         return; // timestamp is within supplied cache length - immediately return without pinging
     }
 
     // if a ping for the same endpoint is currently in progress, await on either it or the a new ping to resolve
-    cachedPingsByEndpoint[endpoint].resolving =
-        cachedPingsByEndpoint[endpoint].resolving !== undefined
-            ? Promise.any<void>([
-                  cachedPingsByEndpoint[endpoint].resolving,
-                  ping(endpoint, timeout, ipv6, signal),
-              ])
-            : ping(endpoint, timeout, ipv6, signal);
+    cachedPingsByEndpoint[endpoint].resolving = cachedPingsByEndpoint[endpoint]
+        .resolving
+        ? Promise.any<void>([
+              cachedPingsByEndpoint[endpoint].resolving,
+              ping(endpoint, timeout, ipv6, signal),
+          ])
+        : ping(endpoint, timeout, ipv6, signal);
 
     await cachedPingsByEndpoint[endpoint].resolving;
 
