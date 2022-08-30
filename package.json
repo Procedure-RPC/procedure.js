@@ -14,7 +14,17 @@
   "bugs": {
     "url": "https://github.com/procedure-rpc/procedure.js/issues"
   },
-  "funding": "https://github.com/procedure-rpc/procedure.js?sponsor=1",
+  "funding": [
+    "https://github.com/procedure-rpc/procedure.js?sponsor=1",
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/toebeann"
+    },
+    {
+      "type": "individual",
+      "url": "https://paypal.me/tobeyblaber"
+    }
+  ],
   "license": "MIT",
   "sideEffects": false,
   "scripts": {
