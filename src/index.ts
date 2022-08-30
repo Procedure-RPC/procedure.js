@@ -230,11 +230,9 @@ export class Procedure<Input = undefined, Output = undefined>
                 output:
                     (await this.callback(
                         input ??
-                            <Input>(
-                                (this.optionalParameterSupport
-                                    ? undefined
-                                    : input)
-                            )
+                            ((this.optionalParameterSupport
+                                ? undefined
+                                : input) as Input)
                     )) ?? null,
             };
         } catch (e) {
