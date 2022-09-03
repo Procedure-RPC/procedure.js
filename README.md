@@ -155,7 +155,7 @@ It also means that procedures with no return value will evaluate to `null` inste
 
 To handle these inconsistencies, we coerce a msgpack decoded `null` to `undefined`. This does not affect the properties of objects - they will still be evaluated as `null` when they were either `null` or `undefined`.
 
-To disable this behavior, you can [set `optionalParameterSupport` to `false`](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureOptions.html#optionalParameterSupport) for either procedure definitions or calls, or both:
+To disable this behavior, you can [set `optionalParameterSupport` to `false`](https://procedure-rpc.github.io/procedure.js/stable/interfaces/index.ProcedureOptions.html#optionalParameterSupport) for either procedure definitions or calls, or both:
 
 ```js
 const procedure = new Procedure((x) => x, { optionalParameterSupport: false });
@@ -174,7 +174,7 @@ For objects, we do not coerce `null` properties to `undefined`. Instead, we leav
 
 This operation adds some overhead, and any code that relies on the presence of a property to infer meaning may not work as expected, e.g. `if ('prop' in obj)`.
 
-To disable this behavior, you can [set `ignoreUndefinedProperties` to `false`](https://procedure-rpc.github.io/procedure.js/interfaces/procedure.ProcedureOptions.html#ignoreUndefinedProperties) for either procedure definitions or calls, or both:
+To disable this behavior, you can [set `ignoreUndefinedProperties` to `false`](https://procedure-rpc.github.io/procedure.js/stable/interfaces/index.ProcedureOptions.html#ignoreUndefinedProperties) for either procedure definitions or calls, or both:
 
 ```js
 const procedure = new Procedure((x) => x, { ignoreUndefinedProperties: false });
@@ -457,7 +457,7 @@ Procedure is currently implemented in the following languages:
         </tr>
         <tr>
             <td rowspan=2>
-                <a href="https://procedure-rpc.github.io/procedure.ws" target="_blank">procedure.ws</a>
+                <a href="https://procedure-rpc.github.io/procedure-browser" target="_blank">procedure-browser</a>
             </td>
             <td>JavaScript</td>
             <td rowspan=2>Browser</td>
