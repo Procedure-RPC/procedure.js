@@ -163,7 +163,7 @@ procedure.bind("tcp://*:54321");
 ```
 
 ```js
-await call("tcp://*:54321", x, { optionalParameterSupport: false });
+await call("tcp://localhost:54321", x, { optionalParameterSupport: false });
 ```
 
 Note that disabling at the definition will not affect the return value, and disabling at the call will not affect the input parameter.
@@ -182,7 +182,7 @@ procedure.bind("tcp://*:54321");
 ```
 
 ```js
-await call("tcp://*:54321", x, { ignoreUndefinedProperties: false });
+await call("tcp://localhost:54321", x, { ignoreUndefinedProperties: false });
 ```
 
 Note that disabling at the definition will not affect the return value, and disabling at the call will not affect the input parameter.
@@ -201,7 +201,7 @@ And then call it like so:
 
 ```js
 let obj = { foo: 123 };
-await call("tcp://*:33333", obj);
+await call("tcp://localhost:33333", obj);
 console.log(obj); // outputs '{ foo: 123 }'
 ```
 
