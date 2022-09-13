@@ -1,4 +1,3 @@
-/// <reference types='node' />
 import {
     isProcedureError,
     isError,
