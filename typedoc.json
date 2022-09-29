@@ -1,5 +1,38 @@
 {
-  "entryPoints": "src",
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src"],
   "entryPointStrategy": "expand",
-  "includeVersion": true
+  "includeVersion": true,
+  "externalSymbolLinkMappings": {
+    "global": {
+      "undefined": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined",
+      "Infinity": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity",
+      "NaN": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN",
+      "null": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null",
+      "Error": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error",
+      "Promise": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+      "Promise.then": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then",
+      "Number.MAX_SAFE_INTEGER": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER",
+      "AbortSignal": "https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal"
+    },
+    "typescript": {
+      "Error": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error",
+      "Promise": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+      "Partial": "https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype",
+      "Record": "https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type"
+    },
+    "node": {
+      "Buffer": "https://nodejs.org/api/buffer.html#buffer"
+    },
+    "@types/node": {
+      "AbortSignal": "https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal",
+      "Buffer": "https://nodejs.org/api/buffer.html#buffer"
+    },
+    "@msgpack/msgpack": {
+      "ExtensionCodec": "https://github.com/msgpack/msgpack-javascript#extension-types"
+    },
+    "typed-emitter": {
+      "TypedEventEmitter": "https://github.com/andywer/typed-emitter#readme"
+    }
+  }
 }
