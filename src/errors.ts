@@ -189,11 +189,9 @@ export class ProcedureExecutionError extends ProcedureError {
 }
 
 /**
- * Type guard for determining whether a given object conforms to the
- * [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) interface.
+ * Type guard for determining whether a given object conforms to the {@link !Error Error} interface.
  * @param {unknown} object The object.
- * @returns {object is Error} `true` if the object conforms to the
- * [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) interface, otherwise `false`.
+ * @returns {object is Error} `true` if the object conforms to the {@link !Error Error} interface, otherwise `false`.
  * @internal
  * @remarks Intended for internal use; may not be exported in future.
  */
