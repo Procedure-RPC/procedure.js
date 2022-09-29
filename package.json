@@ -28,12 +28,12 @@
   "license": "MIT",
   "sideEffects": false,
   "scripts": {
-    "build": "tsc",
-    "prebuild": "npm run format",
-    "format": "prettier -w . --ignore-path .gitignore",
-    "format:check": "prettier -c . --ignore-path .gitignore",
     "test": "jest",
     "posttest": "npm run format:check",
+    "format": "prettier -w . --ignore-path .gitignore",
+    "format:check": "prettier -c . --ignore-path .gitignore",
+    "build": "tsc",
+    "prebuild": "npm run format",
     "docs": "typedoc",
     "predocs": "npm run format"
   },
