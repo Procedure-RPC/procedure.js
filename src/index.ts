@@ -170,7 +170,7 @@ export class Procedure<Input = undefined, Output = undefined>
                     this.#onRepSocketData(data, socket)
                 )
                 .on('error', (error: unknown) => this.#onRepSocketError(error))
-                .once('close', () => this.#onRepSocketClose())
+                .once('close', () => this.#logSocketClose())
                 .bind(endpoint); // bind the socket to the endpoint
         }
 
@@ -189,6 +189,7 @@ export class Procedure<Input = undefined, Output = undefined>
                 socket.removeAllListeners();
             }
             this.sockets = [];
+            this.#emitAndLogUnbind();
         }
         return this;
     }
@@ -381,17 +382,6 @@ export class Procedure<Input = undefined, Output = undefined>
             'Socket encountered an error',
             new ProcedureInternalServerError(undefined, { error })
         );
-    }
-
-    /**
-     * Handles the close event for the underlying {@link sockets} of the {@link Procedure}.
-     */
-    #onRepSocketClose(): void {
-        this.#logSocketClose();
-        if (this.sockets.every((socket) => socket.closed)) {
-            this.unbind();
-            this.#emitAndLogUnbind(); // emit the unbind event
-        }
     }
 
     /**
