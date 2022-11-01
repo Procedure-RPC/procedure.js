@@ -629,7 +629,15 @@ export async function call<Output = unknown>(
                       )
                     : ping(endpoint, opts.ping, opts.ipv6, opts.signal));
             } catch (error) {
-                throw error instanceof ProcedureTimedOutError
+                const isTimeoutError = (error: unknown): boolean =>
+                    error instanceof ProcedureTimedOutError ||
+                    (error instanceof AggregateError &&
+                        error.errors.every(
+                            (e) =>
+                                e instanceof ProcedureTimedOutError ||
+                                isTimeoutError(e)
+                        ));
+                throw isTimeoutError(error)
                     ? new ProcedureNotFoundError() // timeout on ping = not found
                     : error;
             }
