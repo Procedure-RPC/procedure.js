@@ -9,6 +9,8 @@ import {
     jest,
 } from '@jest/globals';
 
+import { platform } from 'node:process';
+
 import Procedure, { call } from '../../../src';
 import { ProcedureErrorCodes } from '../../../src/errors';
 
@@ -21,7 +23,7 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
     let input: unknown;
     let callEndpoint: string | undefined;
 
-    const winDescribe = process.platform === 'win32' ? describe : describe.skip;
+    const winDescribe = platform === 'win32' ? describe : describe.skip;
 
     winDescribe('IPC tests', () => {
         describe('when procedure callback: Callback<number, number> (simple accumulator function)', () => {
