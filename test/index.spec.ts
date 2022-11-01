@@ -1,9 +1,20 @@
+import {
+    afterEach,
+    beforeEach,
+    describe,
+    expect,
+    it,
+    jest,
+} from '@jest/globals';
+
 import { ExtensionCodec } from '@msgpack/msgpack';
 import Procedure, { call, ping, tryPing, isPing } from '../src';
 import {
     ProcedureErrorCodes,
     ProcedureInternalServerError,
 } from '../src/errors';
+
+const consoleLogMockImplementation = <typeof console.log>(<unknown>undefined);
 
 describe('Procedure', () => {
     describe('constructor(endpoint: string, callback: Callback, options: Partial<ProcedureOptions>)', () => {
@@ -187,7 +198,9 @@ describe('Procedure', () => {
         });
 
         describe('when value: false', () => {
-            beforeEach(() => (instance.optionalParameterSupport = false));
+            beforeEach(() => {
+                instance.optionalParameterSupport = false;
+            });
             describe('verbose', () =>
                 it('should be: false', () => {
                     expect(instance.optionalParameterSupport).toEqual(false);
@@ -197,10 +210,14 @@ describe('Procedure', () => {
 
     describe('set ignoreUndefinedProperties(value: boolean)', () => {
         let instance: Procedure;
-        beforeEach(() => (instance = new Procedure((x) => x)));
+        beforeEach(() => {
+            instance = new Procedure((x) => x);
+        });
 
         describe('when value: true', () => {
-            beforeEach(() => (instance.ignoreUndefinedProperties = true));
+            beforeEach(() => {
+                instance.ignoreUndefinedProperties = true;
+            });
             describe('verbose', () =>
                 it('should be: true', () => {
                     expect(instance.ignoreUndefinedProperties).toEqual(true);
@@ -208,7 +225,9 @@ describe('Procedure', () => {
         });
 
         describe('when value: false', () => {
-            beforeEach(() => (instance.ignoreUndefinedProperties = false));
+            beforeEach(() => {
+                instance.ignoreUndefinedProperties = false;
+            });
             describe('verbose', () =>
                 it('should be: false', () => {
                     expect(instance.ignoreUndefinedProperties).toEqual(false);
@@ -218,7 +237,9 @@ describe('Procedure', () => {
 
     describe('bind(): this', () => {
         let instance: Procedure;
-        beforeEach(() => (instance = new Procedure((x) => x)));
+        beforeEach(() => {
+            instance = new Procedure((x) => x);
+        });
         afterEach(() => {
             instance.unbind().removeAllListeners();
         });
@@ -228,7 +249,9 @@ describe('Procedure', () => {
         });
 
         describe("when endpoint: ''", () => {
-            beforeEach(() => (instance = new Procedure((x) => x)));
+            beforeEach(() => {
+                instance = new Procedure((x) => x);
+            });
 
             describe('instance', () =>
                 it("should emit: 'error'", () => {
@@ -246,26 +269,28 @@ describe('Procedure', () => {
                 }));
 
             describe('when verbose: true', () => {
-                let error: jest.SpyInstance;
                 beforeEach(() => {
                     instance = new Procedure((x) => x);
                     instance.verbose = true;
-                    error = jest.spyOn(console, 'error').mockImplementation();
                 });
                 describe('instance', () =>
                     it('should call console.error', () => {
+                        const error = jest
+                            .spyOn(console, 'error')
+                            .mockImplementation(consoleLogMockImplementation);
                         instance.bind('');
                         expect(error).toHaveBeenCalledTimes(1);
                     }));
                 afterEach(() => {
                     instance.verbose = false;
-                    error.mockReset();
                 });
             });
         });
 
         describe("when endpoint: 'inproc://Procedure'", () => {
-            beforeEach(() => (instance = new Procedure((x) => x)));
+            beforeEach(() => {
+                instance = new Procedure((x) => x);
+            });
             describe('instance', () =>
                 it("should not emit: 'error'", () => {
                     const error = jest.fn();
@@ -274,7 +299,9 @@ describe('Procedure', () => {
                 }));
 
             describe('when already bound', () => {
-                beforeEach(() => instance.bind('inproc://Procedure'));
+                beforeEach(() => {
+                    instance.bind('inproc://Procedure');
+                });
                 describe('instance', () =>
                     it("should emit: 'unbind'", () => {
                         const unbind = jest.fn();
@@ -289,7 +316,9 @@ describe('Procedure', () => {
 
     describe('unbind(): this', () => {
         let instance: Procedure;
-        beforeEach(() => (instance = new Procedure((x) => x)));
+        beforeEach(() => {
+            instance = new Procedure((x) => x);
+        });
 
         it('should return: this', () => {
             expect(instance.unbind()).toEqual(instance);
@@ -308,20 +337,19 @@ describe('Procedure', () => {
                 }));
 
             describe('when verbose: true', () => {
-                let log: jest.SpyInstance;
-
                 beforeEach(() => {
                     instance.verbose = true;
-                    log = jest.spyOn(console, 'log').mockImplementation();
                 });
                 describe('instance', () =>
                     it('should call console.log', () => {
+                        const log = jest
+                            .spyOn(console, 'log')
+                            .mockImplementation(consoleLogMockImplementation);
                         instance.unbind();
                         expect(log).toHaveBeenCalledTimes(2);
                     }));
                 afterEach(() => {
                     instance.verbose = false;
-                    log.mockReset();
                 });
             });
         });
@@ -352,10 +380,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -372,31 +404,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toEqual(0);
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -406,11 +442,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: 1000', async () => {
                         await expect(
@@ -418,11 +458,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toEqual(input);
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -435,7 +479,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -454,18 +500,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toEqual(0);
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -474,13 +523,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -490,11 +540,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: 1000', async () => {
                             await expect(
@@ -502,11 +556,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toEqual(input);
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -523,7 +581,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
 
         describe('when procedure callback: Callback<number, null> (testing nullish returns)', () => {
@@ -541,10 +601,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -561,31 +625,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -595,11 +663,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: undefined', async () => {
                         await expect(
@@ -607,11 +679,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -624,7 +700,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -643,18 +721,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -663,13 +744,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -679,11 +761,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: undefined', async () => {
                             await expect(
@@ -691,11 +777,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -712,7 +802,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
 
         describe('when procedure callback: Callback<number, void> (testing nullish returns)', () => {
@@ -730,10 +822,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -750,31 +846,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -784,11 +884,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: undefined', async () => {
                         await expect(
@@ -796,11 +900,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -813,7 +921,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -832,18 +942,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -852,13 +965,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -868,11 +982,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: undefined', async () => {
                             await expect(
@@ -880,11 +998,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -901,7 +1023,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
     });
 
@@ -929,10 +1053,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -949,31 +1077,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toEqual(0);
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -983,11 +1115,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: 1000', async () => {
                         await expect(
@@ -995,11 +1131,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toEqual(input);
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1012,7 +1152,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -1031,18 +1173,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toEqual(0);
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -1051,13 +1196,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -1067,11 +1213,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: 1000', async () => {
                             await expect(
@@ -1079,11 +1229,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toEqual(input);
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -1100,7 +1254,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
 
         describe('when procedure callback: Callback<number, null> (testing nullish returns)', () => {
@@ -1118,10 +1274,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -1138,31 +1298,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1172,11 +1336,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: undefined', async () => {
                         await expect(
@@ -1184,11 +1352,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1201,7 +1373,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -1220,18 +1394,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -1240,13 +1417,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -1256,11 +1434,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: undefined', async () => {
                             await expect(
@@ -1268,11 +1450,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -1289,7 +1475,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
 
         describe('when procedure callback: Callback<number, void> (testing nullish returns)', () => {
@@ -1307,10 +1495,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -1327,31 +1519,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1361,11 +1557,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: undefined', async () => {
                         await expect(
@@ -1373,11 +1573,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1390,7 +1594,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -1409,18 +1615,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -1429,13 +1638,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -1445,11 +1655,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: undefined', async () => {
                             await expect(
@@ -1457,11 +1671,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -1478,7 +1696,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
     });
 
@@ -1499,10 +1719,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -1519,31 +1743,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toEqual(0);
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1553,11 +1781,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: 1000', async () => {
                         await expect(
@@ -1565,11 +1797,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toEqual(input);
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1582,7 +1818,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -1601,18 +1839,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toEqual(0);
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -1621,13 +1862,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -1637,11 +1879,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: 1000', async () => {
                             await expect(
@@ -1649,11 +1895,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toEqual(input);
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -1670,7 +1920,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
 
         describe('when procedure callback: Callback<number, null> (testing nullish returns)', () => {
@@ -1688,10 +1940,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -1708,31 +1964,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1742,11 +2002,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: undefined', async () => {
                         await expect(
@@ -1754,11 +2018,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1771,7 +2039,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -1790,18 +2060,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -1810,13 +2083,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -1826,11 +2100,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: undefined', async () => {
                             await expect(
@@ -1838,11 +2116,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -1859,7 +2141,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
 
         describe('when procedure callback: Callback<number, void> (testing nullish returns)', () => {
@@ -1877,10 +2161,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -1897,31 +2185,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1931,11 +2223,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: undefined', async () => {
                         await expect(
@@ -1943,11 +2239,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -1960,7 +2260,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -1979,18 +2281,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -1999,13 +2304,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -2015,11 +2321,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: undefined', async () => {
                             await expect(
@@ -2027,11 +2337,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -2048,7 +2362,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
     });
 
@@ -2069,10 +2385,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -2089,31 +2409,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toEqual(0);
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -2123,11 +2447,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: 1000', async () => {
                         await expect(
@@ -2135,11 +2463,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toEqual(input);
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -2152,7 +2484,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -2171,18 +2505,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toEqual(0);
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -2191,13 +2528,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -2207,11 +2545,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: 1000', async () => {
                             await expect(
@@ -2219,11 +2561,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toEqual(input);
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -2240,7 +2586,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
 
         describe('when procedure callback: Callback<number, null> (testing nullish returns)', () => {
@@ -2259,10 +2607,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -2279,31 +2631,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -2313,11 +2669,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: undefined', async () => {
                         await expect(
@@ -2325,11 +2685,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -2342,7 +2706,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -2361,18 +2727,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -2381,13 +2750,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -2397,11 +2767,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: undefined', async () => {
                             await expect(
@@ -2409,11 +2783,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -2430,7 +2808,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
 
         describe('when procedure callback: Callback<number, void> (testing nullish returns)', () => {
@@ -2449,10 +2829,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
             });
 
             describe('when endpoint: correct', () => {
-                beforeEach(() => (callEndpoint = procedureEndpoint));
+                beforeEach(() => {
+                    callEndpoint = procedureEndpoint;
+                });
 
                 describe('when input: 0', () => {
-                    beforeEach(() => (input = 0));
+                    beforeEach(() => {
+                        input = 0;
+                    });
 
                     it('should emit: data, with parameter: 0', async () => {
                         let x: unknown = undefined;
@@ -2469,31 +2853,35 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
 
                     describe('when verbose: true', () => {
-                        let log: jest.SpyInstance;
                         beforeEach(() => {
                             procedure.verbose = true;
-                            log = jest
-                                .spyOn(console, 'log')
-                                .mockImplementation();
                         });
 
                         it('should call console.log', async () => {
+                            const log = jest
+                                .spyOn(console, 'log')
+                                .mockImplementation(
+                                    consoleLogMockImplementation
+                                );
                             await call(<string>callEndpoint, input);
                             expect(log).toHaveBeenCalledTimes(3);
                         });
 
                         afterEach(() => {
                             procedure.verbose = false;
-                            log.mockReset();
                         });
                     });
                 });
 
                 describe("when input: 'foo'", () => {
-                    beforeEach(() => (input = 'foo'));
+                    beforeEach(() => {
+                        input = 'foo';
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -2503,11 +2891,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         });
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: 1000', () => {
-                    beforeEach(() => (input = 1000));
+                    beforeEach(() => {
+                        input = 1000;
+                    });
 
                     it('should resolve: undefined', async () => {
                         await expect(
@@ -2515,11 +2907,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                         ).resolves.toBeUndefined();
                     });
 
-                    afterEach(() => (input = undefined));
+                    afterEach(() => {
+                        input = undefined;
+                    });
                 });
 
                 describe('when input: undefined', () => {
-                    beforeEach(() => (input = undefined));
+                    beforeEach(() => {
+                        input = undefined;
+                    });
 
                     it('should throw: ProcedureExecutionError', async () => {
                         await expect(
@@ -2532,7 +2928,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                 describe('when ping: 100', () => {
                     describe('when input: 0', () => {
-                        beforeEach(() => (input = 0));
+                        beforeEach(() => {
+                            input = 0;
+                        });
 
                         it('should emit: data, with parameter: 0', async () => {
                             let x: unknown = undefined;
@@ -2551,18 +2949,21 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
 
                         describe('when verbose: true', () => {
-                            let log: jest.SpyInstance;
                             beforeEach(() => {
                                 procedure.verbose = true;
-                                log = jest
-                                    .spyOn(console, 'log')
-                                    .mockImplementation();
                             });
 
                             it('should call console.log', async () => {
+                                const log = jest
+                                    .spyOn(console, 'log')
+                                    .mockImplementation(
+                                        consoleLogMockImplementation
+                                    );
                                 await call(<string>callEndpoint, input, {
                                     ping: 100,
                                 });
@@ -2571,13 +2972,14 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
                             afterEach(() => {
                                 procedure.verbose = false;
-                                log.mockReset();
                             });
                         });
                     });
 
                     describe("when input: 'foo'", () => {
-                        beforeEach(() => (input = 'foo'));
+                        beforeEach(() => {
+                            input = 'foo';
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -2587,11 +2989,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             });
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: 1000', () => {
-                        beforeEach(() => (input = 1000));
+                        beforeEach(() => {
+                            input = 1000;
+                        });
 
                         it('should resolve: undefined', async () => {
                             await expect(
@@ -2599,11 +3005,15 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
                             ).resolves.toBeUndefined();
                         });
 
-                        afterEach(() => (input = undefined));
+                        afterEach(() => {
+                            input = undefined;
+                        });
                     });
 
                     describe('when input: undefined', () => {
-                        beforeEach(() => (input = undefined));
+                        beforeEach(() => {
+                            input = undefined;
+                        });
 
                         it('should throw: ProcedureExecutionError', async () => {
                             await expect(
@@ -2620,7 +3030,9 @@ describe('call(endpoint: string, input: Input | null, options: Partial<Procedure
 
             // TODO: when endpoint: incorrect
 
-            afterEach(() => procedure.unbind());
+            afterEach(() => {
+                procedure.unbind();
+            });
         });
     });
 });
@@ -2648,7 +3060,9 @@ describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: Abo
         });
 
         describe('when endpoint: correct', () => {
-            beforeEach(() => (pingEndpoint = procedureEndpoint));
+            beforeEach(() => {
+                pingEndpoint = procedureEndpoint;
+            });
 
             it('should not emit: data', async () => {
                 const data = jest.fn();
@@ -2685,7 +3099,9 @@ describe('ping(endpoint: string, timeout: number | undefined = 100, signal?: Abo
         // TODO: when timeout infinity, NaN
         // TODO: when abortion signaled during ping
 
-        afterEach(() => procedure.unbind());
+        afterEach(() => {
+            procedure.unbind();
+        });
     });
 });
 
@@ -2712,7 +3128,9 @@ describe('tryPing(endpoint: string, timeout: number | undefined = 100, signal?: 
         });
 
         describe('when endpoint: correct', () => {
-            beforeEach(() => (pingEndpoint = procedureEndpoint));
+            beforeEach(() => {
+                pingEndpoint = procedureEndpoint;
+            });
 
             it('should not emit: data', async () => {
                 const data = jest.fn();
@@ -2747,7 +3165,9 @@ describe('tryPing(endpoint: string, timeout: number | undefined = 100, signal?: 
         // TODO: when timeout infinity, NaN
         // TODO: when abortion signaled during ping
 
-        afterEach(() => procedure.unbind());
+        afterEach(() => {
+            procedure.unbind();
+        });
     });
 });
 
@@ -2757,35 +3177,45 @@ describe('isPing(object: unknown): object is Ping', () => {
     let object: unknown;
 
     describe("when object: { ping: 'foobar' }", () => {
-        beforeEach(() => (object = { ping: 'foobar' }));
+        beforeEach(() => {
+            object = { ping: 'foobar' };
+        });
         it('should return: true', () => {
             expect(isPing(object)).toEqual(true);
         });
     });
 
     describe('when object: undefined', () => {
-        beforeEach(() => (object = undefined));
+        beforeEach(() => {
+            object = undefined;
+        });
         it('should return: false', () => {
             expect(isPing(object)).toEqual(false);
         });
     });
 
     describe('when object: null', () => {
-        beforeEach(() => (object = null));
+        beforeEach(() => {
+            object = null;
+        });
         it('should return: false', () => {
             expect(isPing(object)).toEqual(false);
         });
     });
 
     describe('when object: instanceof TypeError', () => {
-        beforeEach(() => (object = new TypeError()));
+        beforeEach(() => {
+            object = new TypeError();
+        });
         it('should return: true', () => {
             expect(isPing(object)).toEqual(false);
         });
     });
 
     describe("when object: { name: 'Foo', message: 'Bar' }", () => {
-        beforeEach(() => (object = { name: 'Foo', message: 'Bar' }));
+        beforeEach(() => {
+            object = { name: 'Foo', message: 'Bar' };
+        });
         it('should return: false', () => {
             expect(isPing(object)).toEqual(false);
         });

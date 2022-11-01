@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it } from '@jest/globals';
+
 import {
     ProcedureError,
     ProcedureUnknownError,
@@ -104,7 +106,9 @@ describe('ProcedureInternalClientError', () => {
         let instance: ProcedureInternalClientError;
 
         describe('when no parameters passed', () => {
-            beforeEach(() => (instance = new ProcedureInternalClientError()));
+            beforeEach(() => {
+                instance = new ProcedureInternalClientError();
+            });
 
             it('should be: instanceof ProcedureError', () => {
                 expect(instance).toBeInstanceOf(ProcedureError);
@@ -725,35 +729,45 @@ describe('isError(object: unknown): object is Error', () => {
     });
 
     describe('when object: undefined', () => {
-        beforeEach(() => (object = undefined));
+        beforeEach(() => {
+            object = undefined;
+        });
         it('should return: false', () => {
             expect(isError(object)).toEqual(false);
         });
     });
 
     describe('when object: null', () => {
-        beforeEach(() => (object = null));
+        beforeEach(() => {
+            object = null;
+        });
         it('should return: false', () => {
             expect(isError(object)).toEqual(false);
         });
     });
 
     describe('when object: instanceof TypeError', () => {
-        beforeEach(() => (object = new TypeError()));
+        beforeEach(() => {
+            object = new TypeError();
+        });
         it('should return: true', () => {
             expect(isError(object)).toEqual(true);
         });
     });
 
     describe("when object: { name: 'Foo', message: 'Bar' }", () => {
-        beforeEach(() => (object = { name: 'Foo', message: 'Bar' }));
+        beforeEach(() => {
+            object = { name: 'Foo', message: 'Bar' };
+        });
         it('should return: true', () => {
             expect(isError(object)).toEqual(true);
         });
     });
 
     describe("when object: { name: 'Foo' }", () => {
-        beforeEach(() => (object = { name: 'Foo' }));
+        beforeEach(() => {
+            object = { name: 'Foo' };
+        });
         it('should return: false', () => {
             expect(isError(object)).toEqual(false);
         });
@@ -763,73 +777,85 @@ describe('isError(object: unknown): object is Error', () => {
 describe('isProcedureError(object: unknown): object is ProcedureError', () => {
     let object: unknown;
     describe('when object: instanceof Error', () => {
-        beforeEach(() => (object = new Error()));
+        beforeEach(() => {
+            object = new Error();
+        });
         it('should return: false', () => {
             expect(isProcedureError(object)).toEqual(false);
         });
     });
 
     describe('when object: undefined', () => {
-        beforeEach(() => (object = undefined));
+        beforeEach(() => {
+            object = undefined;
+        });
         it('should return: false', () => {
             expect(isProcedureError(object)).toEqual(false);
         });
     });
 
     describe('when object: null', () => {
-        beforeEach(() => (object = null));
+        beforeEach(() => {
+            object = null;
+        });
         it('should return: false', () => {
             expect(isProcedureError(object)).toEqual(false);
         });
     });
 
     describe('when object: instanceof TypeError', () => {
-        beforeEach(() => (object = new TypeError()));
+        beforeEach(() => {
+            object = new TypeError();
+        });
         it('should return: false', () => {
             expect(isProcedureError(object)).toEqual(false);
         });
     });
 
     describe("when object: { name: 'Foo', message: 'Bar' }", () => {
-        beforeEach(() => (object = { name: 'Foo', message: 'Bar' }));
+        beforeEach(() => {
+            object = { name: 'Foo', message: 'Bar' };
+        });
         it('should return: false', () => {
             expect(isProcedureError(object)).toEqual(false);
         });
     });
 
     describe("when object: { name: 'Foo' }", () => {
-        beforeEach(() => (object = { name: 'Foo' }));
+        beforeEach(() => {
+            object = { name: 'Foo' };
+        });
         it('should return: false', () => {
             expect(isProcedureError(object)).toEqual(false);
         });
     });
 
     describe('when object: instanceof ProcedureError', () => {
-        beforeEach(() => (object = new ProcedureUnknownError()));
+        beforeEach(() => {
+            object = new ProcedureUnknownError();
+        });
         it('should return: true', () => {
             expect(isProcedureError(object)).toEqual(true);
         });
     });
 
     describe("when object: { name: 'ProcedureError', message: 'foo', code: ProcedureErrorCodes.NOT_FOUND }", () => {
-        beforeEach(
-            () =>
-                (object = {
-                    name: 'ProcedureError',
-                    message: 'foo',
-                    code: ProcedureErrorCodes.NOT_FOUND,
-                })
-        );
+        beforeEach(() => {
+            object = {
+                name: 'ProcedureError',
+                message: 'foo',
+                code: ProcedureErrorCodes.NOT_FOUND,
+            };
+        });
         it('should return: true', () => {
             expect(isProcedureError(object)).toEqual(true);
         });
     });
 
     describe("when object: { name: 'ProcedureError', message: 'foo', code: -1 }", () => {
-        beforeEach(
-            () =>
-                (object = { name: 'ProcedureError', message: 'foo', code: -1 })
-        );
+        beforeEach(() => {
+            object = { name: 'ProcedureError', message: 'foo', code: -1 };
+        });
         it('should return: false', () => {
             expect(isProcedureError(object)).toEqual(false);
         });
