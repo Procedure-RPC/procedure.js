@@ -1,6 +1,6 @@
 {
   "name": "@procedure-rpc/procedure.js",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "title": "procedure.js",
   "description": "The simple RPC framework for Node.js.",
   "main": "./dist/index.js",
@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.7.2",
-    "@toebean/signals": "^2.3.5",
+    "@toebean/signals": "^3.0.0",
     "nanomsg": "^4.2.1",
     "uuid": "^9.0.0"
   },
@@ -50,7 +50,7 @@
     "@tsconfig/node16": "^1.0.3",
     "@types/jest": "^29.2.0",
     "@types/nanomsg": "^4.2.0",
-    "@types/uuid": "^8.3.4",
+    "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5.40.1",
     "@typescript-eslint/parser": "^5.40.1",
     "eslint": "^8.26.0",
